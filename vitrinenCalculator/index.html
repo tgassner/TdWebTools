@@ -1,0 +1,250 @@
+<html lang="de">
+<head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <link rel="icon" href="img/favicon114.png" sizes="32x32" />
+    <link rel="icon" href="img/favicon114.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="img/favicon114.png" />
+    <meta name="msapplication-TileImage" content="img/favicon114.png" />
+
+    <title>Vitrinen Calculator</title>
+    <script src="lib/pdfkit.standalone.js"></script>
+    <script src="lib/blob-stream.js"></script>
+    <script type="text/javascript">
+
+    </script>
+    <style>
+        .tableMainClass {
+            display: table;
+            width: 600px;
+            margin-right: auto;
+            margin-left: auto;
+        }
+
+        .trClass {
+            display: table-row;
+            width: 600px;
+        }
+
+        .tdClass {
+            display: table-cell;
+            width: 300px;
+            padding: 5px;
+        }
+
+        .lbh {
+            width: 70px;
+        }
+
+        .tdWhatClass {
+            align-content: baseline;
+            text-align: end;
+        }
+    </style>
+</head>
+<body style="margin: 0px; ">
+
+<div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
+    <div style="display: flex; flex-flow: column;">
+        <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Vitrinen Calculator</h1>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.1&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;14.11.2025 by Gassi</div>
+    </div>
+    <img src="img/td_header.png" height="150px" style="; display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
+</div>
+
+<div id="guiMainDiv" style="">
+
+    <div class="tableMainClass">
+        <div class="trClass">
+            <div class="tdClass tdWhatClass">
+                Berechnungsbasis:
+            </div>
+            <div class="tdClass">
+                <input type="radio" id="aussenmasz" name="masz" value="out" checked onchange="calculate()" />
+                <label for="aussenmasz">Außenmaß</label>
+                <br>
+                <input type="radio" id="innenmasz" name="masz" value="in" onchange="calculate()"/>
+                <label for="innenmasz">Innenmaß</label>
+            </div>
+        </div>
+        <div class="trClass">
+            <div class="tdClass tdWhatClass ">
+                <label for="laenge">Länge</label>:
+            </div>
+            <div class="tdClass">
+                <input type="number" id="laenge" min="1" step="1" value="" pattern="[0-9]*" inputmode="numeric" class="lbh" onchange="calculate()" autofocus='' placeholder="Länge" oninput="onIntegerInput(this)" onkeydown="onIntegerKeyDown(event, this)"/> mm
+            </div>
+        </div>
+        <div class="trClass">
+            <div class="tdClass tdWhatClass">
+                <label for="breite">Breite</label>:
+            </div>
+            <div class="tdClass">
+                <input type="number" id="breite" min="1" step="1" value="" pattern="[0-9]*" inputmode="numeric"  class="lbh" onchange="calculate()"  placeholder="Breite" oninput="onIntegerInput(this)" onkeydown="onIntegerKeyDown(event, this)"/> mm
+            </div>
+        </div>
+        <div class="trClass">
+            <div class="tdClass tdWhatClass">
+                <label for="hoehe">Höhe</label>:
+            </div>
+            <div class="tdClass">
+                <input type="number" id="hoehe" min="1" step="1" value="" pattern="[0-9]*" inputmode="numeric"   class="lbh" onchange="calculate()"  placeholder="Höhe" oninput="onIntegerInput(this)" onkeydown="onIntegerKeyDown(event, this)"/> mm
+            </div>
+        </div>
+        <div class="trClass">
+            <div class="tdClass tdWhatClass">
+                Materialstärke:
+            </div>
+            <div class="tdClass">
+                <input type="radio" id="3mm" name="materialStaerke" value="3"  onchange="calculate()"/>
+                <label for="3mm">3mm</label>
+                <br>
+                <input type="radio" id="4mm" name="materialStaerke" value="4"  onchange="calculate()"/>
+                <label for="4mm">4mm</label>
+                <br>
+                <input type="radio" id="5mm" name="materialStaerke" value="5" checked  onchange="calculate()" />
+                <label for="5mm">5mm</label>
+                <br>
+                <input type="radio" id="6mm" name="materialStaerke" value="6"  onchange="calculate()" />
+                <label for="6mm">6mm</label>
+                <br>
+                <input type="radio" id="8mm" name="materialStaerke" value="8"   onchange="calculate()"/>
+                <label for="8mm">8mm</label>
+                <br>
+                <input type="radio" id="10mm" name="materialStaerke" value="10"   onchange="calculate()"/>
+                <label for="10mm">10mm</label>
+                <br>
+                <input type="radio" id="12mm" name="materialStaerke" value="12"   onchange="calculate()"/>
+                <label for="12mm">12mm</label>
+                <br>
+                <input type="radio" id="15mm" name="materialStaerke" value="15"   onchange="calculate()"/>
+                <label for="15mm">15mm</label>
+                <br>
+                <input type="radio" id="20mm" name="materialStaerke" value="20"   onchange="calculate()"/>
+                <label for="20mm">20mm</label>
+            </div>
+        </div>
+        <div class="trClass">
+            <div class="tdClass tdWhatClass">
+                Serviervorschlag
+            </div>
+            <div class="tdClass">
+            </div>
+        </div>
+        <div class="trClass">
+            <div class="tdClass tdWhatClass">
+                Boden:
+            </div>
+            <div class="tdClass">
+                <span id="bodenSpan"></span>
+            </div>
+        </div>
+        <div class="trClass">
+            <div class="tdClass tdWhatClass">
+                Vorne / Hinten:
+            </div>
+            <div class="tdClass">
+                <span id="vorneHintenSpan"></span>
+            </div>
+        </div>
+        <div class="trClass">
+            <div class="tdClass tdWhatClass">
+                Links / Rechts:
+            </div>
+            <div class="tdClass">
+                <span id="linksRechtsSpan"></span>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+
+    function clearResult() {
+        let resultBodenSpan = document.getElementById("bodenSpan");
+        let resultVorneHintenSpan = document.getElementById("vorneHintenSpan");
+        let resultLinksRechtsSpan = document.getElementById("linksRechtsSpan");
+
+        resultBodenSpan.innerHTML = "";
+        resultVorneHintenSpan.innerHTML = "";
+        resultLinksRechtsSpan.innerHTML = "";
+    }
+    function calculate() {
+        console.log("doCalculate")
+        let lengthStr = document.getElementById("laenge").value;
+        let widthStr = document.getElementById("breite").value;
+        let heightStr = document.getElementById("hoehe").value;
+
+        if (!lengthStr || !widthStr || !heightStr) {
+            clearResult();
+            return;
+        }
+
+        let length = parseInt(lengthStr, 10);
+        let width = parseInt(widthStr, 10);
+        let height = parseInt(heightStr, 10);
+
+        if (isNaN(length) || isNaN(width) || isNaN(height)) {
+            clearResult();
+            return;
+        }
+
+        let masz = "out";
+        document.querySelectorAll("input[name=\"masz\"]").forEach(function(radio) {
+            if (radio.checked) {
+                masz = radio.value;
+            }
+        });
+
+        let materialStaerkeStr = "5";
+        document.querySelectorAll("input[name=\"materialStaerke\"]").forEach(function(radio) {
+            if (radio.checked) {
+                materialStaerkeStr = radio.value;
+            }
+        });
+
+        let materialStaerke = parseInt(materialStaerkeStr, 10);
+
+        let boden = "";
+        let vorneHinten = "";
+        let linksRechts = "";
+        if (masz === "out") {
+            boden = (length + 30) + " x " + (width + 30) + " mm";
+            vorneHinten = (length + 30) + " x " + (height - materialStaerke + 0.5);
+            linksRechts = (width - materialStaerke - materialStaerke) + " x " + (height - materialStaerke + 0.5);
+        } else if (masz === "in") {
+            boden = (length + 30 + materialStaerke + materialStaerke) + " x " + (width + 30 + materialStaerke + materialStaerke) + " mm";
+            vorneHinten = (length + 30 + materialStaerke + materialStaerke) + " x " + (height + 0.5);
+            linksRechts = (width) + " x " + (height + 0.5);
+        }
+
+
+        let resultBodenSpan = document.getElementById("bodenSpan");
+        let resultVorneHintenSpan = document.getElementById("vorneHintenSpan");
+        let resultLinksRechtsSpan = document.getElementById("linksRechtsSpan");
+
+        resultBodenSpan.innerHTML = boden;
+        resultVorneHintenSpan.innerHTML = vorneHinten;
+        resultLinksRechtsSpan.innerHTML = linksRechts;
+
+    }
+
+    function onIntegerInput(inputElement) {
+        inputElement.value = Math.abs(inputElement.value.replace(/[^0-9]*/g,''));
+        if (inputElement.value === '0') {
+            inputElement.value = "";
+        }
+    }
+
+    function onIntegerKeyDown(event, inputElement) {
+        if (event.key === '.' || event.key === ',' || event.key === 'e' || event.key === 'E' || event.key === '-' || event.key === '+') {
+            event.preventDefault();
+        }
+    }
+
+</script>
+</body>
