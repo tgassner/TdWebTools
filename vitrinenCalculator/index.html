@@ -51,7 +51,7 @@
 <div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Vitrinen Calculator</h1>
-        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.1&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;14.11.2025 by Gassi</div>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.2&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;14.11.2025 by Gassi</div>
     </div>
     <img src="img/td_header.png" height="150px" style="; display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
 </div>
@@ -59,6 +59,21 @@
 <div id="guiMainDiv" style="">
 
     <div class="tableMainClass">
+        <div class="trClass">
+            <div class="tdClass tdWhatClass">
+                Art:
+            </div>
+            <div class="tdClass">
+                <input type="radio" id="perfektVerklebt" name="art" value="perfektVerklebt" checked onchange="calculate()" />
+                <label for="perfektVerklebt">Perfekt Verklebt</label>
+                <br>
+                <input type="radio" id="einfachVerklebt" name="art" value="einfachVerklebt" onchange="calculate()"/>
+                <label for="einfachVerklebt">Einfach Verklebt</label>
+                <br>
+                <input type="radio" id="gehrungVerklebt" name="art" value="gehrungVerklebt" onchange="calculate()"/>
+                <label for="gehrungVerklebt">Gehrung Verklebt</label>
+            </div>
+        </div>
         <div class="trClass">
             <div class="tdClass tdWhatClass">
                 Berechnungsbasis:
@@ -193,6 +208,13 @@
             return;
         }
 
+        let art = "perfektVerklebt";
+        document.querySelectorAll("input[name=\"art\"]").forEach(function(radio) {
+            if (radio.checked) {
+                art = radio.value;
+            }
+        });
+
         let masz = "out";
         document.querySelectorAll("input[name=\"masz\"]").forEach(function(radio) {
             if (radio.checked) {
@@ -212,16 +234,38 @@
         let boden = "";
         let vorneHinten = "";
         let linksRechts = "";
-        if (masz === "out") {
-            boden = (length + 30) + " x " + (width + 30) + " mm";
-            vorneHinten = (length + 30) + " x " + (height - materialStaerke + 0.5);
-            linksRechts = (width - materialStaerke - materialStaerke) + " x " + (height - materialStaerke + 0.5);
-        } else if (masz === "in") {
-            boden = (length + 30 + materialStaerke + materialStaerke) + " x " + (width + 30 + materialStaerke + materialStaerke) + " mm";
-            vorneHinten = (length + 30 + materialStaerke + materialStaerke) + " x " + (height + 0.5);
-            linksRechts = (width) + " x " + (height + 0.5);
-        }
 
+        if (art === "perfektVerklebt") {
+            if (masz === "out") {
+                boden = (length + 30) + " x " + (width + 30) + " mm";
+                vorneHinten = (length + 30) + " x " + (height - materialStaerke + 0.5) + " mm";
+                linksRechts = (width - materialStaerke - materialStaerke) + " x " + (height - materialStaerke + 0.5) + " mm";
+            } else if (masz === "in") {
+                boden = (length + 30 + materialStaerke + materialStaerke) + " x " + (width + 30 + materialStaerke + materialStaerke) + " mm";
+                vorneHinten = (length + 30 + materialStaerke + materialStaerke) + " x " + (height + 0.5) + " mm";
+                linksRechts = (width) + " x " + (height + 0.5) + " mm";
+            }
+        } else if (art === "einfachVerklebt") {
+            if (masz === "out") {
+                boden = (length + 1) + " x " + (width + 1) + " mm";
+                vorneHinten = (length + 1) + " x " + (height - materialStaerke + 1) + " mm";
+                linksRechts = (width - materialStaerke - materialStaerke + 1) + " x " + (height - materialStaerke + 1) + " mm";
+            } else if (masz === "in") {
+                boden = (length + 1 + materialStaerke + materialStaerke) + " x " + (width + 1 + materialStaerke + materialStaerke) + " mm";
+                vorneHinten = (length + 1 + materialStaerke + materialStaerke) + " x " + (height + 1) + " mm";
+                linksRechts = (width + 1) + " x " + (height + 1) + " mm";
+            }
+        } else if (art === "gehrungVerklebt") {
+            if (masz === "out") {
+                boden = (length) + " x " + (width) + " mm";
+                vorneHinten = (length) + " x " + (height) + " mm";
+                linksRechts = (width) + " x " + (height) + " mm";
+            } else if (masz === "in") {
+                boden = (length + materialStaerke + materialStaerke) + " x " + (width + materialStaerke + materialStaerke) + " mm";
+                vorneHinten = (length + materialStaerke + materialStaerke) + " x " + (height + materialStaerke + materialStaerke) + " mm";
+                linksRechts = (width + materialStaerke + materialStaerke) + " x " + (height + materialStaerke + materialStaerke) + " mm";
+            }
+        }
 
         let resultBodenSpan = document.getElementById("bodenSpan");
         let resultVorneHintenSpan = document.getElementById("vorneHintenSpan");
