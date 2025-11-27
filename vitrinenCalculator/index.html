@@ -51,7 +51,7 @@
 <div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Vitrinen Calculator</h1>
-        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.2.3&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;17.11.2025 by Gassi</div>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.2.4&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;27.11.2025 by Gassi</div>
     </div>
     <img src="img/td_header.png" height="150px" style="; display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
 </div>
@@ -161,7 +161,7 @@
         </div>
         <div class="trClass">
             <div class="tdClass tdWhatClass">
-                Vorne / Hinten:
+                Lang:
             </div>
             <div class="tdClass">
                 <span id="vorneHintenSpan"></span>
@@ -169,7 +169,7 @@
         </div>
         <div class="trClass">
             <div class="tdClass tdWhatClass">
-                Links / Rechts:
+                Kurz:
             </div>
             <div class="tdClass">
                 <span id="linksRechtsSpan"></span>
@@ -211,6 +211,14 @@
         if (isNaN(length) || isNaN(width) || isNaN(height)) {
             clearResult();
             return;
+        }
+
+        if (length < width) {
+            let swap = length;
+            length = width;
+            width = swap;
+            document.getElementById("laenge").value = length;
+            document.getElementById("breite").value = width;
         }
 
         serviervorschlagHeadlineString = "LxBxH= " + length + " x " + width + " x " + height;
