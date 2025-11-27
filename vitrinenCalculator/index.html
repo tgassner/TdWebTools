@@ -12,27 +12,25 @@
     <meta name="msapplication-TileImage" content="img/favicon114.png" />
 
     <title>Vitrinen Calculator</title>
-    <script src="lib/pdfkit.standalone.js"></script>
-    <script src="lib/blob-stream.js"></script>
     <script type="text/javascript">
 
     </script>
     <style>
         .tableMainClass {
             display: table;
-            width: 700px;
+            width: 800px;
             margin-right: auto;
             margin-left: auto;
         }
 
         .trClass {
             display: table-row;
-            width: 700px;
+            width: 800px;
         }
 
         .tdClass {
             display: table-cell;
-            width: 350px;
+            width: 400px;
             padding: 5px;
         }
 
@@ -51,7 +49,7 @@
 <div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Vitrinen Calculator</h1>
-        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.2.4&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;27.11.2025 by Gassi</div>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.3&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;27.11.2025 by Gassi</div>
     </div>
     <img src="img/td_header.png" height="150px" style="; display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
 </div>
@@ -144,15 +142,15 @@
             </div>
         </div>
         <div class="trClass">
-            <div class="tdClass tdWhatClass">
-                Serviervorschlag
+            <div id="anforderungKeyDiv" class="tdClass tdWhatClass">
+                Anforderung:
             </div>
             <div class="tdClass">
-                <span id="serviervorschlagHeadlineDataSpan"></span>
+                <span id="anforderungHeadlineDataSpan"></span>
             </div>
         </div>
         <div class="trClass">
-            <div class="tdClass tdWhatClass">
+            <div id="bodenKeyDiv" class="tdClass tdWhatClass">
                 Boden:
             </div>
             <div class="tdClass">
@@ -160,7 +158,7 @@
             </div>
         </div>
         <div class="trClass">
-            <div class="tdClass tdWhatClass">
+            <div id="langKeyDiv" class="tdClass tdWhatClass">
                 Lang:
             </div>
             <div class="tdClass">
@@ -168,11 +166,22 @@
             </div>
         </div>
         <div class="trClass">
-            <div class="tdClass tdWhatClass">
+            <div id="kurzKeyDiv" class="tdClass tdWhatClass">
                 Kurz:
             </div>
             <div class="tdClass">
                 <span id="linksRechtsSpan"></span>
+            </div>
+        </div>
+        <div class="trClass">
+            <div class="tdClass tdWhatClass">
+
+            </div>
+            <div class="tdClass">
+                <div id="copyButton" onclick="copyToClipBoard()" style="cursor: pointer; border: 1px solid black; border-radius: 10px; width: fit-content; padding: 5px;box-shadow: 10px 10px 10px grey;display: none">
+                    <img src="img/copy.jpg" width="113px" height="124px" alt="In die Zwischenablage Kopieren" title="In die Zwischenablage Kopieren">
+                </div>
+                <div id="copyMessage"></div>
             </div>
         </div>
     </div>
@@ -180,24 +189,57 @@
 </div>
 <script type="text/javascript">
 
+    function copyToClipBoard() {
+        let text = "";
+        text += document.getElementById("anforderungKeyDiv").innerText;
+        text += " ";
+        text += document.getElementById("anforderungHeadlineDataSpan").innerText;
+        text += "\r\n";
+        text += document.getElementById("bodenKeyDiv").innerText;
+        text += " ";
+        text += document.getElementById("bodenSpan").innerText;
+        text += "\r\n";
+        text += document.getElementById("langKeyDiv").innerText;
+        text += " ";
+        text += document.getElementById("vorneHintenSpan").innerText;
+        text += "\r\n";
+        text += document.getElementById("kurzKeyDiv").innerText;
+        text += " ";
+        text += document.getElementById("linksRechtsSpan").innerText;
+        navigator.clipboard.writeText(text);
+        document.getElementById("copyMessage").innerHTML = "In die Zwischenablage kopiert!";
+        console.log("VOR cleanCopyMessage()");
+        setTimeout(cleanCopyMessage, 2000);
+        console.log("\"nach\" cleanCopyMessage()");
+    }
+
+    function cleanCopyMessage() {
+        console.log("cleanCopyMessage()");
+        document.getElementById("copyMessage").innerHTML = ""
+    }
+
+
     function clearResult() {
         let resultBodenSpan = document.getElementById("bodenSpan");
         let resultVorneHintenSpan = document.getElementById("vorneHintenSpan");
         let resultLinksRechtsSpan = document.getElementById("linksRechtsSpan");
-        let serviervorschlagHeadlineDataSpan = document.getElementById("serviervorschlagHeadlineDataSpan");
+        let anforderungHeadlineDataSpan = document.getElementById("anforderungHeadlineDataSpan");
+        let copyButton = document.getElementById("copyButton");
 
         resultBodenSpan.innerHTML = "";
         resultVorneHintenSpan.innerHTML = "";
         resultLinksRechtsSpan.innerHTML = "";
-        serviervorschlagHeadlineDataSpan.innerHTML = "";
+        anforderungHeadlineDataSpan.innerHTML = "";
+        copyButton.style.display = "none";
+
     }
     function calculate() {
         console.log("doCalculate")
         let lengthStr = document.getElementById("laenge").value;
         let widthStr = document.getElementById("breite").value;
         let heightStr = document.getElementById("hoehe").value;
-        let serviervorschlagHeadlineDataSpanElement = document.getElementById("serviervorschlagHeadlineDataSpan");
-        let serviervorschlagHeadlineString = "";
+        let anforderungHeadlineDataSpanElement = document.getElementById("anforderungHeadlineDataSpan");
+        let anforderungHeadlineString = "";
 
         if (!lengthStr || !widthStr || !heightStr) {
             clearResult();
@@ -221,7 +263,7 @@
             document.getElementById("breite").value = width;
         }
 
-        serviervorschlagHeadlineString = "LxBxH= " + length + " x " + width + " x " + height;
+        anforderungHeadlineString = "LxBxH= " + length + " x " + width + " x " + height;
 
         let art = "perfektVerklebt";
         document.querySelectorAll("input[name=\"art\"]").forEach(function(radio) {
@@ -237,6 +279,8 @@
             }
         });
 
+        anforderungHeadlineString += " " +  ((masz === "out") ? "AM" : ((masz === "in") ? "IM" : "???"));
+
         let materialStaerkeStr = "5";
         document.querySelectorAll("input[name=\"materialStaerke\"]").forEach(function(radio) {
             if (radio.checked) {
@@ -248,14 +292,14 @@
         let materialStaerke = parseInt(materialStaerkeStr, 10);
 
 
-        serviervorschlagHeadlineString += "&nbsp;&nbsp;→∥← " +materialStaerke;
+        anforderungHeadlineString += "&nbsp;&nbsp;→∥← " +materialStaerke;
 
         let boden = "";
         let vorneHinten = "";
         let linksRechts = "";
 
         if (art === "perfektVerklebt") {
-            serviervorschlagHeadlineString += "&nbsp;&nbsp;perfekt Verklebt";
+            anforderungHeadlineString += "&nbsp;&nbsp;perfekt Verklebt";
             if (masz === "out") {
                 boden = (length + 30) + " x " + (width + 30) + " mm";
                 vorneHinten = (length + 30) + " x " + (height - materialStaerke + 0.5) + " mm";
@@ -266,7 +310,7 @@
                 linksRechts = (width) + " x " + (height + 0.5) + " mm";
             }
         } else if (art === "einfachVerklebt") {
-            serviervorschlagHeadlineString += "&nbsp;&nbsp;einfach Verklebt";
+            anforderungHeadlineString += "&nbsp;&nbsp;einfach Verklebt";
             if (masz === "out") {
                 boden = (length + 1) + " x " + (width + 1) + " mm";
                 vorneHinten = (length + 1) + " x " + (height - materialStaerke + 1) + " mm";
@@ -277,7 +321,7 @@
                 linksRechts = (width + 1) + " x " + (height + 1) + " mm";
             }
         } else if (art === "gehrungVerklebt") {
-            serviervorschlagHeadlineString += "&nbsp;&nbsp;Gehrung Verklebt";
+            anforderungHeadlineString += "&nbsp;&nbsp;Gehrung Verklebt";
             if (masz === "out") {
                 boden = (length) + " x " + (width) + " mm";
                 vorneHinten = (length) + " x " + (height) + " mm";
@@ -292,11 +336,13 @@
         let resultBodenSpan = document.getElementById("bodenSpan");
         let resultVorneHintenSpan = document.getElementById("vorneHintenSpan");
         let resultLinksRechtsSpan = document.getElementById("linksRechtsSpan");
+        let copyButton = document.getElementById("copyButton");
 
-        resultBodenSpan.innerHTML = boden;
-        resultVorneHintenSpan.innerHTML = vorneHinten;
-        resultLinksRechtsSpan.innerHTML = linksRechts;
-        serviervorschlagHeadlineDataSpanElement.innerHTML = serviervorschlagHeadlineString;
+        resultBodenSpan.innerHTML = boden.replace(".", ",");
+        resultVorneHintenSpan.innerHTML = vorneHinten.replace(".", ",");
+        resultLinksRechtsSpan.innerHTML = linksRechts.replace(".", ",");
+        anforderungHeadlineDataSpanElement.innerHTML = anforderungHeadlineString;
+        copyButton.style.display = "block";
     }
 
     function onIntegerInput(inputElement) {
