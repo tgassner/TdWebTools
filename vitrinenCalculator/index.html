@@ -49,7 +49,7 @@
 <div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Vitrinen Calculator</h1>
-        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.3.2&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;15.12.2025 by Gassi</div>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.3.3&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;08.01.2026 by Gassi</div>
     </div>
     <img src="img/td_header.png" height="150px" style="; display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
 </div>
@@ -321,13 +321,15 @@
 
         if (art === "perfektVerklebt") {
             anforderungHeadlineString += "&nbsp;&nbsp;perfekt Verklebt";
+            let ueberstand = 10;
+            let doppelterUeberstand = ueberstand * 2;
             if (masz === "out") {
-                boden = (length + 30) + " x " + (width + 30) + " mm";
-                vorneHinten = (length + 30) + " x " + (height - materialStaerke + 0.5) + " mm";
+                boden = (length + doppelterUeberstand) + " x " + (width + doppelterUeberstand) + " mm";
+                vorneHinten = (length + doppelterUeberstand) + " x " + (height - materialStaerke + 0.5) + " mm";
                 linksRechts = (width - materialStaerke - materialStaerke) + " x " + (height - materialStaerke + 0.5) + " mm";
             } else if (masz === "in") {
-                boden = (length + 30 + materialStaerke + materialStaerke) + " x " + (width + 30 + materialStaerke + materialStaerke) + " mm";
-                vorneHinten = (length + 30 + materialStaerke + materialStaerke) + " x " + (height + 0.5) + " mm";
+                boden = (length + doppelterUeberstand + materialStaerke + materialStaerke) + " x " + (width + doppelterUeberstand + materialStaerke + materialStaerke) + " mm";
+                vorneHinten = (length + doppelterUeberstand + materialStaerke + materialStaerke) + " x " + (height + 0.5) + " mm";
                 linksRechts = (width) + " x " + (height + 0.5) + " mm";
             }
         } else if (art === "einfachVerklebt") {
