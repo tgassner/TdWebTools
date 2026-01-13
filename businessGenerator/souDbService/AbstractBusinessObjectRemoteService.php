@@ -1,22 +1,20 @@
 <?php
 
-namespace businessGenerator\souDbService;
-
-use businessGenerator\include\VariaTools;
-use businessGenerator\souDbService\include\DBTool;
+include_once("include/DBServiceTools.php");
+include_once("include/DB.php");
 
 abstract class AbstractBusinessObjectRemoteService
 {
 
     protected DBTool $dbTool;
-    protected VariaTools $variaTools;
+    protected DBServiceTools $dbServiceTools;
 
-    public function __construct($variaTools = null, $dbTool = null)
+    public function __construct($dbServiceTools = null, $dbTool = null)
     {
-        if ($variaTools == null) {
-            $this->variaTools = new VariaTools();
+        if ($dbServiceTools == null) {
+            $this->dbServiceTools = new DBServiceTools();
         } else {
-            $this->variaTools = $variaTools;
+            $this->dbServiceTools = $dbServiceTools;
         }
 
         if ($dbTool == null) {

@@ -1,13 +1,10 @@
 <?php
 
-use businessGenerator\include\VariaTools;
-use businessGenerator\souDbService\AbstractBusinessObjectRemoteService;
-
 header('Content-Type: application/json; charset=utf-8');
 
-include_once "include/DB.php";
-include_once "include/VariaTools.php";
-require_once "AbstractBusinessObjectRemoteService.php";
+include_once("include/DBServiceTools.php");
+include_once("include/DB.php");
+include_once("AbstractBusinessObjectRemoteService.php");
 
 class OrderRemoteService extends AbstractBusinessObjectRemoteService
 {
@@ -39,7 +36,7 @@ class OrderRemoteService extends AbstractBusinessObjectRemoteService
             " and AbschlFertigung = 0                                                                                                                                             \n" .
             " order by a.Liefertermin, a.Versandtermin, a.Nr, ap.PosNr                                                                                                            \n";
 
-        $mitarbeiterId = $this->variaTools->readFromRequestGetPost("MitarbeiterNr", "");
+        $mitarbeiterId = $this->dbServiceTools->readFromRequestGetPost("MitarbeiterNr", "");
 
         $ret = $this->dbTool->runQueryList($sql, function ($row) {
             $order = [];
@@ -188,10 +185,10 @@ class OrderRemoteService extends AbstractBusinessObjectRemoteService
     }
 }
 
-$variaTools = new VariaTools();
-$orderRemoteService = new OrderRemoteService($variaTools);
+$dbServiceTools = new DBServiceTools();
+$orderRemoteService = new OrderRemoteService($dbServiceTools);
 
-$action = $variaTools->readFromRequestGetPost("action", "");
+$action = $dbServiceTools->readFromRequestGetPost("action", "");
 
 switch ($action) {
     case "getOpenOrderByEmployee" :

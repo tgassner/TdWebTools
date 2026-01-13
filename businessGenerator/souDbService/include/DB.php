@@ -1,6 +1,5 @@
 <?php
 
-namespace businessGenerator\souDbService\include;
 class DBTool
 {
     public function openConnection()

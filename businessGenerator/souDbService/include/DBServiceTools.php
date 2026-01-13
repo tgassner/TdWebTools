@@ -1,7 +1,6 @@
 <?php
 
-namespace businessGenerator\souDbService\include;
-class VariaTools
+class DBServiceTools
 {
     public function readFromRequestGetPost($parName, $defaultValue = "")
     {

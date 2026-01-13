@@ -1,15 +1,9 @@
 <?php
-
-namespace businessGenerator\souDbService;
-
-use businessGenerator\include\VariaTools;
-use businessGenerator\souDbService\AbstractBusinessObjectRemoteService;
-
 header('Content-Type: application/json; charset=utf-8');
 
-include_once "include/DB.php";
-include_once "include/VariaTools.php";
-require_once "AbstractBusinessObjectRemoteService.php";
+include_once("include/DBServiceTools.php");
+include_once("include/DB.php");
+include_once("AbstractBusinessObjectRemoteService.php");
 
 class ArtikelRemoteService extends AbstractBusinessObjectRemoteService
 {
@@ -31,10 +25,10 @@ class ArtikelRemoteService extends AbstractBusinessObjectRemoteService
     }
 }
 
-$variaTools = new VariaTools();
+$dbServiceTools = new DBServiceTools();
 $ArtikelRemoteService = new ArtikelRemoteService();
 
-$action = $variaTools->readFromRequestGetPost("action", "");
+$action = $dbServiceTools->readFromRequestGetPost("action", "");
 
 switch ($action) {
     case "findAllProducts" :
