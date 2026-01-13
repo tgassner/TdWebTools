@@ -52,6 +52,10 @@ abstract class AbstractBusinessObjectRemoteService
             "Bereich" => 0,
             "Maske" => $maske));
 
+        if ($ret["rowCount"] == 0 && !array_key_exists("errCode", $ret)) {
+            $ret["msg"] = $ret["msg"] . "  Vielleicht wurde in diesem Kalenderjahr noch kein solchen BusinessObject via Sou.Matrixx erstellt?";
+        }
+
         return $ret;
     }
 

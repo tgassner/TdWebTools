@@ -28,6 +28,7 @@ class DBTool
         $ret["ok"] = false;
         $ret["value"] = [];
         $ret["msg"] = "";
+        $ret["rowCount"] = 0;
         try {
             $conn = $this->OpenConnection();
             $stmt = $conn->prepare($sql);
@@ -35,12 +36,14 @@ class DBTool
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $ret["value"][] = $rowHandler($row);
             }
+            $ret["rowCount"] = $stmt->rowCount();
             $ret["ok"] = true;
             $conn = null;
             return $ret;
         } catch (PDOException $e) {
             $conn = null;
             $ret["msg"] = $e->getMessage();
+            $ret["errCode"] = $e->getCode();
             return $ret;
         }
     }
@@ -50,6 +53,7 @@ class DBTool
         $ret["ok"] = false;
         $ret["value"] = null;
         $ret["msg"] = "";
+        $ret["rowCount"] = 0;
         try {
             $conn = $this->OpenConnection();
             $stmt = $conn->prepare($sql);
@@ -61,10 +65,12 @@ class DBTool
             } else {
                 $ret["msg"] = "No result from DB";
             }
+            $ret["rowCount"] = $stmt->rowCount();
             $conn = null;
             return $ret;
         } catch (PDOException $e) {
             $conn = null;
+            $ret["errCode"] = $e->getCode();
             $ret["msg"] = $e->getMessage();
             return $ret;
         }

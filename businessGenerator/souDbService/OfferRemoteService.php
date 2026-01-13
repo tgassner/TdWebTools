@@ -1,7 +1,5 @@
 <?php
 
-namespace businessGenerator\souDbService;
-
 use businessGenerator\include\VariaTools;
 use businessGenerator\souDbService\AbstractBusinessObjectRemoteService;
 

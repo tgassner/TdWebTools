@@ -718,13 +718,13 @@ function doCreateBusinessObjectWithExistingBusinessNummer(businessType) {
 }
 
 function doPrepareOffer() {
-    document.getElementById("ButtonsDownloadOrShowDiv").style.display = "";
+    document.getElementById("ButtonsDownloadOrShowDiv").style.display = "none";
     document.getElementById("ButtonsOfferOrOrderDiv").style.display = "none";
     determineBusinessnummerFromServer("OfferServiceRemoteCall.php?action=generateNewOfferNumber", BusinessTypes.OFFER);
 }
 
 function doPrepareOrder() {
-    document.getElementById("ButtonsDownloadOrShowDiv").style.display = "";
+    document.getElementById("ButtonsDownloadOrShowDiv").style.display = "none";
     document.getElementById("ButtonsOfferOrOrderDiv").style.display = "none";
     determineBusinessnummerFromServer("OrderServiceRemoteCall.php?action=generateNewOrderNumber", BusinessTypes.ORDER);
 }
@@ -792,8 +792,11 @@ function determineBusinessnummerFromServer(url, businessType) {
 
             if (!ok) {
                 alert(msg);
+                document.getElementById("ButtonsOfferOrOrderDiv").style.display = "";
                 return;
             }
+
+            document.getElementById("ButtonsDownloadOrShowDiv").style.display = "";
             document.getElementById("BusinessNummer").value = value;
             document.getElementById("BusinessType").style.display = "block";
             document.getElementById("BusinessType").value = Object(businessType).description;
