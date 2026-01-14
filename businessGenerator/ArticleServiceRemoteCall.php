@@ -1,10 +1,8 @@
 <?php
 
-use businessGenerator\include\VariaTools;
+include_once ("include\VariaTools.php");
 
 header('Content-Type: application/json; charset=utf-8');
-
-include_once "include/VariaTools.php";
 
 $remoteServiceConfig = json_decode(file_get_contents("RemoteServiceInfo.json"));
 $serviceEntpoint = $remoteServiceConfig->services->ArtikelRemoteService;

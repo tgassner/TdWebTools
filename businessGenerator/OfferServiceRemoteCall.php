@@ -1,7 +1,6 @@
 <?php
 
-use businessGenerator\include\VariaTools;
+include_once ("include\VariaTools.php");
 
-include_once "include/VariaTools.php";
 (new VariaTools())->doRemoteServiceCall("OfferRemoteService");
 

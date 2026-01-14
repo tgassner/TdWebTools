@@ -1,6 +1,5 @@
 <?php
 
-namespace businessGenerator\include;
 class VariaTools
 {
     public function readFromRequestGetPost($parName, $defaultValue = "")
