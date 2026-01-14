@@ -14,6 +14,11 @@ class VariaTools
         return $retval;
     }
 
+    public function getEnvironment() {
+        $environment = json_decode(file_get_contents("Environment.json"));
+        return $environment;
+    }
+
     public function doRemoteServiceCall($service)
     {
 

@@ -31,7 +31,11 @@
 <div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">TD Business Generator</h1>
-        <div id="headerLowerDiv" style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.9.11&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;12.01.2026 <span id="statusSpan" style="margin-left: 10px"> </span></div>
+        <div id="headerLowerDiv" style="display: flex; margin-top: 0px;margin-bottom: 15px;">
+            Version 0.9.11&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;12.01.2026
+            <span id="statusSpan" style="margin-left: 10px"> </span>
+            <span id="statusSpanEnvironment" style="margin-left: 10px"> </span>
+        </div>
     </div>
     <img src="img/td_header.png" height="150px" style="; display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
 </div>

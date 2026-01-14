@@ -871,22 +871,30 @@ function onClickRechnungsanschriftReiter() {
     switchReiterAdresse("reiterRechnungsanschrift", "reiterContentRechnungsanschrift");
 }
 
-function createStatusElement(status, text) {
-    let okElement = document.createElement('span');
+function createStatusElement(status, tooltip, text) {
+    let okElementContainer = document.createElement('span');
+    let okElementColor = document.createElement('span');
+    let okElementInfoText = document.createElement('span');
     switch (status) {
         case "ok":
-            okElement.style.color = "#AFC80A";
+            okElementColor.style.color = "#AFC80A";
             break;
         case "nok":
-            okElement.style.color = "#FF0000";
+            okElementColor.style.color = "#FF0000";
             break;
         default:
-            okElement.style.color = "#000000";
+            okElementColor.style.color = "#000000";
             break;
     }
-    okElement.title = text;
-    okElement.innerHTML = "&#xFFED;"
-    return okElement;
+    okElementColor.title = tooltip;
+    okElementColor.innerHTML = "&#xFFED;";
+    okElementContainer.appendChild(okElementColor);
+    if (text) {
+        okElementInfoText.innerHTML = "&nbsp;" + text;
+        okElementInfoText.style.fontWeight = "bold";
+        okElementContainer.appendChild(okElementInfoText);
+    }
+    return okElementContainer;
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -905,18 +913,35 @@ document.addEventListener("DOMContentLoaded", function() {
             let msg = res.msg;
 
             if (!ok) {
-                document.getElementById("statusSpan").appendChild(createStatusElement("nok", msg));
+                document.getElementById("statusSpan").appendChild(createStatusElement("nok", msg, ""));
                 return;
             }
 
             allArticleData = value;
 
-            document.getElementById("statusSpan").appendChild(createStatusElement("ok", "Article Data loaded Successfully!"));
+            document.getElementById("statusSpan").appendChild(createStatusElement("ok", "Article Data loaded Successfully!", ""));
         })
         .catch(function(e) {
-            document.getElementById("statusSpan").appendChild(createStatusElement("nok", "Sorry, something went wrong.\n" + e));
+            document.getElementById("statusSpan").appendChild(createStatusElement("nok", "Sorry, Article prefetch not possible - something went wrong.\n" + e, ""));
         }).finally(function () {
     });
+
+    fetch("Environment.json")
+        .then(res => res.json())
+        .then(function (res) {
+            if (res && res.deployment && res.deployment.deployment_qualifier && res.deployment.deployment_text) {
+                qual = res.deployment.deployment_qualifier;
+                text = res.deployment.deployment_text;
+                document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("ok", text, ((qual === "PROD") ? "" : text)));
+            } else {
+                document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("nok", "Sorry, No Environent Data could be loaded - something went wrong.\n"));
+            }
+        })
+        .catch(function(e) {
+            document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("nok", "Sorry, something went wrong.\n" + e));
+        }).finally(function () {
+    });
+
 })
 
 function initAutoComplete(artikelNrInputElementId, artikelBezeichnungInputElementId, positionPreisInputElementId, positionEinheitSelectElementId, positionBausteinSelectElementId) {
