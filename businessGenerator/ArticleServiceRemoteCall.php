@@ -1,6 +1,6 @@
 <?php
 
-include_once ("include\VariaTools.php");
+include_once ("include/VariaTools.php");
 
 header('Content-Type: application/json; charset=utf-8');
 
