@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b140c360-2a4f-4b8a-9f9f-cc100c0901cf" name="Changes" comment="" />
+    <list default="true" id="b140c360-2a4f-4b8a-9f9f-cc100c0901cf" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/floorbridgeSchachtelCalculator/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/floorbridgeSchachtelCalculator/index.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -31,6 +35,7 @@
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/dev/wwwroot/TdWebTools/businessGenerator",
+    "nodejs_package_manager_path": "npm",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -42,8 +47,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PS-253.29346.257" />
-        <option value="bundled-php-predefined-a98d8de5180a-0e0d91225499-com.jetbrains.php.sharedIndexes-PS-253.29346.257" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PS-253.30387.85" />
+        <option value="bundled-php-predefined-a98d8de5180a-0e0d91225499-com.jetbrains.php.sharedIndexes-PS-253.30387.85" />
       </set>
     </attachedChunks>
   </component>
@@ -56,6 +61,7 @@
       <updated>1768293601506</updated>
       <workItem from="1768293603668" duration="2207000" />
       <workItem from="1768374077689" duration="9019000" />
+      <workItem from="1769165841055" duration="112000" />
     </task>
     <servers />
   </component>
