@@ -59,7 +59,20 @@ abstract class AbstractBusinessObjectRemoteService
 
     public function convertJson($input)
     {
+        $input["instance"] = $this->getInstance();
         return json_encode($input, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function getInstance() {
+        $DB_LOGIN = (new DBTool())->loadDbCredentials();
+        switch ($DB_LOGIN->dbname) {
+            case "SouMatrixx":
+                return "PROD";
+            case "SouMatrixxTest";
+                return "TEST";
+            default:
+                return $DB_LOGIN->dbname ?: "UNDEFINED";
+        }
     }
 }
 

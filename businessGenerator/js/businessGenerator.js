@@ -897,6 +897,16 @@ function createStatusElement(status, tooltip, text) {
     return okElementContainer;
 }
 
+function viewEnvironmentStatus(environment) {
+    if (environment === "PROD") {
+        document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("ok", "Production Environment", ""));
+    } else if (environment === "TEST") {
+        document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("ok", " *** Test System *** ", " *** Test System *** "));
+    } else {
+        document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("nok", "Sorrry, No valid Environent Data could be loaded - something went wrong: " + environment));
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     //document.getElementById("headerLowerDiv").innerHTML =
     //    "window.screen.=" + window.screen.width + "x" + window.screen.height + " - " +
@@ -911,11 +921,14 @@ document.addEventListener("DOMContentLoaded", function() {
             let ok = res.ok;
             let value = res.value;
             let msg = res.msg;
+            let instance = res.instance;
 
             if (!ok) {
                 document.getElementById("statusSpan").appendChild(createStatusElement("nok", msg, ""));
                 return;
             }
+
+            viewEnvironmentStatus(instance ? instance : "");
 
             allArticleData = value;
 
@@ -925,23 +938,6 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("statusSpan").appendChild(createStatusElement("nok", "Sorry, Article prefetch not possible - something went wrong.\n" + e, ""));
         }).finally(function () {
     });
-
-    fetch("Environment.json")
-        .then(res => res.json())
-        .then(function (res) {
-            if (res && res.deployment && res.deployment.deployment_qualifier && res.deployment.deployment_text) {
-                qual = res.deployment.deployment_qualifier;
-                text = res.deployment.deployment_text;
-                document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("ok", text, ((qual === "PROD") ? "" : text)));
-            } else {
-                document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("nok", "Sorry, No Environent Data could be loaded - something went wrong.\n"));
-            }
-        })
-        .catch(function(e) {
-            document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("nok", "Sorry, something went wrong.\n" + e));
-        }).finally(function () {
-    });
-
 })
 
 function initAutoComplete(artikelNrInputElementId, artikelBezeichnungInputElementId, positionPreisInputElementId, positionEinheitSelectElementId, positionBausteinSelectElementId) {

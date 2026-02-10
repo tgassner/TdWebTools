@@ -2,9 +2,13 @@
 
 class DBTool
 {
+    public function loadDbCredentials() {
+        return json_decode(file_get_contents("DB.json", true));
+    }
+
     public function openConnection()
     {
-        $DB_LOGIN = json_decode(file_get_contents("DB.json", true));
+        $DB_LOGIN = $this->loadDbCredentials();
 
         $dbhost = $DB_LOGIN->dbhost;
         $dbuser = $DB_LOGIN->dbuser;
