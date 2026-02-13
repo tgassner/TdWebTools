@@ -777,6 +777,8 @@ function doReset() {
     document.getElementById("ihreZeichenFormElementDiv").style.display = "";
 
     onClickAdresseReiter();
+
+    onClickMainTabBusinessDaten();
 }
 
 function determineBusinessnummerFromServer(url, businessType) {
@@ -869,6 +871,36 @@ function onClickLieferanschriftReiter() {
 
 function onClickRechnungsanschriftReiter() {
     switchReiterAdresse("reiterRechnungsanschrift", "reiterContentRechnungsanschrift");
+}
+
+function onClickMainTabBusinessDaten() {
+    switchReiterMainTab("mainTabTabButtonBusinessWerteDiv", "tabContentBusinessWerteDiv");
+}
+
+function onClickMainTabAdressen() {
+    switchReiterMainTab("mainTabTabButtonAdressenDiv", "tabContentAdressenDiv");
+}
+
+function onClickMainTabArtikel() {
+    switchReiterMainTab("mainTabTabButtonArtikelDiv", "tabContentArtikelDiv");
+}
+
+function onClickMainTabZeichnung() {
+    switchReiterMainTab("mainTabTabButtonZeichnungDiv", "tabContentZeichnungDiv");
+}
+
+function switchReiterMainTab(idOfEnabledButtons, idOfEnabledContent) {
+    document.getElementById("mainTabTabButtonBusinessWerteDiv").classList.remove("reiterSelectedElementDiv");
+    document.getElementById("mainTabTabButtonAdressenDiv").classList.remove("reiterSelectedElementDiv");
+    document.getElementById("mainTabTabButtonArtikelDiv").classList.remove("reiterSelectedElementDiv");
+    document.getElementById("mainTabTabButtonZeichnungDiv").classList.remove("reiterSelectedElementDiv");
+    document.getElementById(idOfEnabledButtons).classList.add("reiterSelectedElementDiv");
+
+    document.getElementById("tabContentBusinessWerteDiv").style.display = "none";
+    document.getElementById("tabContentAdressenDiv").style.display = "none";
+    document.getElementById("tabContentArtikelDiv").style.display = "none";
+    document.getElementById("tabContentZeichnungDiv").style.display = "none";
+    document.getElementById(idOfEnabledContent).style.display = "";
 }
 
 function createStatusElement(status, tooltip, text) {
@@ -1041,3 +1073,131 @@ function fillArticleWithAutocompletion(
 }
 
 var allArticleData = null;
+
+/* ================= Canvas Setup ================= */
+
+var canvas;
+var signaturePad;
+function resizeCanvas() {
+    console.log("resize");
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext("2d").scale(ratio, ratio);
+}
+
+/* ================= Undo / Redo ================= */
+
+let history = [];
+let redoStack = [];
+
+function saveState() {
+    history.push(signaturePad.toData());
+    redoStack = [];
+    saveLocalBackup();
+}
+
+
+function undo() {
+    if (!history.length) return;
+    redoStack.push(signaturePad.toData());
+    signaturePad.fromData(history.pop());
+    saveLocalBackup();
+}
+
+function redo() {
+    if (!redoStack.length) return;
+    history.push(signaturePad.toData());
+    signaturePad.fromData(redoStack.pop());
+    saveLocalBackup();
+}
+
+/* ================= Farben ================= */
+
+function setColor(color) {
+    signaturePad.penColor = color;
+}
+
+/* ================= Clear ================= */
+
+function clearCanvas() {
+    saveState();
+    signaturePad.clear();
+    saveLocalBackup();
+}
+
+/* ================= LocalStorage Backup ================= */
+
+const STORAGE_KEY = "kundenskizze_backup";
+
+function saveLocalBackup() {
+    const dataURL = canvas.toDataURL("image/jpeg", 0.9);
+    localStorage.setItem(STORAGE_KEY, dataURL);
+}
+
+function loadLocalBackup() {
+    const dataURL = localStorage.getItem(STORAGE_KEY);
+    if (!dataURL) return;
+
+    const img = new Image();
+    img.onload = () => {
+        signaturePad.clear();
+        canvas.getContext("2d").drawImage(img, 0, 0);
+    };
+    img.src = dataURL;
+}
+
+
+
+/* ================= Netzwerk-Upload ================= */
+
+function sendSketch() {
+    if (signaturePad.isEmpty()) {
+        alert("Keine Skizze vorhanden");
+        return;
+    }
+
+    const dataURL = canvas.toDataURL("image/jpeg", 0.9);
+
+    fetch("/api/save_sketch.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataURL })
+    })
+        .then(r => {
+            if (!r.ok) throw new Error("Upload fehlgeschlagen");
+            return r.json();
+        })
+        .then(() => {
+            alert("Skizze erfolgreich gespeichert");
+            localStorage.removeItem(STORAGE_KEY);
+        })
+        .catch(() => {
+            alert("⚠️ Kein Netzwerk – Skizze lokal gesichert");
+            saveLocalBackup();
+        });
+}
+
+document.addEventListener ("DOMContentLoaded", () => {
+    document.getElementById("tabContentZeichnungDiv").style.display = "";
+    canvas = document.getElementById("canvasSketch");
+
+    signaturePad = new SignaturePad(canvas, {
+        minWidth: 1,
+        maxWidth: 2,
+        penColor: "red",
+        backgroundColor: 'rgba(255, 255, 255, 1)'
+    });
+
+    signaturePad.onEnd = saveState;
+
+    resizeCanvas();
+
+    window.addEventListener("resize", resizeCanvas);
+
+    //loadLocalBackup();
+
+    //signaturePad.clear();
+
+    document.getElementById("tabContentZeichnungDiv").style.display = "none";
+});

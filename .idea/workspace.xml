@@ -2,12 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b140c360-2a4f-4b8a-9f9f-cc100c0901cf" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/businessGenerator/Environment.json.example" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/businessGenerator/businessGenerator.php" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/businessGenerator.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/businessGenerator/css/businessGenerator.css" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/css/businessGenerator.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/businessGenerator/js/businessGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/js/businessGenerator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/businessGenerator/souDbService/AbstractBusinessObjectRemoteService.php" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/souDbService/AbstractBusinessObjectRemoteService.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/businessGenerator/souDbService/include/DB.php" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/souDbService/include/DB.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +64,8 @@
       <workItem from="1768374077689" duration="9019000" />
       <workItem from="1769165841055" duration="474000" />
       <workItem from="1770123745309" duration="1788000" />
-      <workItem from="1770647123180" duration="6679000" />
+      <workItem from="1770647123180" duration="9168000" />
+      <workItem from="1770894244768" duration="16574000" />
     </task>
     <servers />
   </component>

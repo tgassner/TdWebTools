@@ -1,12 +1,55 @@
+:root {
+    --td-sunshine-yellow: #ffdc14;
+    --td-sunshine-yellow-outer: #ffcd00;
+    --td-sunshine-yellow-inner: var(--td-sunshine-yellow);
+
+    --td-laguna-blue: #00aac8;
+    --td-laguna-blue-outer: #0096be;
+    --td-laguna-blue-inner: var(--td-laguna-blue);
+
+    --td-kiwi-green: #AFC80A;
+    --td-kiwi-green-outer: #96C323;
+    --td-kiwi-green-inner: var(--td-kiwi-green);
+
+    --td-citrus-yellow: #E6E678;
+    --td-citrus-yellow-outer: #E6E65A;
+    --td-citrus-yellow-inner: var(--td-citrus-yellow);
+
+    --td-buttongray: #848484;
+    --td_buttongray-outer: #707070;
+    --td-buttongray-inner: var(--td-buttongray);
+}
+
+body {
+    font-family: 'helvetica neue', Helvetica, Arial, sans-serif;
+}
+
 .fullFormElementDiv {
     display: flex;
     flex-direction: row;
     width: 100%;
+    /* margin-bottom: 10px; */
+}
+
+.tabContentGeneralClass {
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+}
+
+.mainTabTabButtonsContainerClass {
+    display: flex;
+    flex-direction: row;
+}
+
+.mainTabTabButtonClass {
+    display: flex;
 }
 
 .labelFormElementDiv {
     display: flex;
-    width: 150px;
+    width: 250px;
+    font-size: 22px;
 }
 
 .lkzPlzOrtDivClass {
@@ -41,9 +84,24 @@
     row-gap: 10px;
 }
 
+@media only screen and (max-width: 1239px) {
+    .formAtAllDiv {
+        background-color: #ff0000;
+        /* margin-top: 10px;
+        margin-left: auto;
+        margin-right: auto;
+        min-width: 700px;
+        max-width: 900px;
+        row-gap: 10px; */
+    }
+}
+
 .inputElement {
     display: flex;
     width: 100%;
+    height: 120%;
+    font-size: 20px;
+    box-sizing: border-box;
 }
 
 .adressContainerDivClass {
@@ -60,7 +118,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    row-gap: 5px;
+    row-gap: 35px;
 }
 
 .reiterButtonContainerDiv {
@@ -147,7 +205,7 @@
 .positionenContainerGridDiv {
     display: grid;
     column-gap: 2px;
-    row-gap: 2px;
+    row-gap: 20px;
     grid-template-columns: auto auto auto auto auto auto auto auto auto auto auto auto auto auto;
     padding-top: 10px;
     border-top: #cdcdcd 1px solid;
@@ -480,4 +538,34 @@
 .positionBausteinSelectClass,
 .positionEinheitListSelectClass {
     height: 28px;
+}
+
+
+.canvasSketchClass {
+    border: 1px solid #aaa;
+    background: white;
+    width: 100%;
+    height: 65vh;
+    touch-action: none;
+}
+
+.toolbarSketchClass {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.buttonSketchClass {
+    padding: 8px 14px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.colorSketchClass {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #555;
+    cursor: pointer;
 }
