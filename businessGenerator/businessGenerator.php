@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <link rel="stylesheet" href="css/businessGenerator.css">
+    <link rel="stylesheet" href="css/businessGenerator.css?d=<?php echo(time()); ?>">
     <meta charset="UTF-8">
     <meta http-equiv="cache-control" content="max-age=0" />
     <meta http-equiv="cache-control" content="no-cache" />
@@ -21,7 +21,7 @@
 
     <script src="js/autoComplete.min.js"></script>
     <script src="js/signature_pad.umd.min.js"></script>
-    <script type="text/javascript" src="js/businessGenerator.js"></script>
+    <script type="text/javascript" src="js/businessGenerator.js?d=<?php echo(time()); ?>"></script>
 
     <link rel="stylesheet" href="css/autoComplete.min.css">
 
@@ -39,7 +39,7 @@
             <span id="statusSpanEnvironment" style="margin-left: 10px"> </span>
         </div>
     </div>
-    <img src="img/td_header.png" height="150px" style="; display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
+    <img src="img/td_header.png" height="100px" style="; display: flex; justify-content: right; align-self: center;" alt="TD Header Logo">
 </div>
 
 <div style="" class="formAtAllDiv">
@@ -603,6 +603,7 @@
             <div class="colorSketchClass" style="background:green" onclick="setColor('green')"></div>
 
             <button onclick="sendSketch()">📡 Senden</button>
+            <button id="buttonLoadLocalBackup" onclick="loadLocalBackup()">Load local Backup</button>
         </div>
 
         <canvas id="canvasSketch" class="canvasSketchClass"></canvas>

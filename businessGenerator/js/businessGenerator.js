@@ -41,6 +41,7 @@ function einheitFromString(einheitString) {
 
 window.addEventListener("beforeunload", function (event) {
     event.preventDefault();
+    saveLocalBackup();
 });
 
 function deletePosition(posNumber) {
@@ -466,10 +467,17 @@ function processLangtextHtml(planeLangtext) {
 function determineFilename() {
     let mitarbeiter = document.getElementById("MitarbeiterNr").value.trim();
     let currentDate = new Date();
-    let dateTime = currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1) + "-" + currentDate.getDate() + " " + currentDate.getHours() + "." + currentDate.getMinutes() + "." + currentDate.getSeconds();
+    let dateTime =
+        currentDate.getFullYear() + "-" +
+        String(currentDate.getMonth() + 1).padStart(2, '0') + "-" +
+        String(currentDate.getDate()).padStart(2, '0') + "_" +
+        String(currentDate.getHours()).padStart(2, '0') + "." +
+        String(currentDate.getMinutes()).padStart(2, '0') + "." +
+        String(currentDate.getSeconds()).padStart(2, '0');
     let businessNummer = document.getElementById("BusinessNummer").value;
-    // TODO BusinessTypes into Filename...
-    return  ((mitarbeiter === "") ? "" : (mitarbeiter + " ")) + dateTime  + " " + businessNummer + ".xml";
+    let businessType = document.getElementById("BusinessType").value;
+
+    return  dateTime + "_" + mitarbeiter + "_" + businessNummer + "_" + businessType + ".xml";
 }
 
 function download(data) {
@@ -485,7 +493,6 @@ function download(data) {
         window.URL.revokeObjectURL(url);
     }, 0);
 }
-
 
 function doCreateBusinessObjectWithExistingBusinessNummer(businessType) {
     let xmlOffDoc = document.implementation.createDocument("", "", null);
@@ -779,6 +786,10 @@ function doReset() {
     onClickAdresseReiter();
 
     onClickMainTabBusinessDaten();
+
+    addPosition();
+
+    clearCanvas();
 }
 
 function determineBusinessnummerFromServer(url, businessType) {
@@ -887,6 +898,7 @@ function onClickMainTabArtikel() {
 
 function onClickMainTabZeichnung() {
     switchReiterMainTab("mainTabTabButtonZeichnungDiv", "tabContentZeichnungDiv");
+    resizeCanvas();
 }
 
 function switchReiterMainTab(idOfEnabledButtons, idOfEnabledContent) {
@@ -938,39 +950,6 @@ function viewEnvironmentStatus(environment) {
         document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("nok", "Sorrry, No valid Environent Data could be loaded - something went wrong: " + environment));
     }
 }
-
-document.addEventListener("DOMContentLoaded", function() {
-    //document.getElementById("headerLowerDiv").innerHTML =
-    //    "window.screen.=" + window.screen.width + "x" + window.screen.height + " - " +
-    //    "window.inner=" + window.innerWidth + "x" + window.innerHeight + " - " +
-    //    "document.documentElement.client=" + document.documentElement.clientWidth + "x" + document.documentElement.clientHeight + " - " +
-    //    "document.body.client" + document.body.clientWidth + "x" + document.body.clientHeight + " - " +
-    //    document.getElementById("headerLowerDiv").innerHTML;
-
-    fetch("ArticleServiceRemoteCall.php?action=findAllProducts") // Call the fetch function passing the url of the API as a parameter
-        .then(res => res.json())
-        .then(function (res) {
-            let ok = res.ok;
-            let value = res.value;
-            let msg = res.msg;
-            let instance = res.instance;
-
-            if (!ok) {
-                document.getElementById("statusSpan").appendChild(createStatusElement("nok", msg, ""));
-                return;
-            }
-
-            viewEnvironmentStatus(instance ? instance : "");
-
-            allArticleData = value;
-
-            document.getElementById("statusSpan").appendChild(createStatusElement("ok", "Article Data loaded Successfully!", ""));
-        })
-        .catch(function(e) {
-            document.getElementById("statusSpan").appendChild(createStatusElement("nok", "Sorry, Article prefetch not possible - something went wrong.\n" + e, ""));
-        }).finally(function () {
-    });
-})
 
 function initAutoComplete(artikelNrInputElementId, artikelBezeichnungInputElementId, positionPreisInputElementId, positionEinheitSelectElementId, positionBausteinSelectElementId) {
     const autoCompleteJS = new autoComplete({
@@ -1080,35 +1059,39 @@ var canvas;
 var signaturePad;
 function resizeCanvas() {
     console.log("resize");
+    const data = signaturePad.toData();
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     canvas.width = canvas.offsetWidth * ratio;
     canvas.height = canvas.offsetHeight * ratio;
     canvas.getContext("2d").scale(ratio, ratio);
+    signaturePad.clear();
+    signaturePad.fromData(data);
 }
 
 /* ================= Undo / Redo ================= */
 
-let history = [];
 let redoStack = [];
 
 function saveState() {
-    history.push(signaturePad.toData());
     redoStack = [];
     saveLocalBackup();
 }
 
 
 function undo() {
-    if (!history.length) return;
-    redoStack.push(signaturePad.toData());
-    signaturePad.fromData(history.pop());
+    const data = signaturePad.toData();
+    if (data.length > 0) {
+        redoStack.push(data.pop()); // Entfernt den letzten Strich aus dem Array
+        signaturePad.fromData(data); // Zeichnet die verbleibenden Striche neu
+    }
     saveLocalBackup();
 }
 
 function redo() {
     if (!redoStack.length) return;
-    history.push(signaturePad.toData());
-    signaturePad.fromData(redoStack.pop());
+    const data = signaturePad.toData();
+    data.push(redoStack.pop());
+    signaturePad.fromData(data);
     saveLocalBackup();
 }
 
@@ -1131,23 +1114,17 @@ function clearCanvas() {
 const STORAGE_KEY = "kundenskizze_backup";
 
 function saveLocalBackup() {
-    const dataURL = canvas.toDataURL("image/jpeg", 0.9);
-    localStorage.setItem(STORAGE_KEY, dataURL);
+    const meinSkizzenData = signaturePad.toData();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(meinSkizzenData));
 }
 
 function loadLocalBackup() {
-    const dataURL = localStorage.getItem(STORAGE_KEY);
-    if (!dataURL) return;
-
-    const img = new Image();
-    img.onload = () => {
-        signaturePad.clear();
-        canvas.getContext("2d").drawImage(img, 0, 0);
-    };
-    img.src = dataURL;
+    const gespeicherterString = localStorage.getItem(STORAGE_KEY);
+    if (gespeicherterString) {
+        const datenObjekt = JSON.parse(gespeicherterString);
+        signaturePad.fromData(datenObjekt);
+    }
 }
-
-
 
 /* ================= Netzwerk-Upload ================= */
 
@@ -1178,26 +1155,65 @@ function sendSketch() {
         });
 }
 
-document.addEventListener ("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function() {
+    console.log(
+        "window.screen= " + window.screen.width + " x " + window.screen.height + "\n" +
+        "window.inner= " + window.innerWidth + " x " + window.innerHeight + "\n" +
+        "document.documentElement.client= " + document.documentElement.clientWidth + " x " + document.documentElement.clientHeight + "\n" +
+        "document.body.client= " + document.body.clientWidth + " x " + document.body.clientHeight);
+
+    fetch("ArticleServiceRemoteCall.php?action=findAllProducts") // Call the fetch function passing the url of the API as a parameter
+        .then(res => res.json())
+        .then(function (res) {
+            let ok = res.ok;
+            let value = res.value;
+            let msg = res.msg;
+            let instance = res.instance;
+
+            if (!ok) {
+                document.getElementById("statusSpan").appendChild(createStatusElement("nok", msg, ""));
+                return;
+            }
+
+            viewEnvironmentStatus(instance ? instance : "");
+
+            allArticleData = value;
+
+            document.getElementById("statusSpan").appendChild(createStatusElement("ok", "Article Data loaded Successfully!", ""));
+            addPosition();
+        })
+        .catch(function(e) {
+            document.getElementById("statusSpan").appendChild(createStatusElement("nok", "Sorry, Article prefetch not possible - something went wrong.\n" + e, ""));
+        }).finally(function () {
+    });
+
     document.getElementById("tabContentZeichnungDiv").style.display = "";
     canvas = document.getElementById("canvasSketch");
 
     signaturePad = new SignaturePad(canvas, {
         minWidth: 1,
         maxWidth: 2,
-        penColor: "red",
+        penColor: "black",
         backgroundColor: 'rgba(255, 255, 255, 1)'
     });
 
-    signaturePad.onEnd = saveState;
+    signaturePad.addEventListener("endStroke", saveState);
 
     resizeCanvas();
 
-    window.addEventListener("resize", resizeCanvas);
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            resizeCanvas(); // Deine Funktion von vorhin
+        }, 200); // Wartet 200ms, bis der User fertig mit Ziehen ist
+    });
 
-    //loadLocalBackup();
 
-    //signaturePad.clear();
+    const backupSketch = localStorage.getItem(STORAGE_KEY);
+    if (!backupSketch) {
+        document.getElementById("buttonLoadLocalBackup").style.display = "none";
+    }
 
     document.getElementById("tabContentZeichnungDiv").style.display = "none";
-});
+})
