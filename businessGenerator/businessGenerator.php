@@ -81,12 +81,6 @@
             </div>
             <div style="" class="inputFormElementDiv">
                 <select id="MitarbeiterNr" name="MitarbeiterNr" class="inputElement">
-                    <option value=""></option>
-                    <option value="LST">Ludwig</option>
-                    <option value="RRI">Richard</option>
-                    <option value="SSC">Silvia</option>
-                    <option value="MMU">Martina</option>
-                    <option value="WPU">Wolfgang</option>
                 </select>
             </div>
         </div>
@@ -613,6 +607,7 @@
         <button id="prepareOfferButton" onclick="doPrepareOffer()" class="defaultButtonClass">Angebot</button>
         <button id="prepareOrderButton" onclick="doPrepareOrder()" class="defaultButtonClass">Auftrag</button>
         <button id="resetButton1" onclick="doReset()" class="defaultButtonClass">Reset</button>
+        <button id="sendToERPButton" onclick="doSendToERP()" class="defaultButtonClass">Send To ERP</button>
     </div>
 
     <div  id="ButtonsDownloadOrShowDiv" style="display: none" class="buttonsDivClass">

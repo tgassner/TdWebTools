@@ -494,6 +494,77 @@ function download(data) {
     }, 0);
 }
 
+function doSendToERP() {
+    doCreateBusinessObjectJson(BusinessTypes.OFFER);
+}
+
+function doCreateBusinessObjectJson(businessType) {
+    let businessObjectJSON = {};
+
+    switch (businessType) {
+        case BusinessTypes.OFFER:
+            businessObjectJSON["ObjectName"] = "Angebot";
+            businessObjectJSON["Lieferzeit"] = document.getElementById("Lieferzeit").value;
+            businessObjectJSON["IhreZeichen"] = document.getElementById("IhreZeichen").value;
+            break;
+        case BusinessTypes.ORDER:
+            //businessObjectElem = createXmlObject(xmlOffDoc, businessobjectsRootElement, "Auftrag", "", "33");
+
+            // AuftragTyp   - BusiGen
+            //createXmlField(xmlOffDoc, businessObjectElem, "AuftragTyp", "AB");
+
+            // GpartnerNr -
+            //createXmlField(xmlOffDoc, businessObjectElem, "GpartnerNr", document.getElementById("GpartnerNr").value);
+
+            // Liefertermin
+            //createXmlField(xmlOffDoc, businessObjectElem, "Liefertermin", document.getElementById("Liefertermin").value);
+
+            break;
+        default:
+            alert("do hots greber wos!!");
+            return;
+    }
+
+    // MitarbeiterNr
+    businessObjectJSON["MitarbeiterNr"] = document.getElementById("MitarbeiterNr").value;
+
+    // ErstelltVon
+    businessObjectJSON["ErstelltVon"] = document.getElementById("MitarbeiterNr").value;
+
+    // LiefBedText
+    businessObjectJSON["LiefBedText"] = document.getElementById("LiefBedText").value;
+
+    // Versandart
+    businessObjectJSON["Versandart"] = document.getElementById("Versandart").value;
+
+    // Versandvermerk
+    businessObjectJSON["Versandvermerk"] = document.getElementById("Versandvermerk").value;
+
+    // ZahlBedText
+    businessObjectJSON["ZahlBedText"] = document.getElementById("ZahlBedText").value;
+
+    // ZahlTage
+    let zahlBedTextSelectElement = document.getElementById("ZahlBedText");
+    let option = zahlBedTextSelectElement.options[zahlBedTextSelectElement.selectedIndex];
+    businessObjectJSON["ZahlTage"] = option.getAttribute("zahlTage");
+
+    let jsonText = JSON.stringify(businessObjectJSON);
+
+    console.log(businessObjectJSON);
+    console.log("______________");
+    console.log(jsonText);
+
+    fetch('AfpsHttpClient.php?action=createAngebot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: jsonText
+    })
+        .then(res => res.json())
+        .then(console.log);
+
+    //console.log(businessObjectJSON);
+}
+
 function doCreateBusinessObjectWithExistingBusinessNummer(businessType) {
     let xmlOffDoc = document.implementation.createDocument("", "", null);
 
@@ -531,7 +602,7 @@ function doCreateBusinessObjectWithExistingBusinessNummer(businessType) {
 
             break;
         default:
-            alert("do hot greber wos!!");
+            alert("do hots greber wos!!");
             return;
     }
     // Business Object / Angebot / Auftrag Object
@@ -941,7 +1012,8 @@ function createStatusElement(status, tooltip, text) {
     return okElementContainer;
 }
 
-function viewEnvironmentStatus(environment) {
+function viewEnvironmentStatus() {
+    let environment = instance ? instance : "";
     if (environment === "PROD") {
         document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("ok", "Production Environment", ""));
     } else if (environment === "TEST") {
@@ -1155,7 +1227,11 @@ function sendSketch() {
         });
 }
 
+var instance = "UNDEFINED";
+
 document.addEventListener("DOMContentLoaded", function() {
+
+
     console.log(
         "window.screen= " + window.screen.width + " x " + window.screen.height + "\n" +
         "window.inner= " + window.innerWidth + " x " + window.innerHeight + "\n" +
@@ -1168,14 +1244,15 @@ document.addEventListener("DOMContentLoaded", function() {
             let ok = res.ok;
             let value = res.value;
             let msg = res.msg;
-            let instance = res.instance;
+            instance = res.instance;
 
             if (!ok) {
                 document.getElementById("statusSpan").appendChild(createStatusElement("nok", msg, ""));
                 return;
             }
 
-            viewEnvironmentStatus(instance ? instance : "");
+            viewEnvironmentStatus();
+            fillMitarbeiterSelect();
 
             allArticleData = value;
 
@@ -1217,3 +1294,34 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById("tabContentZeichnungDiv").style.display = "none";
 })
+
+function fillMitarbeiterSelect() {
+    const mitarbeiter = {
+        'Ludwig'   : {'prod' : 'LST',  'test' : '0045'},
+        'Richard'  : {'prod' : 'RRI',  'test' : '0025'},
+        'Silvia'   : {'prod' : 'SSC',  'test' : '0003'},
+        'Martina'  : {'prod' : 'MMU',  'test' : '0018'},
+        'Wolfgang' : {'prod' : 'WPU',  'test' : '0044'}
+    };
+
+    let mitarbeiterNrSelect = document.getElementById("MitarbeiterNr");
+    let environment = instance ? instance : "";
+
+    for (let name in mitarbeiter) {
+        let mitarbeiterSingle = mitarbeiter[name];
+        let mrNr = "";
+
+        if (environment === "PROD") {
+            mrNr = mitarbeiterSingle.prod;
+        } else if (environment === "TEST") {
+            mrNr = mitarbeiterSingle.test;
+        } else {
+            mrNr = "0815";
+        }
+
+        let option = document.createElement('option')
+        option.textContent = name;
+        option.value = mrNr;
+        mitarbeiterNrSelect.appendChild(option);
+    }
+}

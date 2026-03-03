@@ -1,0 +1,5 @@
+{
+  "AfpsHttpEndpoint": "http://example.com:4711/AfpsHttpConnector/connectorservlet",
+  "username": "Max Mustermann",
+  "userpassword": "*************"
+}

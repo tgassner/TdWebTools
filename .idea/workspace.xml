@@ -2,9 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b140c360-2a4f-4b8a-9f9f-cc100c0901cf" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/businessGenerator/AfpsHttpClient.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/businessGenerator/AfpsHttpClientConfig.json.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/businessGenerator/businessGenerator.php" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/businessGenerator.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/businessGenerator/css/businessGenerator.css" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/css/businessGenerator.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/businessGenerator/js/businessGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/js/businessGenerator.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -14,6 +16,13 @@
   </component>
   <component name="ComposerSettings">
     <execution />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="PHP File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -44,12 +53,15 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\dev\wwwroot\TdWebTools\businessGenerator" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\dev\wwwroot\TdWebTools\businessGenerator" />
+    </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PS-253.30387.85" />
-        <option value="bundled-php-predefined-a98d8de5180a-0e0d91225499-com.jetbrains.php.sharedIndexes-PS-253.30387.85" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PS-253.31033.138" />
+        <option value="bundled-php-predefined-a98d8de5180a-0e0d91225499-com.jetbrains.php.sharedIndexes-PS-253.31033.138" />
       </set>
     </attachedChunks>
   </component>
@@ -66,7 +78,9 @@
       <workItem from="1770123745309" duration="1788000" />
       <workItem from="1770647123180" duration="9168000" />
       <workItem from="1770894244768" duration="22065000" />
-      <workItem from="1771253275012" duration="12760000" />
+      <workItem from="1771253275012" duration="15975000" />
+      <workItem from="1772028670942" duration="13951000" />
+      <workItem from="1772438026801" duration="19640000" />
     </task>
     <servers />
   </component>
