@@ -19,88 +19,129 @@ if (json_last_error() !== JSON_ERROR_NONE
 switch ($action) {
     case "createAngebot":
         doCreateAngebot($json, $afpsConfig);
+        break;
     default:
         doErrorAndDie("not set or illegal action= " . $action);
 }
 
 function doCreateAngebot(array $json, array $afpsConfig) {
-
     $xml = createXML($json, "Angebot", "createAngebot", $afpsConfig);
-
+    //echo($xml);
     $tempZip = createTmpZipFile($xml);
 
-    list($response, $httpCode) = doSyncWsCall($tempZip, $afpsConfig);
+    $responseXMLString = doSyncWsCall($tempZip, $afpsConfig);
 
     $ret["ok"] = false;
     $ret["value"] = -1;
     $ret["msg"] = "";
 
-    if ($httpCode === 200 && !empty($response)) {
-        // Response-ZIP temporär speichern, um es zu entpacken
-        $respZipPath = __DIR__ . '/resp_temp.zip';
-        file_put_contents($respZipPath, $response);
+    $responseXML = extractXmlStructureFromString($responseXMLString);
 
-        $resZip = new ZipArchive();
-        if ($resZip->open($respZipPath) === TRUE) {
-            // SOU schickt die Antwort immer in einer Datei namens "soap-response" (oder ähnlich) im ZIP
-            // Wir suchen einfach die erste Datei im Archiv
-            $responseXMLString = $resZip->getFromIndex(0);
-            $resZip->close();
-            unlink($respZipPath);
-
-            $responseXML = simplexml_load_string($responseXMLString);
-
-            if (isset($responseXML->{'response-error'})) {
-                $errorName = "";
-                $errorDescription = "";
-                if (isset($responseXML->{'response-error'}['name'])) {
-                    $errorName = $responseXML->{'response-error'}['name'];
-                }
-                if (isset($responseXML->{'response-error'}['description'])) {
-                    $errorDescription = $responseXML->{'response-error'}['description'];
-                }
-
-                $ret["msg"] = $errorName . " " . $errorDescription;
-            }
-
-            if (isset($responseXML->{'response-data-object'})) {
-                $ret["ok"] = true;
-                if (isset($responseXML->{'response-data-object'}->attribute)) {
-                    $attributes = [];
-                    foreach ($responseXML->{'response-data-object'}->attribute as $item) {
-                        $key = (string)$item['name'];
-                        $attributes[$key] = [
-                            'type'  => (string)$item['type'],
-                            'value' => (string)$item['value']
-                        ];
-                    }
-                    $ret["attributes"] = $attributes;
-                }
-            }
-        } else {
-            $ret["msg"] = "Antwort kein gültiges ZIP im Response von AFPS - Sou.Matrixx";
+    if (isset($responseXML->{'response-error'})) {
+        $errorName = "";
+        $errorDescription = "";
+        if (isset($responseXML->{'response-error'}['name'])) {
+            $errorName = $responseXML->{'response-error'}['name'];
         }
-    } else {
-        $ret["msg"] = "HTTP Fehler $httpCode";
+        if (isset($responseXML->{'response-error'}['description'])) {
+            $errorDescription = $responseXML->{'response-error'}['description'];
+        }
+
+        $ret["msg"] = $errorName . " " . $errorDescription;
+    }
+
+    if (isset($responseXML->{'response-data-object'})) {
+        $ret["ok"] = true;
+        if (isset($responseXML->{'response-data-object'}->attribute)) {
+            $attributes = [];
+            foreach ($responseXML->{'response-data-object'}->attribute as $item) {
+                $key = (string)$item['name'];
+                $attributes[$key] = [
+                    'type'  => (string)$item['type'],
+                    'value' => (string)$item['value']
+                ];
+            }
+            $ret["attributes"] = $attributes;
+        }
     }
 
     echo(json_encode($ret, JSON_UNESCAPED_UNICODE));
 }
 
-function doSyncWsCall(string $tempZip, $afpsConfig): array
+function extractXmlStructureFromString(string $responseXMLString): mixed
 {
-    // Per cURL an SOU schicken
+    $responseXML = simplexml_load_string($responseXMLString);
+    if ($responseXML === false) {
+        $errors = libxml_get_errors();
+        $errorDetails = [];
+
+        foreach ($errors as $error) {
+            $errorDetails[] = sprintf(
+                "Fehler in Zeile %d: %s",
+                $error->line,
+                trim($error->message)
+            );
+        }
+
+        libxml_clear_errors();
+
+        doErrorAndDie("XML-Parsing fehlgeschlagen:\n" . implode("\n", $errorDetails) . "\n\n" . $responseXMLString);
+    }
+    return $responseXML;
+}
+
+function doSyncWsCall(string $tempZip, $afpsConfig): string
+{
     $ch = curl_init($afpsConfig['AfpsHttpEndpoint']);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents($tempZip));
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/zip']);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    $response = curl_exec($ch);
+    $responseZipData = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     unlink($tempZip);
-    return array($response, $httpCode);
+
+    if ($httpCode !== 200 || empty($responseZipData)) {
+        doErrorAndDie("HTTP Fehler " . $httpCode);
+    }
+
+    return extractResponseZipFile($responseZipData);
+}
+
+function extractResponseZipFile(bool|string $responseZipData): string|false
+{
+// Response-ZIP temporär speichern, um es zu entpacken
+    $respZipPath = __DIR__ . '/resp_temp.zip';
+    file_put_contents($respZipPath, $responseZipData);
+
+    $resZip = new ZipArchive();
+    $openResult = $resZip->open($respZipPath);
+    $responseXMLString = "";
+    if ($openResult === TRUE) {
+        $responseXMLString = $resZip->getFromIndex(0);
+        $resZip->close();
+        unlink($respZipPath);
+    } else {
+        doErrorAndDie("Fehler beim Öffnen des SouMatrixx Response ZIP-Files: " . getZipErrorMessage($openResult) . "  (Code= " . $openResult . " )");
+    }
+    return $responseXMLString;
+}
+
+function getZipErrorMessage($errno) {
+    $zipErrors = [
+        ZipArchive::ER_EXISTS => 'Datei existiert bereits.',
+        ZipArchive::ER_INCONS => 'Inkonsistentes Archiv.',
+        ZipArchive::ER_INVAL  => 'Ungültiges Argument.',
+        ZipArchive::ER_MEMORY => 'Speicherfehler.',
+        ZipArchive::ER_NOENT  => 'Datei nicht gefunden.',
+        ZipArchive::ER_NOZIP  => 'Kein gültiges ZIP-Archiv.',
+        ZipArchive::ER_OPEN   => 'Datei konnte nicht geöffnet werden.',
+        ZipArchive::ER_READ   => 'Lesefehler.',
+        ZipArchive::ER_SEEK   => 'Positionsfehler (Seek).'
+    ];
+    return $zipErrors[$errno] ?? 'Unbekannter Fehler';
 }
 
 function createTmpZipFile(string $xml): string|false
@@ -142,8 +183,8 @@ function createXML(array $json, string $functionname, string $methodname, array 
 }
 
 function createXmlBusinessObject(SimpleXMLElement $param, array $json): void {
-    $obj = $param->addChild('object');
-    $obj->addAttribute('name', 'Angebot');
+    $objRootXml = $param->addChild('object');
+    $objRootXml->addAttribute('name', 'Angebot');
 
     $fields = [];
 
@@ -159,8 +200,93 @@ function createXmlBusinessObject(SimpleXMLElement $param, array $json): void {
     addCleanString("Versandart", $fields, $json);
     addCleanString("Versandvermerk", $fields, $json);
     addCleanString("ZahlBedText", $fields, $json);
-    //addCleanInteger("ZahlTage", $fields, $json);
+    addCleanInteger("ZahlTage", $fields, $json);
 
+    convertMapToXml($fields, $objRootXml);
+
+    addAllPos($json, $objRootXml);
+}
+
+function addAllPos(array $json, SimpleXMLElement $objRootXml): void
+{
+    if (isset($json["pos"]) && !empty($json["pos"])) {
+        $posListObjectXml = $objRootXml->addChild('object');
+        $posListObjectXml->addAttribute('name', "angebotposlist");
+
+        addSinglePos($json["pos"], $posListObjectXml);
+    }
+}
+
+function addSinglePos($pos, SimpleXMLElement $posListObjectXml): void
+{
+    foreach ($pos as $posJson) {
+        $posObjectXml = $posListObjectXml->addChild('object');
+        $posObjectXml->addAttribute('name', "angebotpos");
+
+        $posFields = [];
+        addCleanInteger("PosNr", $posFields, $posJson);
+        addCleanString("Baustein", $posFields, $posJson);
+        addCleanString("ArtikelNr", $posFields, $posJson);
+        addCleanString("Bezeichnung", $posFields, $posJson);
+        addCleanDecimal("Menge", $posFields, $posJson);
+        addCleanString("Einheit", $posFields, $posJson);
+        addCleanDecimal("Preis", $posFields, $posJson);
+        addCleanDecimal("Rabatt", $posFields, $posJson);
+        addCleanDecimal("Gesamtpreis", $posFields, $posJson);
+        addCleanString("LangtextHtml", $posFields, $posJson);
+        addCleanString("MwStNr", $posFields, $posJson, false, "20");
+        addCleanDecimal("MwStSatz", $posFields, $posJson, false, "20");
+        addCleanString("SachkontoNr", $posFields, $posJson, false, "4022");
+
+        convertMapToXml($posFields, $posObjectXml);
+
+        adPosFreeField($posObjectXml, $posJson["FreieFelder"]);
+    }
+}
+
+function adPosFreeField(SimpleXMLElement $posObjectXml, $freieFelder): void
+{
+    $freieFelderlistObjectXml = $posObjectXml->addChild('object');
+    $freieFelderlistObjectXml->addAttribute('name', "freiefelderlist");
+
+    foreach ($freieFelder as $freiesFeld) {
+        $freiesFeldObjectXml = $freieFelderlistObjectXml->addChild('object');
+        $freiesFeldObjectXml->addAttribute('name', "freiesfeld");
+        $freiesFeldAttrName = $freiesFeldObjectXml->addChild('attribute');
+        $freiesFeldAttrName->addAttribute('name', 'name');
+        $freiesFeldAttrName->addAttribute('type', 'string');
+        $freiesFeldAttrValue = $freiesFeldObjectXml->addChild('attribute');
+        $freiesFeldAttrValue->addAttribute('name', 'wert');
+        switch ($freiesFeld["Name"]) {
+            case "PosLaenge":
+                $freiesFeldAttrName->addAttribute('value', 'PosLaenge');
+                $freiesFeldAttrValue->addAttribute('type', 'decimal');
+                break;
+            case "PosBreite":
+                $freiesFeldAttrName->addAttribute('value', 'PosBreite');
+                $freiesFeldAttrValue->addAttribute('type', 'decimal');
+                break;
+            case "PosAnzahl":
+                $freiesFeldAttrName->addAttribute('value', 'PosAnzahl');
+                $freiesFeldAttrValue->addAttribute('type', 'string');
+                break;
+            case "PosLaengeEinheit":
+                $freiesFeldAttrName->addAttribute('value', 'PosLaengeEinheit');
+                $freiesFeldAttrValue->addAttribute('type', 'string');
+                break;
+            case "PosBreiteEinheit":
+                $freiesFeldAttrName->addAttribute('value', 'PosBreiteEinheit');
+                $freiesFeldAttrValue->addAttribute('type', 'string');
+                break;
+            default:
+
+        }
+        $freiesFeldAttrValue->addAttribute('value', $freiesFeld["Wert"]);
+    }
+}
+
+function convertMapToXml(array $fields, SimpleXMLElement $obj): void
+{
     foreach ($fields as $name => $info) {
         $attr = $obj->addChild('attribute');
         $attr->addAttribute('name', $name);
@@ -188,7 +314,7 @@ function addCleanInteger(string $arraySchluessel, array &$fields, array $json, b
     $value = $defaultValue;
     if (isset($json[$arraySchluessel])) {
         $strVal = $json[$arraySchluessel];
-        if (is_int($strVal)) {
+        if (filter_var($strVal, FILTER_VALIDATE_INT) !== false) {
             $value = intval($strVal);
         }
     } else if ($omitIfnotSet) {
@@ -196,6 +322,21 @@ function addCleanInteger(string $arraySchluessel, array &$fields, array $json, b
     }
     $fields[$arraySchluessel] =  ['type' => "integer", 'value' => $value];
 }
+
+function addCleanDecimal(string $arraySchluessel, array &$fields, array $json, bool $omitIfnotSet = true, int $defaultValue = 0): void {
+    $value = $defaultValue;
+    if (isset($json[$arraySchluessel])) {
+        $strVal = $json[$arraySchluessel];
+        if (is_numeric($strVal)) {
+            $value = floatval($strVal);
+        }
+    } else if ($omitIfnotSet) {
+        return;
+    }
+    $fields[$arraySchluessel] =  ['type' => "decimal", 'value' => $value];
+}
+
+
 
 function addHardCodedInteger(string $arraySchluessel, array &$fields, int $value = 0): void {
     $fields[$arraySchluessel] =  ['type' => "integer", 'value' => $value];

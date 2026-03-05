@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b140c360-2a4f-4b8a-9f9f-cc100c0901cf" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/businessGenerator/AfpsHttpClient.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/businessGenerator/AfpsHttpClientConfig.json.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/businessGenerator/AfpsHttpClient.php" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/AfpsHttpClient.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/businessGenerator/businessGenerator.php" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/businessGenerator.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/businessGenerator/js/businessGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/js/businessGenerator.js" afterDir="false" />
     </list>
@@ -80,7 +78,7 @@
       <workItem from="1770894244768" duration="22065000" />
       <workItem from="1771253275012" duration="15975000" />
       <workItem from="1772028670942" duration="13951000" />
-      <workItem from="1772438026801" duration="19640000" />
+      <workItem from="1772438026801" duration="43638000" />
     </task>
     <servers />
   </component>

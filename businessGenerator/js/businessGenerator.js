@@ -548,6 +548,41 @@ function doCreateBusinessObjectJson(businessType) {
     let option = zahlBedTextSelectElement.options[zahlBedTextSelectElement.selectedIndex];
     businessObjectJSON["ZahlTage"] = option.getAttribute("zahlTage");
 
+    // Positionen BEGIN
+    let posElements = document.getElementsByName("positionHiddenPos");
+    if (posElements) {
+        businessObjectJSON["pos"] = [];
+        posElements.forEach(pos => {
+            let posNumber = pos.value;
+
+            // object position
+            let posElement = {};
+
+            posElement["PosNr"] = posNumber;
+            posElement["Baustein"] =document.getElementById("positionBausteinSelect" + posNumber).value;
+            posElement["ArtikelNr"] = document.getElementById("positionArtikelNrInput" + posNumber).value;
+            posElement["Bezeichnung"] = document.getElementById("positionBezeichnungInput" + posNumber).value;
+            posElement["FreieFelder"] = [];
+            posElement["FreieFelder"].push({ "Name" : "PosLaenge", "Wert" : document.getElementById("positionLengthInput" + posNumber).value});
+            posElement["FreieFelder"].push({ "Name" : "PosLaengeEinheit", "Wert" : "mm" });
+            posElement["FreieFelder"].push({ "Name" : "PosBreite", "Wert" : document.getElementById("positionWidthInput" + posNumber).value });
+            posElement["FreieFelder"].push({ "Name" : "PosBreiteEinheit", "Wert" : "mm" });
+            posElement["FreieFelder"].push({ "Name" : "PosAnzahl", "Wert" : document.getElementById("positionAnzahlInput" + posNumber).value });
+            posElement["Menge"] = document.getElementById("positionMengeInput" + posNumber).value;
+            posElement["Einheit"] = document.getElementById("positionEinheitSelect" + posNumber).value;
+            posElement["Preis"] = document.getElementById("positionPreisInput" + posNumber).value;
+            posElement["Rabatt"] = document.getElementById("positionRabattInput" + posNumber).value;
+            posElement["Gesamtpreis"] = document.getElementById("positionGesamtpreisInput" + posNumber).value;
+            posElement["LangtextHtml"] = processLangtextHtml(document.getElementById("posLangTextTextArea" + posNumber).value);
+            posElement["MwStNr"] = "20"
+            posElement["MwStSatz"] = "20";
+            posElement["SachkontoNr"] = "4022";
+
+            businessObjectJSON["pos"].push(posElement);
+        })
+    }
+    // Positionen BEGIN
+
     let jsonText = JSON.stringify(businessObjectJSON);
 
     console.log(businessObjectJSON);
