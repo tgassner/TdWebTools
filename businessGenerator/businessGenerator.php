@@ -114,44 +114,44 @@
             </div>
             <div style="" class="inputFormElementDiv">
                 <select id="ZahlBedText" name="ZahlBedText" class="inputElement">
-                    <option value=""></option>
-                    <option value="14 Tage 2%, 30 Tage netto" >14 Tage 2%, 30 Tage netto</option>
-                    <option value="Vorauskasse" >Vorauskasse</option>
-                    <option value="zahlbar bei Abholung" >zahlbar bei Abholung</option>
-                    <option value="14 Tage 3%, 30 Tage netto" >14 Tage 3%, 30 Tage netto</option>
-                    <option value="bei Erstbestellung: zahlbar bei Abholung oder Vorauskassa" >bei Erstbestellung: zahlbar bei Abholung oder Vorauskassa</option>
-                    <option value="zahlbar bei Abholung oder Vorauskassa" >zahlbar bei Abholung oder Vorauskassa</option>
-                    <option value="10 Tage netto" >10 Tage netto</option>
-                    <option value="bei Erstbestellung: zahlbar bei Abholung, Vorauskassa oder Nachnahme" >bei Erstbestellung: zahlbar bei Abholung, Vorauskassa oder Nachnahme</option>
-                    <option value="zahlbar bei Abholung, Vorauskassa oder Nachnahme" >zahlbar bei Abholung, Vorauskassa oder Nachnahme</option>
-                    <option value="30 Tage 3%, 60 Tage netto" >30 Tage 3%, 60 Tage netto</option>
-                    <option value="10 Tage 3%, 30 Tage netto" >10 Tage 3%, 30 Tage netto</option>
-                    <option value="10 Tage 2%, 30 Tage netto" >10 Tage 2%, 30 Tage netto</option>
-                    <option value="30 Tage 5%, 60 Tage netto" >30 Tage 5%, 60 Tage netto</option>
-                    <option value="14 Tage 3%, 60 Tage netto" >14 Tage 3%, 60 Tage netto</option>
-                    <option value="21 Tage 3%, 30 Tage netto" >21 Tage 3%, 30 Tage netto</option>
-                    <option value="30 Tage 3%, 90 Tage netto" >30 Tage 3%, 90 Tage netto</option>
-                    <option value="sofort nach Rechnungserhalt ohne Abzug" >sofort nach Rechnungserhalt ohne Abzug</option>
-                    <option value="60 Tage netto" >60 Tage netto</option>
-                    <option value="bei Erstbestellung: Vorauskassa oder Nachnahme" >bei Erstbestellung: Vorauskassa oder Nachnahme</option>
-                    <option value="bei Erstbestellung: zahlbar bei Abholung, Vorauskassa oder Nachnahme (NN-Gebühr 20,-- + 20% MWST.)" >bei Erstbestellung: zahlbar bei Abholung, Vorauskassa oder Nachnahme (NN-Gebühr 20,-- + 20% MWST.)</option>
-                    <option value="21 Tage 2% Skonto, 30 Tage netto" >21 Tage 2% Skonto, 30 Tage netto</option>
-                    <option value="zahlbar bei Abholung, Vorauskassa oder Nachnahme (NN-Gebühr 20,-- + 20% MWST.)" >zahlbar bei Abholung, Vorauskassa oder Nachnahme (NN-Gebühr 20,-- + 20% MWST.)</option>
-                    <option value="Vorauskassa oder Nachnahme" >Vorauskassa oder Nachnahme</option>
-                    <option value="bei Erstbestellung: zahlbar bei Abholung" >bei Erstbestellung: zahlbar bei Abholung</option>
-                    <option value="Zahlung per Nachnahme" >Zahlung per Nachnahme</option>
-                    <option value="14 Tage 2%, 60 Tage netto" >14 Tage 2%, 60 Tage netto</option>
-                    <option value="30 Tage netto" >30 Tage netto</option>
-                    <option value="bei Erstbestellung: Vorauskassa" >bei Erstbestellung: Vorauskassa</option>
-                    <option value="7 Tage netto" >7 Tage netto</option>
-                    <option value="19 Tage 3%, 30 Tage netto" >19 Tage 3%, 30 Tage netto</option>
-                    <option value="7 Tage 5%, 14 Tage 3%, 30 Tage netto" >7 Tage 5%, 14 Tage 3%, 30 Tage netto</option>
-                    <option value="14 Tage 2%, 45 Tage netto" >14 Tage 2%, 45 Tage netto</option>
-                    <option value="nach Vereinbarung" >nach Vereinbarung</option>
-                    <option value="prepayment" >prepayment</option>
-                    <option value="zahlbar bei Zustellung" >zahlbar bei Zustellung</option>
-                    <option value="30 Tage 3%, 45 Tage 2%, 90 Tage netto" >30 Tage 3%, 45 Tage 2%, 90 Tage netto</option>
-                    <option value="7 Tage 3%, 30 Tage netto" >7 Tage 3%, 30 Tage netto</option>
+                    <option value="0"></option>
+                    <option value="30">14 Tage 2%, 30 Tage netto</option>
+                    <option value="0">Vorauskasse</option>
+                    <option value="0">zahlbar bei Abholung</option>
+                    <option value="30">14 Tage 3%, 30 Tage netto</option>
+                    <option value="0">bei Erstbestellung: zahlbar bei Abholung oder Vorauskassa</option>
+                    <option value="0">zahlbar bei Abholung oder Vorauskassa</option>
+                    <option value="10">10 Tage netto</option>
+                    <option value="0">bei Erstbestellung: zahlbar bei Abholung, Vorauskassa oder Nachnahme</option>
+                    <option value="0">zahlbar bei Abholung, Vorauskassa oder Nachnahme</option>
+                    <option value="60">30 Tage 3%, 60 Tage netto</option>
+                    <option value="30">10 Tage 3%, 30 Tage netto</option>
+                    <option value="30">10 Tage 2%, 30 Tage netto</option>
+                    <option value="60">30 Tage 5%, 60 Tage netto</option>
+                    <option value="60">14 Tage 3%, 60 Tage netto</option>
+                    <option value="30">21 Tage 3%, 30 Tage netto</option>
+                    <option value="90">30 Tage 3%, 90 Tage netto</option>
+                    <option value="0">sofort nach Rechnungserhalt ohne Abzug</option>
+                    <option value="60">60 Tage netto</option>
+                    <option value="0">bei Erstbestellung: Vorauskassa oder Nachnahme</option>
+                    <option value="0">bei Erstbestellung: zahlbar bei Abholung, Vorauskassa oder Nachnahme (NN-Gebühr 20,-- + 20% MWST.)</option>
+                    <option value="30">21 Tage 2% Skonto, 30 Tage netto</option>
+                    <option value="0">zahlbar bei Abholung, Vorauskassa oder Nachnahme (NN-Gebühr 20,-- + 20% MWST.)</option>
+                    <option value="0">Vorauskassa oder Nachnahme</option>
+                    <option value="0">bei Erstbestellung: zahlbar bei Abholung</option>
+                    <option value="0">Zahlung per Nachnahme</option>
+                    <option value="60">14 Tage 2%, 60 Tage netto</option>
+                    <option value="30">30 Tage netto</option>
+                    <option value="0">bei Erstbestellung: Vorauskassa</option>
+                    <option value="7">7 Tage netto</option>
+                    <option value="30">19 Tage 3%, 30 Tage netto</option>
+                    <option value="30">7 Tage 5%, 14 Tage 3%, 30 Tage netto</option>
+                    <option value="45">14 Tage 2%, 45 Tage netto</option>
+                    <option value="0">nach Vereinbarung</option>
+                    <option value="0">prepayment</option>
+                    <option value="0">zahlbar bei Zustellung</option>
+                    <option value="90">30 Tage 3%, 45 Tage 2%, 90 Tage netto</option>
+                    <option value="30">7 Tage 3%, 30 Tage netto</option>
                 </select>
             </div>
         </div>
@@ -607,7 +607,8 @@
         <button id="prepareOfferButton" onclick="doPrepareOffer()" class="defaultButtonClass">Angebot</button>
         <button id="prepareOrderButton" onclick="doPrepareOrder()" class="defaultButtonClass">Auftrag</button>
         <button id="resetButton1" onclick="doReset()" class="defaultButtonClass">Reset</button>
-        <button id="sendToERPButton" onclick="doSendToERP()" class="defaultButtonClass">Send To ERP</button>
+        <button id="sendToERPButton" onclick="doSendAngebotToERP()" class="defaultButtonClass">Send To Angebot ERP</button>
+        <button id="sendToERPButton" onclick="doSendAuftragToERP()" class="defaultButtonClass">Send To Auftrag ERP</button>
     </div>
 
     <div  id="ButtonsDownloadOrShowDiv" style="display: none" class="buttonsDivClass">

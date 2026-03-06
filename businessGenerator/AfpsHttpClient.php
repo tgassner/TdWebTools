@@ -20,20 +20,43 @@ switch ($action) {
     case "createAngebot":
         doCreateAngebot($json, $afpsConfig);
         break;
+    case "createAuftrag":
+        doCreateAuftrag($json, $afpsConfig);
+        break;
     default:
         doErrorAndDie("not set or illegal action= " . $action);
 }
 
-function doCreateAngebot(array $json, array $afpsConfig) {
-    $xml = createXML($json, "Angebot", "createAngebot", $afpsConfig);
+function doCreateAngebot(array $json, array $afpsConfig) :void {
+    doCreateBusinessObject($json, $afpsConfig, "Angebot", "Angebot", "createAngebot");
+}
+
+function doCreateAuftrag(array $json, array $afpsConfig) :void {
+    doCreateBusinessObject($json, $afpsConfig, "Auftrag", "Auftrag", "createAuftrag");
+}
+
+function doCreateBusinessObject(array $json, array $afpsConfig, string $businessObjectType, string $functionName, string $methodname): void {
+    $xml = createXML($json, $functionName, $methodname, $afpsConfig, $businessObjectType);
     //echo($xml);
     $tempZip = createTmpZipFile($xml);
 
+    handleWsCall($tempZip, $afpsConfig, $xml);
+}
+
+function handleWsCall(string $tempZip, array $afpsConfig, string $xml): void {
     $responseXMLString = doSyncWsCall($tempZip, $afpsConfig);
 
     $ret["ok"] = false;
     $ret["value"] = -1;
     $ret["msg"] = "";
+
+    // Ersetzt den Wert von userpassword="..." durch "******"
+    $patterns = [
+        '/username="[^"]+"/',
+        '/password="[^"]+"/'
+    ];
+    $loggerXml = preg_replace($patterns, 'password="************"', $xml);
+    $ret["xmlToErp"] = $loggerXml;
 
     $responseXML = extractXmlStructureFromString($responseXMLString);
 
@@ -57,7 +80,7 @@ function doCreateAngebot(array $json, array $afpsConfig) {
             foreach ($responseXML->{'response-data-object'}->attribute as $item) {
                 $key = (string)$item['name'];
                 $attributes[$key] = [
-                    'type'  => (string)$item['type'],
+                    'type' => (string)$item['type'],
                     'value' => (string)$item['value']
                 ];
             }
@@ -68,8 +91,7 @@ function doCreateAngebot(array $json, array $afpsConfig) {
     echo(json_encode($ret, JSON_UNESCAPED_UNICODE));
 }
 
-function extractXmlStructureFromString(string $responseXMLString): mixed
-{
+function extractXmlStructureFromString(string $responseXMLString): SimpleXMLElement {
     $responseXML = simplexml_load_string($responseXMLString);
     if ($responseXML === false) {
         $errors = libxml_get_errors();
@@ -144,7 +166,7 @@ function getZipErrorMessage($errno) {
     return $zipErrors[$errno] ?? 'Unbekannter Fehler';
 }
 
-function createTmpZipFile(string $xml): string|false
+function createTmpZipFile(string $xml): string
 {
     $tempZip = tempnam(sys_get_temp_dir(), 'sou');
 
@@ -167,7 +189,7 @@ function createTmpZipFile(string $xml): string|false
     return $tempZip;
 }
 
-function createXML(array $json, string $functionname, string $methodname, array $afpsConfig): string {
+function createXML(array $json, string $functionname, string $methodname, array $afpsConfig, string $businessObjectType): string {
     $xml = new SimpleXMLElement('<soap-request/>');
     // <request ... > Request Metadata
     $request = $xml->addChild('request');
@@ -178,18 +200,30 @@ function createXML(array $json, string $functionname, string $methodname, array 
 
     //<request-parameter>
     $param = $xml->addChild('request-parameter');
-    createXmlBusinessObject($param, $json);
+    createXmlBusinessObject($param, $json, $businessObjectType);
     return $xml->asXML();
 }
 
-function createXmlBusinessObject(SimpleXMLElement $param, array $json): void {
+function createXmlBusinessObject(SimpleXMLElement $param, array $json, string $businessObjectType): void {
     $objRootXml = $param->addChild('object');
-    $objRootXml->addAttribute('name', 'Angebot');
 
     $fields = [];
 
-    addHardCodedInteger("AngebotArt", $fields);
-    addHardCodedString("AngebotTyp", $fields);
+    switch (strtolower($businessObjectType)) {
+        case "angebot":
+            $objRootXml->addAttribute('name', 'Angebot');
+            addHardCodedInteger("AngebotArt", $fields);
+            addHardCodedString("AngebotTyp", $fields);
+            break;
+        case "auftrag":
+            $objRootXml->addAttribute('name', 'Auftrag');
+            addHardCodedString("AuftragTyp", $fields, "AB");
+
+            break;
+        default:
+    }
+
+    addCleanString("GpartnerNr", $fields, $json, false, "20");
     addCleanString("Lieferzeit", $fields, $json);
     addCleanString("IhreZeichen", $fields, $json);
     addCleanString("MitarbeiterNr", $fields, $json);
@@ -204,11 +238,38 @@ function createXmlBusinessObject(SimpleXMLElement $param, array $json): void {
 
     convertMapToXml($fields, $objRootXml);
 
+    addAddresses($json, $objRootXml);
     addAllPos($json, $objRootXml);
 }
 
-function addAllPos(array $json, SimpleXMLElement $objRootXml): void
-{
+function addAddresses(array $json, SimpleXMLElement $objRootXml): void {
+    getSingleAddress("adresse", $json, $objRootXml);
+    getSingleAddress("lieferadresse", $json, $objRootXml);
+    getSingleAddress("rechnadresse", $json, $objRootXml);
+}
+
+function getSingleAddress(string $addressType, array $json, SimpleXMLElement $objRootXml): void {
+    if (isset($json[$addressType])) {
+        $addressJson = $json[$addressType];
+
+        $posAddressObjectXml = $objRootXml->addChild('object');
+        $posAddressObjectXml->addAttribute('name', $addressType);
+
+        $addressFields = [];
+        addCleanString("ApartnerName", $addressFields, $addressJson);
+        addCleanString("Email", $addressFields, $addressJson);
+        addCleanString("Firma1", $addressFields, $addressJson);
+        addCleanString("Firma2", $addressFields, $addressJson);
+        addCleanString("Lkz", $addressFields, $addressJson);
+        addCleanString("Ort", $addressFields, $addressJson);
+        addCleanString("Plz", $addressFields, $addressJson);
+        addCleanString("Strasse", $addressFields, $addressJson);
+        addCleanString("Telefon", $addressFields, $addressJson);
+        convertMapToXml($addressFields, $posAddressObjectXml);
+    }
+}
+
+function addAllPos(array $json, SimpleXMLElement $objRootXml): void {
     if (isset($json["pos"]) && !empty($json["pos"])) {
         $posListObjectXml = $objRootXml->addChild('object');
         $posListObjectXml->addAttribute('name', "angebotposlist");

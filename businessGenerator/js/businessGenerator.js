@@ -494,8 +494,26 @@ function download(data) {
     }, 0);
 }
 
-function doSendToERP() {
-    doCreateBusinessObjectJson(BusinessTypes.OFFER);
+function doSendAngebotToERP() {
+    const businessObjectJSON = doCreateBusinessObjectJson(BusinessTypes.OFFER);
+    const jsonText = JSON.stringify(businessObjectJSON);
+    sendJsonToAfpsHttpClient(jsonText, "createAngebot");
+}
+
+function doSendAuftragToERP() {
+    const businessObjectJSON = doCreateBusinessObjectJson(BusinessTypes.ORDER);
+    const jsonText = JSON.stringify(businessObjectJSON);
+    sendJsonToAfpsHttpClient(jsonText, "createAuftrag");
+}
+
+function sendJsonToAfpsHttpClient(jsonText, action) {
+    fetch('AfpsHttpClient.php?action=' + action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: jsonText
+    })
+        .then(res => res.json())
+        .then(console.log);
 }
 
 function doCreateBusinessObjectJson(businessType) {
@@ -504,49 +522,27 @@ function doCreateBusinessObjectJson(businessType) {
     switch (businessType) {
         case BusinessTypes.OFFER:
             businessObjectJSON["ObjectName"] = "Angebot";
-            businessObjectJSON["Lieferzeit"] = document.getElementById("Lieferzeit").value;
-            businessObjectJSON["IhreZeichen"] = document.getElementById("IhreZeichen").value;
             break;
         case BusinessTypes.ORDER:
-            //businessObjectElem = createXmlObject(xmlOffDoc, businessobjectsRootElement, "Auftrag", "", "33");
-
-            // AuftragTyp   - BusiGen
-            //createXmlField(xmlOffDoc, businessObjectElem, "AuftragTyp", "AB");
-
-            // GpartnerNr -
-            //createXmlField(xmlOffDoc, businessObjectElem, "GpartnerNr", document.getElementById("GpartnerNr").value);
-
-            // Liefertermin
-            //createXmlField(xmlOffDoc, businessObjectElem, "Liefertermin", document.getElementById("Liefertermin").value);
-
+            businessObjectJSON["ObjectName"] = "Auftrag";
             break;
         default:
-            alert("do hots greber wos!!");
+            // alles Cool ist halt noch undefined...
             return;
     }
 
-    // MitarbeiterNr
+    businessObjectJSON["Lieferzeit"] = document.getElementById("Lieferzeit").value;
+    businessObjectJSON["Liefertermin"] = document.getElementById("Liefertermin").value;
+    businessObjectJSON["IhreZeichen"] = document.getElementById("IhreZeichen").value;
+    businessObjectJSON["GpartnerNr"] = document.getElementById("GpartnerNr").value;
     businessObjectJSON["MitarbeiterNr"] = document.getElementById("MitarbeiterNr").value;
-
-    // ErstelltVon
     businessObjectJSON["ErstelltVon"] = document.getElementById("MitarbeiterNr").value;
-
-    // LiefBedText
     businessObjectJSON["LiefBedText"] = document.getElementById("LiefBedText").value;
-
-    // Versandart
     businessObjectJSON["Versandart"] = document.getElementById("Versandart").value;
-
-    // Versandvermerk
     businessObjectJSON["Versandvermerk"] = document.getElementById("Versandvermerk").value;
-
-    // ZahlBedText
-    businessObjectJSON["ZahlBedText"] = document.getElementById("ZahlBedText").value;
-
-    // ZahlTage
-    let zahlBedTextSelectElement = document.getElementById("ZahlBedText");
-    let option = zahlBedTextSelectElement.options[zahlBedTextSelectElement.selectedIndex];
-    businessObjectJSON["ZahlTage"] = option.getAttribute("zahlTage");
+    businessObjectJSON["ZahlBedText"] = document.getElementById("ZahlBedText").textContent;
+    businessObjectJSON["ZahlBedText"] = document.getElementById('ZahlBedText').options[document.getElementById('ZahlBedText').selectedIndex].text;
+    businessObjectJSON["ZahlTage"] = document.getElementById("ZahlBedText").value;
 
     // Positionen BEGIN
     let posElements = document.getElementsByName("positionHiddenPos");
@@ -581,23 +577,51 @@ function doCreateBusinessObjectJson(businessType) {
             businessObjectJSON["pos"].push(posElement);
         })
     }
-    // Positionen BEGIN
+    // Positionen END
 
-    let jsonText = JSON.stringify(businessObjectJSON);
+    // Adresse BEGIN
+    let adresseJson = {};
+    adresseJson["ApartnerName"] = document.getElementById("adresseApartnerName").value;
+    adresseJson["Email"] = document.getElementById("adresseemail").value;
+    adresseJson["Firma1"] = document.getElementById("adresseFirma1").value;
+    adresseJson["Firma2"] = document.getElementById("adresseFirma2").value;
+    adresseJson["Lkz"] = document.getElementById("adresseLkz").value;
+    adresseJson["Ort"] = document.getElementById("adresseOrt").value;
+    adresseJson["Plz"] = document.getElementById("adressePlz").value;
+    adresseJson["Strasse"] = document.getElementById("adresseStrasse").value;
+    adresseJson["Telefon"] = document.getElementById("adresseTel").value;
+    businessObjectJSON["adresse"] = adresseJson;
+    // Adresse END
 
-    console.log(businessObjectJSON);
-    console.log("______________");
-    console.log(jsonText);
+    // Lieferanschrift BEGIN
+    let lieferadresseJson = {};
+    lieferadresseJson["ApartnerName"] = document.getElementById("lieferanschriftApartnerName").value;
+    lieferadresseJson["Email"] = document.getElementById("lieferanschriftemail").value;
+    lieferadresseJson["Firma1"] = document.getElementById("lieferanschriftFirma1").value;
+    lieferadresseJson["Firma2"] = document.getElementById("lieferanschriftFirma2").value;
+    lieferadresseJson["Lkz"] = document.getElementById("lieferanschriftLkz").value;
+    lieferadresseJson["Ort"] = document.getElementById("lieferanschriftOrt").value;
+    lieferadresseJson["Plz"] = document.getElementById("lieferanschriftPlz").value;
+    lieferadresseJson["Strasse"] = document.getElementById("lieferanschriftStrasse").value;
+    lieferadresseJson["Telefon"] = document.getElementById("lieferanschriftTel").value;
+    businessObjectJSON["lieferadresse"] = lieferadresseJson;
+    // Lieferanschrift END
 
-    fetch('AfpsHttpClient.php?action=createAngebot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: jsonText
-    })
-        .then(res => res.json())
-        .then(console.log);
+    // Rechnungsanschrift BEGIN
+    rechnadresseJson = {};
+    rechnadresseJson["ApartnerName"] = document.getElementById("rechnungsanschriftApartnerName").value;
+    rechnadresseJson["Email"] = document.getElementById("rechnungsanschriftemail").value;
+    rechnadresseJson["Firma1"] = document.getElementById("rechnungsanschriftFirma1").value;
+    rechnadresseJson["Firma2"] = document.getElementById("rechnungsanschriftFirma2").value;
+    rechnadresseJson["Lkz"] = document.getElementById("rechnungsanschriftLkz").value;
+    rechnadresseJson["Ort"] = document.getElementById("rechnungsanschriftOrt").value;
+    rechnadresseJson["Plz"] = document.getElementById("rechnungsanschriftPlz").value;
+    rechnadresseJson["Strasse"] = document.getElementById("rechnungsanschriftStrasse").value;
+    rechnadresseJson["Telefon"] = document.getElementById("rechnungsanschriftTel").value;
+    businessObjectJSON["rechnadresse"] = rechnadresseJson;
+    // Rechnungsanschrift END
 
-    //console.log(businessObjectJSON);
+    return businessObjectJSON;
 }
 
 function doCreateBusinessObjectWithExistingBusinessNummer(businessType) {
