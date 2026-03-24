@@ -2,10 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b140c360-2a4f-4b8a-9f9f-cc100c0901cf" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/urlaubsantragGenerator/employees.json.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/businessGenerator/AfpsHttpClient.php" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/AfpsHttpClient.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/businessGenerator/AfpsHttpClientConfig.json.example" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/AfpsHttpClientConfig.json.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/businessGenerator/businessGenerator.php" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/businessGenerator.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/businessGenerator/js/businessGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/js/businessGenerator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/urlaubsantragGenerator/employees.json" beforeDir="false" afterPath="$PROJECT_DIR$/urlaubsantragGenerator/employees.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,21 +37,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/dev/wwwroot/TdWebTools/businessGenerator&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/dev/wwwroot/TdWebTools/urlaubsantragGenerator",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\dev\wwwroot\TdWebTools\urlaubsantragGenerator" />
       <recent name="C:\dev\wwwroot\TdWebTools\businessGenerator" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -58,8 +62,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PS-253.31033.138" />
-        <option value="bundled-php-predefined-a98d8de5180a-0e0d91225499-com.jetbrains.php.sharedIndexes-PS-253.31033.138" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PS-253.32098.40" />
+        <option value="bundled-php-predefined-a98d8de5180a-0e0d91225499-com.jetbrains.php.sharedIndexes-PS-253.32098.40" />
       </set>
     </attachedChunks>
   </component>
@@ -78,7 +82,9 @@
       <workItem from="1770894244768" duration="22065000" />
       <workItem from="1771253275012" duration="15975000" />
       <workItem from="1772028670942" duration="13951000" />
-      <workItem from="1772438026801" duration="57133000" />
+      <workItem from="1772438026801" duration="58528000" />
+      <workItem from="1773222076788" duration="20389000" />
+      <workItem from="1774342609955" duration="491000" />
     </task>
     <servers />
   </component>
