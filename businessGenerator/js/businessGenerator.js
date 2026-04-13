@@ -523,7 +523,7 @@ function doSendAngebotToERP() {
                 if (response.pureMsg) {
                     alert("Sou.Matrixx meldet:\n" + response.pureMsg);
                 } else if (response.msg) {
-                    alert("Sou.Matrixx meldet:\n" + response.msg);
+                    alert(response.msg);
                 }
             }
         }
@@ -607,9 +607,7 @@ async function sendJsonToAfpsHttpClient(jsonText, action) {
         return jsonData;
 
     } catch (e) {
-        alert("Sorry, something went wrong.\n" + e);
-        // Hier geben wir das Fehler-Objekt zurück
-        return { ok: false, msg: e.message, value: [] };
+        return { ok: false, msg: "Verbindungsproblem:\n" + e.message, value: [] };
     }
 }
 
