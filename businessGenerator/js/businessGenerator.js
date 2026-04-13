@@ -3,6 +3,13 @@ const BusinessTypes = Object.freeze({
     ORDER:  Symbol("ORDER")
 });
 
+const isBlank = (str) => !str?.toString().trim();
+
+const isEmptyOrZero = (val) => {
+    const trimmed = String(val || "").trim();
+    return trimmed === "" || trimmed === "0" || Number(trimmed) === 0;
+};
+
 function businessTypeFromString(businessTypeString) {
     switch (businessTypeString) {
         case Object(BusinessTypes.OFFER).description:
@@ -495,25 +502,214 @@ function download(data) {
 }
 
 function doSendAngebotToERP() {
+    let valiationMessages = validateFormData();
+    if (Array.isArray(valiationMessages) && valiationMessages.length > 0) {
+        alert(valiationMessages);
+        return;
+    }
     const businessObjectJSON = doCreateBusinessObjectJson(BusinessTypes.OFFER);
     const jsonText = JSON.stringify(businessObjectJSON);
-    sendJsonToAfpsHttpClient(jsonText, "createAngebot");
+    sendJsonToAfpsHttpClient(jsonText, "createAngebot").then(response => {
+        if (response) {
+            if (response.ok) {
+                document.getElementById("sendOfferToERPButton").disabled = true;
+                document.getElementById("sendOrderToERPButton").disabled = true;
+                if (response.value && response.value.attributes && response.value.attributes.result && response.value.attributes.result.value) {
+                    document.getElementById("BusinessNummer").value = response.value.attributes.result.value;
+                    document.getElementById("BusinessType").style.display = "block";
+                    document.getElementById("BusinessType").value = "Angebot";
+                }
+            } else {
+                if (response.pureMsg) {
+                    alert("Sou.Matrixx meldet:\n" + response.pureMsg);
+                } else if (response.msg) {
+                    alert("Sou.Matrixx meldet:\n" + response.msg);
+                }
+            }
+        }
+    });
 }
 
 function doSendAuftragToERP() {
+    let valiationMessages = validateFormData();
+    if (Array.isArray(valiationMessages) && valiationMessages.length > 0) {
+        alert(valiationMessages);
+        return;
+    }
     const businessObjectJSON = doCreateBusinessObjectJson(BusinessTypes.ORDER);
     const jsonText = JSON.stringify(businessObjectJSON);
-    sendJsonToAfpsHttpClient(jsonText, "createAuftrag");
+    sendJsonToAfpsHttpClient(jsonText, "createAuftrag").then(response => {
+        if (response && response.ok) {
+            document.getElementById("sendOfferToERPButton").disabled = true;
+            document.getElementById("sendOrderToERPButton").disabled = true;
+            if (response.value && response.value.attributes && response.value.attributes.result && response.value.attributes.result.value) {
+                document.getElementById("BusinessNummer").value = response.value.attributes.result.value;
+                document.getElementById("BusinessType").style.display = "block";
+                document.getElementById("BusinessType").value = "Auftrag";
+            }
+        }
+    });
 }
 
+function validateFormData() {
+    let valiationMessages = [];
+    valiationMessages = valiationMessages.concat(validateArticle());
+    console.log(valiationMessages);
+    return valiationMessages;
+}
+
+function validateArticle() {
+    let valiationMessages = [];
+    let articles = parseArticlePositionsDomToJson();
+    for (const article of articles) {
+        if (isBlank(article["ArtikelNr"]) &&
+            isBlank(article["Baustein"]) &&
+            isBlank(article["Bezeichnung"]) &&
+            isEmptyOrZero(article["Menge"]) &&
+            isEmptyOrZero(article["Rabatt"]) &&
+            isEmptyOrZero(article["Preis"]) &&
+            isEmptyOrZero(article["Gesamtpreis"]) &&
+            (isBlank(article["LangtextHtml"]) || article["LangtextHtml"] === "<p></p>")) {
+
+            // wenn Artikel Position leer ist, einfach löschen und kein Theater machen...
+            deletePosition(article["PosNr"]);
+            continue;
+        }
+
+        if (isBlank(article["ArtikelNr"])) {
+            valiationMessages.push("Artikel Position = " + article["PosNr"] + " hat keine Artikelnummer.");
+        }
+        if (isBlank(article["Baustein"])) {
+            valiationMessages.push("Artikel Position = " + article["PosNr"] + " hat keinen Baustein.");
+        }
+    }
+    return valiationMessages;
+}
+
+async function sendJsonToAfpsHttpClient(jsonText, action) {
+    try {
+        const response = await fetch('AfpsHttpClient.php?action=' + action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: jsonText
+        });
+
+        if (!response.ok) {
+            return { ok: false, msg: "HTTP-Fehler! Status: " + response.status, value: [] };
+        }
+
+        const jsonData = await response.json();
+        console.log(jsonData);
+
+        return jsonData;
+
+    } catch (e) {
+        alert("Sorry, something went wrong.\n" + e);
+        // Hier geben wir das Fehler-Objekt zurück
+        return { ok: false, msg: e.message, value: [] };
+    }
+}
+
+/*
 function sendJsonToAfpsHttpClient(jsonText, action) {
     fetch('AfpsHttpClient.php?action=' + action, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: jsonText
     })
-        .then(res => res.json())
-        .then(console.log);
+    .then(res => {
+        if (!res.ok) {
+            throw new Error(`HTTP-Fehler! Status: ${res.status}`);
+        }
+        return res.json();
+    })
+    .then(function (res) {
+        console.log(res);
+    })
+    .catch(function(e) {
+        alert("Sorry, something went wrong.\n" + e);
+        let ret = [];
+        ret["ok"] = false;
+        ret["msg"] = e;
+        ret["value"] = [];
+        return ret;
+    })
+    .finally(function () {
+    //console.log();
+    });
+}
+*/
+
+function getInstanceFromAfpsHttpClient() {
+    fetch('AfpsHttpClient.php?action=instanceInfo', {
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error(`HTTP-Fehler! Status: ${res.status}`);
+        }
+        return res.json();
+    })
+    .then(function (res) {
+        if (res && res.value && res.value.instance) {
+            instanceAfpsHttpClient = res.value.instance;
+        }
+    })
+    .catch(function(e) {
+        console.log("Sorry, something went wrong. => AfpsHttpClient.php?action=instanceInfo");
+        console.log(e);
+    })
+    .finally(function () {
+        viewEnvironmentStatusAfpsHttpClient();
+    });
+}
+
+function parseArticlePositionsDomToJson() {
+    let posElementsDom = document.getElementsByName("positionHiddenPos");
+    let posElementsJson = []
+    if (posElementsDom) {
+        posElementsDom.forEach(pos => {
+            let posNumber = pos.value;
+
+            // object position
+            let posElement = {};
+
+            posElement["PosNr"] = posNumber;
+            posElement["Baustein"] = document.getElementById("positionBausteinSelect" + posNumber).value;
+            posElement["ArtikelNr"] = document.getElementById("positionArtikelNrInput" + posNumber).value;
+            posElement["Bezeichnung"] = document.getElementById("positionBezeichnungInput" + posNumber).value;
+            posElement["FreieFelder"] = [];
+            posElement["FreieFelder"].push({
+                "Name": "PosLaenge",
+                "Wert": document.getElementById("positionLengthInput" + posNumber).value
+            });
+            posElement["FreieFelder"].push({"Name": "PosLaengeEinheit", "Wert": "mm"});
+            posElement["FreieFelder"].push({
+                "Name": "PosBreite",
+                "Wert": document.getElementById("positionWidthInput" + posNumber).value
+            });
+            posElement["FreieFelder"].push({"Name": "PosBreiteEinheit", "Wert": "mm"});
+            posElement["FreieFelder"].push({
+                "Name": "PosAnzahl",
+                "Wert": document.getElementById("positionAnzahlInput" + posNumber).value
+            });
+            posElement["Menge"] = document.getElementById("positionMengeInput" + posNumber).value;
+            posElement["Einheit"] = document.getElementById("positionEinheitSelect" + posNumber).value;
+            posElement["Preis"] = document.getElementById("positionPreisInput" + posNumber).value;
+            posElement["Rabatt"] = document.getElementById("positionRabattInput" + posNumber).value;
+            posElement["Gesamtpreis"] = document.getElementById("positionGesamtpreisInput" + posNumber).value;
+            posElement["LangtextHtml"] = processLangtextHtml(document.getElementById("posLangTextTextArea" + posNumber).value);
+            posElement["MwStNr"] = "20"
+            posElement["MwStSatz"] = "20";
+            posElement["SachkontoNr"] = "4022";
+
+            posElementsJson.push(posElement);
+        })
+    }
+    return posElementsJson;
 }
 
 function doCreateBusinessObjectJson(businessType) {
@@ -544,40 +740,8 @@ function doCreateBusinessObjectJson(businessType) {
     businessObjectJSON["ZahlBedText"] = document.getElementById('ZahlBedText').options[document.getElementById('ZahlBedText').selectedIndex].text;
     businessObjectJSON["ZahlTage"] = document.getElementById("ZahlBedText").value;
 
-    // Positionen BEGIN
-    let posElements = document.getElementsByName("positionHiddenPos");
-    if (posElements) {
-        businessObjectJSON["pos"] = [];
-        posElements.forEach(pos => {
-            let posNumber = pos.value;
-
-            // object position
-            let posElement = {};
-
-            posElement["PosNr"] = posNumber;
-            posElement["Baustein"] =document.getElementById("positionBausteinSelect" + posNumber).value;
-            posElement["ArtikelNr"] = document.getElementById("positionArtikelNrInput" + posNumber).value;
-            posElement["Bezeichnung"] = document.getElementById("positionBezeichnungInput" + posNumber).value;
-            posElement["FreieFelder"] = [];
-            posElement["FreieFelder"].push({ "Name" : "PosLaenge", "Wert" : document.getElementById("positionLengthInput" + posNumber).value});
-            posElement["FreieFelder"].push({ "Name" : "PosLaengeEinheit", "Wert" : "mm" });
-            posElement["FreieFelder"].push({ "Name" : "PosBreite", "Wert" : document.getElementById("positionWidthInput" + posNumber).value });
-            posElement["FreieFelder"].push({ "Name" : "PosBreiteEinheit", "Wert" : "mm" });
-            posElement["FreieFelder"].push({ "Name" : "PosAnzahl", "Wert" : document.getElementById("positionAnzahlInput" + posNumber).value });
-            posElement["Menge"] = document.getElementById("positionMengeInput" + posNumber).value;
-            posElement["Einheit"] = document.getElementById("positionEinheitSelect" + posNumber).value;
-            posElement["Preis"] = document.getElementById("positionPreisInput" + posNumber).value;
-            posElement["Rabatt"] = document.getElementById("positionRabattInput" + posNumber).value;
-            posElement["Gesamtpreis"] = document.getElementById("positionGesamtpreisInput" + posNumber).value;
-            posElement["LangtextHtml"] = processLangtextHtml(document.getElementById("posLangTextTextArea" + posNumber).value);
-            posElement["MwStNr"] = "20"
-            posElement["MwStSatz"] = "20";
-            posElement["SachkontoNr"] = "4022";
-
-            businessObjectJSON["pos"].push(posElement);
-        })
-    }
-    // Positionen END
+    // Artikel Positionen
+    businessObjectJSON["pos"] = parseArticlePositionsDomToJson();
 
     // Adresse BEGIN
     let adresseJson = {};
@@ -913,6 +1077,9 @@ function doReset() {
     document.getElementById("lieferZeitFormElementDiv").style.display = "";
     document.getElementById("ihreZeichenFormElementDiv").style.display = "";
 
+    document.getElementsByName("sendOfferToERPButton").disabled = false;
+    document.getElementsByName("sendOfferToERPButton").disabled = false;
+
     onClickAdresseReiter();
 
     onClickMainTabBusinessDaten();
@@ -1071,14 +1238,25 @@ function createStatusElement(status, tooltip, text) {
     return okElementContainer;
 }
 
-function viewEnvironmentStatus() {
-    let environment = instance ? instance : "";
+function viewEnvironmentStatusSouDbService() {
+    let environment = instanceSouDbService ? instanceSouDbService : "";
     if (environment === "PROD") {
-        document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("ok", "Production Environment", ""));
+        document.getElementById("statusSpanEnvironmentSouDbService").appendChild(createStatusElement("ok", "SouDbService Production Environment", ""));
     } else if (environment === "TEST") {
-        document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("ok", " *** Test System *** ", " *** Test System *** "));
+        document.getElementById("statusSpanEnvironmentSouDbService").appendChild(createStatusElement("ok", " *** SouDbService Test System *** ", " *** SouDbService Test System *** "));
     } else {
-        document.getElementById("statusSpanEnvironment").appendChild(createStatusElement("nok", "Sorrry, No valid Environent Data could be loaded - something went wrong: " + environment));
+        document.getElementById("statusSpanEnvironmentSouDbService").appendChild(createStatusElement("nok", "Sorrry, No valid SouDbService Environent Data could be loaded - something went wrong: " + environment));
+    }
+}
+
+function viewEnvironmentStatusAfpsHttpClient() {
+    let environment = instanceAfpsHttpClient ? instanceAfpsHttpClient : "";
+    if (environment === "PROD") {
+        document.getElementById("statusSpanEnvironmentAfpsHttpClient").appendChild(createStatusElement("ok", "AfpsHttpClient Production Environment", ""));
+    } else if (environment === "TEST") {
+        document.getElementById("statusSpanEnvironmentAfpsHttpClient").appendChild(createStatusElement("ok", " *** AfpsHttpClient Test System *** ", " *** AfpsHttpClient Test System *** "));
+    } else {
+        document.getElementById("statusSpanEnvironmentAfpsHttpClient").appendChild(createStatusElement("nok", "Sorrry, No valid AfpsHttpClient Environent Data could be loaded - something went wrong: " + environment));
     }
 }
 
@@ -1286,7 +1464,8 @@ function sendSketch() {
         });
 }
 
-var instance = "UNDEFINED";
+var instanceSouDbService = "UNDEFINED";
+var instanceAfpsHttpClient = "UNDEFINED";
 
 document.addEventListener("DOMContentLoaded", function() {
 
@@ -1297,20 +1476,22 @@ document.addEventListener("DOMContentLoaded", function() {
         "document.documentElement.client= " + document.documentElement.clientWidth + " x " + document.documentElement.clientHeight + "\n" +
         "document.body.client= " + document.body.clientWidth + " x " + document.body.clientHeight);
 
+    getInstanceFromAfpsHttpClient();
+
     fetch("ArticleServiceRemoteCall.php?action=findAllProducts") // Call the fetch function passing the url of the API as a parameter
         .then(res => res.json())
         .then(function (res) {
             let ok = res.ok;
             let value = res.value;
             let msg = res.msg;
-            instance = res.instance;
+            instanceSouDbService = res.instance;
 
             if (!ok) {
                 document.getElementById("statusSpan").appendChild(createStatusElement("nok", msg, ""));
                 return;
             }
 
-            viewEnvironmentStatus();
+            viewEnvironmentStatusSouDbService();
             fillMitarbeiterSelect();
 
             allArticleData = value;
@@ -1364,7 +1545,7 @@ function fillMitarbeiterSelect() {
     };
 
     let mitarbeiterNrSelect = document.getElementById("MitarbeiterNr");
-    let environment = instance ? instance : "";
+    let environment = instanceSouDbService ? instanceSouDbService : "";
 
     for (let name in mitarbeiter) {
         let mitarbeiterSingle = mitarbeiter[name];

@@ -34,9 +34,10 @@
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">TD Business Generator</h1>
         <div id="headerLowerDiv" style="display: flex; margin-top: 0px;margin-bottom: 15px;">
-            Version 0.10.0&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;13.02.2026
+            Version 0.11.0&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;12.03.2026
             <span id="statusSpan" style="margin-left: 10px"> </span>
-            <span id="statusSpanEnvironment" style="margin-left: 10px"> </span>
+            <span id="statusSpanEnvironmentSouDbService" style="margin-left: 10px"> </span>
+            <span id="statusSpanEnvironmentAfpsHttpClient" style="margin-left: 10px"> </span>
         </div>
     </div>
     <img src="img/td_header.png" height="100px" style="; display: flex; justify-content: right; align-self: center;" alt="TD Header Logo">
@@ -604,13 +605,13 @@
     </div> <!-- END tabContentZeichnungDiv -->
 
     <div id="ButtonsOfferOrOrderDiv" style="" class="buttonsDivClass">
-        <button id="prepareOfferButton" onclick="doPrepareOffer()" class="defaultButtonClass">Angebot</button>
-        <button id="prepareOrderButton" onclick="doPrepareOrder()" class="defaultButtonClass">Auftrag</button>
+        <!--<button id="prepareOfferButton" onclick="doPrepareOffer()" class="defaultButtonClass">Angebot</button>-->
+        <!--<button id="prepareOrderButton" onclick="doPrepareOrder()" class="defaultButtonClass">Auftrag</button>-->
+        <button id="sendOfferToERPButton" onclick="doSendAngebotToERP()" class="defaultButtonClass">Send To Angebot ERP</button>
+        <button id="sendOrderToERPButton" onclick="doSendAuftragToERP()" class="defaultButtonClass">Send To Auftrag ERP</button>
         <button id="resetButton1" onclick="doReset()" class="defaultButtonClass">Reset</button>
-        <button id="sendToERPButton" onclick="doSendAngebotToERP()" class="defaultButtonClass">Send To Angebot ERP</button>
-        <button id="sendToERPButton" onclick="doSendAuftragToERP()" class="defaultButtonClass">Send To Auftrag ERP</button>
     </div>
-
+<!--
     <div  id="ButtonsDownloadOrShowDiv" style="display: none" class="buttonsDivClass">
         <button id="downloadButton" onclick="doDownloadFile()" class="defaultButtonClass">Download XML-File</button>
         <button id="viewButton" onclick="doShowFile()" class="defaultButtonClass">Anzeigen XML-File</button>
@@ -619,6 +620,7 @@
     <div id="preViewDiv" style="display: none" class="preViewDivClass">
         <textarea id="offerXmlPreView" style="" class="previewTextAreaClass"></textarea>
     </div>
+    -->
 </div> <!-- formAtAllDiv -->
 </body>
 </html>

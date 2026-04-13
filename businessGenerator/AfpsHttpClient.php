@@ -1,9 +1,14 @@
 <?php
 
 $action = $_GET["action"] ?? 'ERROR';
-$json = json_decode(file_get_contents('php://input'), true);
-if (json_last_error() !== JSON_ERROR_NONE) {
-    doErrorAndDie("Json from Webclient is illegal!");
+
+$fileGetContents = file_get_contents('php://input');
+$json = "";
+if (!empty($fileGetContents)) {
+    $json = json_decode($fileGetContents, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        doErrorAndDie("Json from Webclient is illegal!");
+    }
 }
 
 $afpsConfig = json_decode(file_get_contents("AfpsHttpClientConfig.json"), true);
@@ -11,7 +16,8 @@ if (json_last_error() !== JSON_ERROR_NONE
     || !isset($afpsConfig)
     || !isset($afpsConfig['username'])
     || !isset($afpsConfig['userpassword'])
-    || !isset($afpsConfig['AfpsHttpEndpoint'])) {
+    || !isset($afpsConfig['AfpsHttpEndpoint'])
+    || !isset($afpsConfig['instance'])) {
 
     doErrorAndDie("AfpsHttpClientConfig.json is missing or illegal!");
 }
@@ -23,8 +29,20 @@ switch ($action) {
     case "createAuftrag":
         doCreateAuftrag($json, $afpsConfig);
         break;
+    case "instanceInfo":
+        doReturnInstanceInfo($afpsConfig);
+        break;
     default:
         doErrorAndDie("not set or illegal action= " . $action);
+}
+
+function doReturnInstanceInfo(array $afpsConfig) {
+    $ret["ok"] = false;
+    $ret["msg"] = "";
+    $ret["value"] = [];
+    $ret["value"]['instance'] = $afpsConfig['instance'];
+    header("Content-type: application/json; charset=utf-8");
+    echo(json_encode($ret, JSON_UNESCAPED_UNICODE));
 }
 
 function doCreateAngebot(array $json, array $afpsConfig) :void {
@@ -59,8 +77,11 @@ function handleWsCall(string $tempZip, array $afpsConfig, string $xml): void {
     $ret["xmlToErp"] = $loggerXml;
 
     $responseXML = extractXmlStructureFromString($responseXMLString);
+    $ret["xmlFromErp"] = $responseXML;
 
+    $hasResponseErrorTag = false;
     if (isset($responseXML->{'response-error'})) {
+        $hasResponseErrorTag = true;
         $errorName = "";
         $errorDescription = "";
         if (isset($responseXML->{'response-error'}['name'])) {
@@ -71,10 +92,29 @@ function handleWsCall(string $tempZip, array $afpsConfig, string $xml): void {
         }
 
         $ret["msg"] = $errorName . " " . $errorDescription;
+
+        $lines = preg_split('/\r?\n/', $errorDescription, -1, PREG_SPLIT_NO_EMPTY);
+
+        $ret["pureMsg"] = "";
+        foreach ($lines as $line) {
+            $line = trim($line); // Leerzeichen am Anfang/Ende entfernen
+
+            // 2. Prüfen, ob die Zeile mit "Details: " beginnt
+            if (str_starts_with($line, "Details: ")) {
+
+                // 3. Den Anfang abschneiden (9 Zeichen)
+                $cleanLine = substr($line, 9);
+
+                $ret["pureMsg"] = $cleanLine . "\n";
+            }
+        }
+        $ret["pureMsg"] = trim($ret["pureMsg"]);
     }
 
     if (isset($responseXML->{'response-data-object'})) {
-        $ret["ok"] = true;
+        if (!$hasResponseErrorTag) {
+            $ret["ok"] = true;
+        }
         if (isset($responseXML->{'response-data-object'}->attribute)) {
             $attributes = [];
             foreach ($responseXML->{'response-data-object'}->attribute as $item) {
@@ -84,10 +124,11 @@ function handleWsCall(string $tempZip, array $afpsConfig, string $xml): void {
                     'value' => (string)$item['value']
                 ];
             }
-            $ret["attributes"] = $attributes;
+            $ret["value"] = [];
+            $ret["value"]["attributes"] = $attributes;
         }
     }
-
+    header("Content-type: application/json; charset=utf-8");
     echo(json_encode($ret, JSON_UNESCAPED_UNICODE));
 }
 
@@ -409,6 +450,7 @@ function doErrorAndDie(string $message): void
     $ret["ok"] = false;
     $ret["value"] = -1;
     $ret["msg"] = $message;
+    header("Content-type: application/json; charset=utf-8");
     echo(json_encode($ret, JSON_UNESCAPED_UNICODE));
     die;
 }
