@@ -1021,16 +1021,16 @@ function doCreateBusinessObjectWithExistingBusinessNummer(businessType) {
     return xmlOfferDocString;
 }
 
-function doDownloadFile() {
-    let businessType = businessTypeFromString(document.getElementById("BusinessType").value);
-    download(doCreateBusinessObjectWithExistingBusinessNummer(businessType));
-}
-
-function doShowFile() {
-    let businessType = businessTypeFromString(document.getElementById("BusinessType").value);
-    document.getElementById("preViewDiv").style.display = "flex";
-    document.getElementById("offerXmlPreView").innerHTML = formatXml(doCreateBusinessObjectWithExistingBusinessNummer(businessType));
-}
+//function doDownloadFile() {
+//    let businessType = businessTypeFromString(document.getElementById("BusinessType").value);
+//    download(doCreateBusinessObjectWithExistingBusinessNummer(businessType));
+//}
+//
+//function doShowFile() {
+//    let businessType = businessTypeFromString(document.getElementById("BusinessType").value);
+//    document.getElementById("preViewDiv").style.display = "flex";
+//    document.getElementById("offerXmlPreView").innerHTML = formatXml(doCreateBusinessObjectWithExistingBusinessNummer(businessType));
+//}
 
 function doReset() {
     Array.from(document.getElementsByClassName("singlePositionContainerDivClass")).forEach(element => {
@@ -1058,12 +1058,8 @@ function doReset() {
     document.getElementById("BusinessType").style.display = "none";
     document.getElementById("BusinessType").value = "";
 
-    document.getElementById("preViewDiv").style.display = "none";
-
     document.getElementById("GpartnerNr").value = "20";
 
-    document.getElementById("ButtonsDownloadOrShowDiv").style.display = "none";
-    document.getElementById("ButtonsOfferOrOrderDiv").style.display = "";
     document.getElementById("lieferTerminFormElementDiv").style.display = "";
     document.getElementById("lieferZeitFormElementDiv").style.display = "";
     document.getElementById("ihreZeichenFormElementDiv").style.display = "";
