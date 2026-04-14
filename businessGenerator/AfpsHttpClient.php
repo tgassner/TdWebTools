@@ -1,4 +1,5 @@
 <?php
+require_once "include/constants.php";
 
 $action = $_GET["action"] ?? 'ERROR';
 
@@ -55,7 +56,6 @@ function doCreateAuftrag(array $json, array $afpsConfig) :void {
 
 function doCreateBusinessObject(array $json, array $afpsConfig, string $businessObjectType, string $functionName, string $methodname): void {
     $xml = createXML($json, $functionName, $methodname, $afpsConfig, $businessObjectType);
-    //echo($xml);
     $tempZip = createTmpZipFile($xml);
 
     handleWsCall($tempZip, $afpsConfig, $xml);
@@ -167,7 +167,11 @@ function doSyncWsCall(string $tempZip, $afpsConfig): string
     unlink($tempZip);
 
     if ($httpCode !== 200 || empty($responseZipData)) {
-        doErrorAndDie("HTTP Fehler " . $httpCode);
+        if ($httpCode === 0) {
+            doErrorAndDie("Middleware AfpsHttpClient meldet:\nVerbindungsproblem\nKeine Verbindung zum Sou.Matrixx Server möglich.\n" . $afpsConfig['AfpsHttpEndpoint']);
+        } else {
+            doErrorAndDie("Middleware AfpsHttpClient meldet:\nVerbindungsproblem\nFehler bei der Verbindung zum Sou.Matrixx Server.\nStatus: " . $httpCode . " - " . STATUS_TEXTS[$httpCode]);
+        }
     }
 
     return extractResponseZipFile($responseZipData);

@@ -43,6 +43,10 @@
     <img src="img/td_header.png" height="100px" style="; display: flex; justify-content: right; align-self: center;" alt="TD Header Logo">
 </div>
 
+<div id="messageZoneDiv" style="" class="messageZoneDivClass">
+
+</div>
+
 <div style="" class="formAtAllDiv">
 
     <div id="mainTabTabButtonsContainer" class="mainTabTabButtonsContainerClass">

@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b140c360-2a4f-4b8a-9f9f-cc100c0901cf" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/businessGenerator/include/constants.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/businessGenerator/AfpsHttpClient.php" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/AfpsHttpClient.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/businessGenerator/businessGenerator.php" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/businessGenerator.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/businessGenerator/css/businessGenerator.css" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/css/businessGenerator.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/businessGenerator/js/businessGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/businessGenerator/js/businessGenerator.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -81,7 +85,7 @@
       <workItem from="1772438026801" duration="58528000" />
       <workItem from="1773222076788" duration="20389000" />
       <workItem from="1774342609955" duration="1829000" />
-      <workItem from="1776083415323" duration="5853000" />
+      <workItem from="1776083415323" duration="15444000" />
     </task>
     <servers />
   </component>

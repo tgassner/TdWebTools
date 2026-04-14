@@ -1,6 +1,6 @@
 const BusinessTypes = Object.freeze({
-    OFFER:  Symbol("OFFER"),
-    ORDER:  Symbol("ORDER")
+    OFFER: Symbol("OFFER"),
+    ORDER: Symbol("ORDER")
 });
 
 const isBlank = (str) => !str?.toString().trim();
@@ -22,11 +22,11 @@ function businessTypeFromString(businessTypeString) {
 }
 
 const Einheiten = Object.freeze({
-    STUECK:  Symbol("Stück"),
-    QUADRATMETER:  Symbol("m²"),
+    STUECK: Symbol("Stück"),
+    QUADRATMETER: Symbol("m²"),
     METER: Symbol("m"),
     SET: Symbol("Set"),
-    PAUSCHALE:  Symbol("Pau"),
+    PAUSCHALE: Symbol("Pau"),
 });
 
 function einheitFromString(einheitString) {
@@ -119,7 +119,7 @@ function calculateNewPosNr() {
     let maxPos = posElements.length * 10;
     if (posElements) {
         posElements.forEach(pos => {
-            let intValue =  parseInt(pos.value, 10);
+            let intValue = parseInt(pos.value, 10);
             maxPos = (intValue > maxPos) ? intValue : maxPos;
         })
     }
@@ -195,7 +195,7 @@ function calcMenge(posNumber) {
 
     let laenge = (laengeElement && laengeElement.value && isNumeric(laengeElement.value)) ? parseFloat(laengeElement.value) : 0;
     let breite = (breiteElement && breiteElement.value && isNumeric(breiteElement.value)) ? parseFloat(breiteElement.value) : 0;
-    let anzahl= (anzahlElement && anzahlElement.value && isNumeric(anzahlElement.value)) ? parseFloat(anzahlElement.value) : 0;
+    let anzahl = (anzahlElement && anzahlElement.value && isNumeric(anzahlElement.value)) ? parseFloat(anzahlElement.value) : 0;
     let einheit = (einheitElement.value) ? einheitElement.value : "";
 
     switch (einheitFromString(einheit)) {
@@ -218,13 +218,14 @@ function calcMenge(posNumber) {
             break;
     }
 }
+
 function calcGesamtPreis(posNumber) {
     let mengeElement = document.getElementById('positionMengeInput' + posNumber);
     let preisElement = document.getElementById('positionPreisInput' + posNumber);
     let anzahlElement = document.getElementById('positionAnzahlInput' + posNumber);
     let rabattElement = document.getElementById('positionRabattInput' + posNumber);
 
-    if (!mengeElement || ! preisElement || !anzahlElement) {
+    if (!mengeElement || !preisElement || !anzahlElement) {
         document.getElementById("positionGesamtpreisInput" + posNumber).value = "";
         return;
     }
@@ -484,7 +485,7 @@ function determineFilename() {
     let businessNummer = document.getElementById("BusinessNummer").value;
     let businessType = document.getElementById("BusinessType").value;
 
-    return  dateTime + "_" + mitarbeiter + "_" + businessNummer + "_" + businessType + ".xml";
+    return dateTime + "_" + mitarbeiter + "_" + businessNummer + "_" + businessType + ".xml";
 }
 
 function download(data) {
@@ -502,53 +503,57 @@ function download(data) {
 }
 
 function doSendAngebotToERP() {
-    let valiationMessages = validateFormData();
-    if (Array.isArray(valiationMessages) && valiationMessages.length > 0) {
-        alert(valiationMessages);
+    if (doValidations()) {
         return;
     }
     const businessObjectJSON = doCreateBusinessObjectJson(BusinessTypes.OFFER);
     const jsonText = JSON.stringify(businessObjectJSON);
     sendJsonToAfpsHttpClient(jsonText, "createAngebot").then(response => {
-        if (response) {
-            if (response.ok) {
-                document.getElementById("sendOfferToERPButton").disabled = true;
-                document.getElementById("sendOrderToERPButton").disabled = true;
-                if (response.value && response.value.attributes && response.value.attributes.result && response.value.attributes.result.value) {
-                    document.getElementById("BusinessNummer").value = response.value.attributes.result.value;
-                    document.getElementById("BusinessType").style.display = "block";
-                    document.getElementById("BusinessType").value = "Angebot";
-                }
-            } else {
-                if (response.pureMsg) {
-                    alert("Sou.Matrixx meldet:\n" + response.pureMsg);
-                } else if (response.msg) {
-                    alert(response.msg);
-                }
-            }
-        }
+        createBusinessObjectHandleRespopnse(response, "Angebot");
     });
 }
 
 function doSendAuftragToERP() {
-    let valiationMessages = validateFormData();
-    if (Array.isArray(valiationMessages) && valiationMessages.length > 0) {
-        alert(valiationMessages);
+    if (doValidations()) {
         return;
     }
     const businessObjectJSON = doCreateBusinessObjectJson(BusinessTypes.ORDER);
     const jsonText = JSON.stringify(businessObjectJSON);
     sendJsonToAfpsHttpClient(jsonText, "createAuftrag").then(response => {
-        if (response && response.ok) {
+        createBusinessObjectHandleRespopnse(response, "Auftrag");
+    });
+}
+
+function createBusinessObjectHandleRespopnse(response, businessObjectName) {
+    if (response) {
+        if (response.ok) {
             document.getElementById("sendOfferToERPButton").disabled = true;
             document.getElementById("sendOrderToERPButton").disabled = true;
             if (response.value && response.value.attributes && response.value.attributes.result && response.value.attributes.result.value) {
                 document.getElementById("BusinessNummer").value = response.value.attributes.result.value;
                 document.getElementById("BusinessType").style.display = "block";
-                document.getElementById("BusinessType").value = "Auftrag";
+                document.getElementById("BusinessType").value = businessObjectName;
+            }
+        } else {
+            if (response.pureMsg) {
+                addErrorMessage("Sou.Matrixx meldet:\n" + response.pureMsg);
+            } else if (response.msg) {
+                addErrorMessage(response.msg);
             }
         }
-    });
+    }
+}
+
+function doValidations() {
+    document.getElementById("messageZoneDiv").replaceChildren();
+    let valiationMessages = validateFormData();
+    if (Array.isArray(valiationMessages) && valiationMessages.length > 0) {
+        for (const valiationMessage of valiationMessages) {
+            addWarningMessage(valiationMessage);
+        }
+        return true;
+    }
+    return false;
 }
 
 function validateFormData() {
@@ -598,7 +603,7 @@ async function sendJsonToAfpsHttpClient(jsonText, action) {
         });
 
         if (!response.ok) {
-            return { ok: false, msg: "HTTP-Fehler! Status: " + response.status, value: [] };
+            return {ok: false, msg: "HTTP-Fehler! Status: " + response.status, value: []};
         }
 
         const jsonData = await response.json();
@@ -607,7 +612,7 @@ async function sendJsonToAfpsHttpClient(jsonText, action) {
         return jsonData;
 
     } catch (e) {
-        return { ok: false, msg: "Verbindungsproblem:\n" + e.message, value: [] };
+        return {ok: false, msg: "Verbindungsproblem:\n" + e.message, value: []};
     }
 }
 
@@ -643,26 +648,26 @@ function sendJsonToAfpsHttpClient(jsonText, action) {
 
 function getInstanceFromAfpsHttpClient() {
     fetch('AfpsHttpClient.php?action=instanceInfo', {
-        headers: { 'Accept': 'application/json' }
+        headers: {'Accept': 'application/json'}
     })
-    .then(res => {
-        if (!res.ok) {
-            throw new Error(`HTTP-Fehler! Status: ${res.status}`);
-        }
-        return res.json();
-    })
-    .then(function (res) {
-        if (res && res.value && res.value.instance) {
-            instanceAfpsHttpClient = res.value.instance;
-        }
-    })
-    .catch(function(e) {
-        console.log("Sorry, something went wrong. => AfpsHttpClient.php?action=instanceInfo");
-        console.log(e);
-    })
-    .finally(function () {
-        viewEnvironmentStatusAfpsHttpClient();
-    });
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP-Fehler! Status: ${res.status}`);
+            }
+            return res.json();
+        })
+        .then(function (res) {
+            if (res && res.value && res.value.instance) {
+                instanceAfpsHttpClient = res.value.instance;
+            }
+        })
+        .catch(function (e) {
+            console.log("Sorry, something went wrong. => AfpsHttpClient.php?action=instanceInfo");
+            console.log(e);
+        })
+        .finally(function () {
+            viewEnvironmentStatusAfpsHttpClient();
+        });
 }
 
 function parseArticlePositionsDomToJson() {
@@ -1016,18 +1021,6 @@ function doCreateBusinessObjectWithExistingBusinessNummer(businessType) {
     return xmlOfferDocString;
 }
 
-function doPrepareOffer() {
-    document.getElementById("ButtonsDownloadOrShowDiv").style.display = "none";
-    document.getElementById("ButtonsOfferOrOrderDiv").style.display = "none";
-    determineBusinessnummerFromServer("OfferServiceRemoteCall.php?action=generateNewOfferNumber", BusinessTypes.OFFER);
-}
-
-function doPrepareOrder() {
-    document.getElementById("ButtonsDownloadOrShowDiv").style.display = "none";
-    document.getElementById("ButtonsOfferOrOrderDiv").style.display = "none";
-    determineBusinessnummerFromServer("OrderServiceRemoteCall.php?action=generateNewOrderNumber", BusinessTypes.ORDER);
-}
-
 function doDownloadFile() {
     let businessType = businessTypeFromString(document.getElementById("BusinessType").value);
     download(doCreateBusinessObjectWithExistingBusinessNummer(businessType));
@@ -1075,8 +1068,9 @@ function doReset() {
     document.getElementById("lieferZeitFormElementDiv").style.display = "";
     document.getElementById("ihreZeichenFormElementDiv").style.display = "";
 
-    document.getElementsByName("sendOfferToERPButton").disabled = false;
-    document.getElementsByName("sendOfferToERPButton").disabled = false;
+
+    document.getElementById("sendOfferToERPButton").disabled = false;
+    document.getElementById("sendOrderToERPButton").disabled = false;
 
     onClickAdresseReiter();
 
@@ -1085,51 +1079,8 @@ function doReset() {
     addPosition();
 
     clearCanvas();
-}
 
-function determineBusinessnummerFromServer(url, businessType) {
-    document.getElementById("animationWaitStribeBusinessNummer").style.display = "block";
-    document.getElementById("BusinessNummer").style.display = "none";
-
-    fetch(url) // Call the fetch function passing the url of the API as a parameter
-        .then(res => res.json())
-        .then(function (res) {
-            let ok = res.ok;
-            let value = res.value;
-            let msg = res.msg;
-
-            if (!ok) {
-                alert(msg);
-                document.getElementById("ButtonsOfferOrOrderDiv").style.display = "";
-                return;
-            }
-
-            document.getElementById("ButtonsDownloadOrShowDiv").style.display = "";
-            document.getElementById("BusinessNummer").value = value;
-            document.getElementById("BusinessType").style.display = "block";
-            document.getElementById("BusinessType").value = Object(businessType).description;
-            switch (businessType) {
-                case BusinessTypes.OFFER:
-                    console.log("OFFER");
-                    document.getElementById("lieferTerminFormElementDiv").style.display = "none";
-                    break;
-                case BusinessTypes.ORDER:
-                    console.log("ORDER");
-                    document.getElementById("lieferZeitFormElementDiv").style.display = "none";
-                    document.getElementById("ihreZeichenFormElementDiv").style.display = "none";
-                    break;
-                default:
-                    alert("UI .. do hots greber wos...");
-                    return;
-            }
-        })
-        .catch(function(e) {
-            alert("Sorry, something went wrong.\n" + e);
-        }).finally(function () {
-        document.getElementById("BusinessNummer").style.display = "block";
-        document.getElementById("animationWaitStribeBusinessNummer").style.display = "none";
-    });
-
+    document.getElementById("messageZoneDiv").replaceChildren();
 }
 
 /**
@@ -1140,11 +1091,11 @@ function determineBusinessnummerFromServer(url, businessType) {
  * @returns formated XML
  */
 function formatXml(xml, tab) {
-    let formatted = '', indent= '';
+    let formatted = '', indent = '';
     tab = tab || '\t';
     let regexIntent = new RegExp("^" + "<" + "?" + "\\" + "w[^>]*[^" + "\\" + "/]$");
-    xml.split(/>\s*</).forEach(function(node) {
-        if (node.match( /^\/\w/ )) indent = indent.substring(tab.length); // decrease indent by one 'tab'
+    xml.split(/>\s*</).forEach(function (node) {
+        if (node.match(/^\/\w/)) indent = indent.substring(tab.length); // decrease indent by one 'tab'
         formatted += indent + '<' + node + '>\r\n';
 
         console.log(regexIntent);
@@ -1152,7 +1103,7 @@ function formatXml(xml, tab) {
             indent += tab;
         }
     });
-    return formatted.substring(1, formatted.length-3);
+    return formatted.substring(1, formatted.length - 3);
 }
 
 function switchReiterAdresse(idOfEnabledButtons, idOfEnabledContent) {
@@ -1261,13 +1212,13 @@ function viewEnvironmentStatusAfpsHttpClient() {
 function initAutoComplete(artikelNrInputElementId, artikelBezeichnungInputElementId, positionPreisInputElementId, positionEinheitSelectElementId, positionBausteinSelectElementId) {
     const autoCompleteJS = new autoComplete({
         selector: "#" + artikelNrInputElementId,
-        data: { src: allArticleData, keys: ["Nr", "Bezeichnung"] },
+        data: {src: allArticleData, keys: ["Nr", "Bezeichnung"]},
         resultItem: {
             highlight: true,
             //selected: "autoComplete_selected"
         },
         resultsList: {
-            tabSelect : true,
+            tabSelect: true,
         }
     });
 
@@ -1364,6 +1315,7 @@ var allArticleData = null;
 
 var canvas;
 var signaturePad;
+
 function resizeCanvas() {
     console.log("resize");
     const data = signaturePad.toData();
@@ -1445,8 +1397,8 @@ function sendSketch() {
 
     fetch("/api/save_sketch.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: dataURL })
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({image: dataURL})
     })
         .then(r => {
             if (!r.ok) throw new Error("Upload fehlgeschlagen");
@@ -1465,7 +1417,7 @@ function sendSketch() {
 var instanceSouDbService = "UNDEFINED";
 var instanceAfpsHttpClient = "UNDEFINED";
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
 
 
     console.log(
@@ -1497,7 +1449,7 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("statusSpan").appendChild(createStatusElement("ok", "Article Data loaded Successfully!", ""));
             addPosition();
         })
-        .catch(function(e) {
+        .catch(function (e) {
             document.getElementById("statusSpan").appendChild(createStatusElement("nok", "Sorry, Article prefetch not possible - something went wrong.\n" + e, ""));
         }).finally(function () {
     });
@@ -1535,11 +1487,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function fillMitarbeiterSelect() {
     const mitarbeiter = {
-        'Ludwig'   : {'prod' : 'LST',  'test' : '0045'},
-        'Richard'  : {'prod' : 'RRI',  'test' : '0025'},
-        'Silvia'   : {'prod' : 'SSC',  'test' : '0003'},
-        'Martina'  : {'prod' : 'MMU',  'test' : '0018'},
-        'Wolfgang' : {'prod' : 'WPU',  'test' : '0044'}
+        'Ludwig': {'prod': 'LST', 'test': '0045'},
+        'Richard': {'prod': 'RRI', 'test': '0025'},
+        'Silvia': {'prod': 'SSC', 'test': '0003'},
+        'Martina': {'prod': 'MMU', 'test': '0018'},
+        'Wolfgang': {'prod': 'WPU', 'test': '0044'}
     };
 
     let mitarbeiterNrSelect = document.getElementById("MitarbeiterNr");
@@ -1562,4 +1514,33 @@ function fillMitarbeiterSelect() {
         option.value = mrNr;
         mitarbeiterNrSelect.appendChild(option);
     }
+}
+
+function addWarningMessage(text) {
+    addMessage(text, "messageWarningDivClass")
+}
+
+function addErrorMessage(text) {
+    addMessage(text, "messageErrorDivClass")
+}
+
+function addMessage(text, className) {
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add(className);
+    const messageSpan = document.createElement("span");
+    messageDiv.prepend(messageSpan);
+    messageSpan.innerText = text;
+    const messageCloseButton = document.createElement("button");
+    messageDiv.appendChild(messageCloseButton);
+    messageCloseButton.classList.add("messageCloseButtonClass");
+    //messageCloseButton.onclick = "this.parentElement.remove()";
+    messageCloseButton.addEventListener('click', function() {
+        this.parentElement.remove();
+    });
+    messageCloseButton.innerHTML =
+        "<svg viewBox='0 0 24 24' width='18' height='18' stroke='currentColor' stroke-width='2' fill='none'>\n" +
+        "        <line x1='18' y1='6' x2='6' y2='18'></line>\n" +
+        "        <line x1='6' y1='6' x2='18' y2='18'></line>\n" +
+        "</svg>";
+    document.getElementById("messageZoneDiv").prepend(messageDiv);
 }
