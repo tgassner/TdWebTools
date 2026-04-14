@@ -513,6 +513,21 @@ function doSendAngebotToERP() {
     });
 }
 
+function doUpdateAngebotInERP() {
+    if (doValidations()) {
+        return;
+    }
+    const businessObjectJSON = doCreateBusinessObjectJson(BusinessTypes.OFFER);
+    const jsonText = JSON.stringify(businessObjectJSON);
+    sendJsonToAfpsHttpClient(jsonText, "updateAngebot").then(response => {
+        createBusinessObjectHandleRespopnse(response, "Angebot");
+    });
+}
+
+function doUpdateAuftragInERP() {
+    alert("TODO");
+}
+
 function doSendAuftragToERP() {
     if (doValidations()) {
         return;
@@ -527,12 +542,17 @@ function doSendAuftragToERP() {
 function createBusinessObjectHandleRespopnse(response, businessObjectName) {
     if (response) {
         if (response.ok) {
-            document.getElementById("sendOfferToERPButton").disabled = true;
-            document.getElementById("sendOrderToERPButton").disabled = true;
+            document.getElementById("sendOfferToERPButton").style.display = 'none';
+            document.getElementById("sendOrderToERPButton").style.display = 'none';
             if (response.value && response.value.attributes && response.value.attributes.result && response.value.attributes.result.value) {
                 document.getElementById("BusinessNummer").value = response.value.attributes.result.value;
                 document.getElementById("BusinessType").style.display = "block";
                 document.getElementById("BusinessType").value = businessObjectName;
+                if (businessObjectName === "Angebot") {
+                    document.getElementById("updateOfferInERPButton").style.display = "inline-flex";
+                } else if (businessObjectName === "Auftrag") {
+                    document.getElementById("updateOrderInERPButton").style.display = "inline-flex";
+                }
             }
         } else {
             if (response.pureMsg) {
@@ -729,7 +749,10 @@ function doCreateBusinessObjectJson(businessType) {
             // alles Cool ist halt noch undefined...
             return;
     }
-
+    if (document.getElementById("BusinessNummer") && document.getElementById("BusinessNummer").value)
+    {
+        businessObjectJSON["Nr"] = document.getElementById("BusinessNummer").value;
+    }
     businessObjectJSON["Lieferzeit"] = document.getElementById("Lieferzeit").value;
     businessObjectJSON["Liefertermin"] = document.getElementById("Liefertermin").value;
     businessObjectJSON["IhreZeichen"] = document.getElementById("IhreZeichen").value;
@@ -1064,9 +1087,10 @@ function doReset() {
     document.getElementById("lieferZeitFormElementDiv").style.display = "";
     document.getElementById("ihreZeichenFormElementDiv").style.display = "";
 
-
-    document.getElementById("sendOfferToERPButton").disabled = false;
-    document.getElementById("sendOrderToERPButton").disabled = false;
+    document.getElementById("sendOfferToERPButton").style.display = "inline-flex";
+    document.getElementById("sendOrderToERPButton").style.display = "inline-flex";
+    document.getElementById("updateOfferInERPButton").style.display = "none";
+    document.getElementById("updateOrderInERPButton").style.display = "none";
 
     onClickAdresseReiter();
 

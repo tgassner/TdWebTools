@@ -613,6 +613,8 @@
         <!--<button id="prepareOrderButton" onclick="doPrepareOrder()" class="defaultButtonClass">Auftrag</button>-->
         <button id="sendOfferToERPButton" onclick="doSendAngebotToERP()" class="defaultButtonClass">Send To Angebot ERP</button>
         <button id="sendOrderToERPButton" onclick="doSendAuftragToERP()" class="defaultButtonClass">Send To Auftrag ERP</button>
+        <button id="updateOfferInERPButton" onclick="doUpdateAngebotInERP()" class="defaultButtonClass" style="display: none">Update Angebot in ERP</button>
+        <button id="updateOrderInERPButton" onclick="doUpdateAuftragInERP()" class="defaultButtonClass" style="display: none">Update Auftrag in ERP</button>
         <button id="resetButton1" onclick="doReset()" class="defaultButtonClass">Reset</button>
     </div>
 <!--

@@ -30,6 +30,9 @@ switch ($action) {
     case "createAuftrag":
         doCreateAuftrag($json, $afpsConfig);
         break;
+    case "updateAngebot":
+        doUpdateAngebot($json, $afpsConfig);
+        break;
     case "instanceInfo":
         doReturnInstanceInfo($afpsConfig);
         break;
@@ -47,14 +50,18 @@ function doReturnInstanceInfo(array $afpsConfig) {
 }
 
 function doCreateAngebot(array $json, array $afpsConfig) :void {
-    doCreateBusinessObject($json, $afpsConfig, "Angebot", "Angebot", "createAngebot");
+    doCreateOrUpdateBusinessObject($json, $afpsConfig, "Angebot", "Angebot", "createAngebot");
+}
+
+function doUpdateAngebot (array $json, array $afpsConfig) :void {
+    doCreateOrUpdateBusinessObject($json, $afpsConfig, "Angebot", "Angebot", "updateAngebot");
 }
 
 function doCreateAuftrag(array $json, array $afpsConfig) :void {
-    doCreateBusinessObject($json, $afpsConfig, "Auftrag", "Auftrag", "createAuftrag");
+    doCreateOrUpdateBusinessObject($json, $afpsConfig, "Auftrag", "Auftrag", "createAuftrag");
 }
 
-function doCreateBusinessObject(array $json, array $afpsConfig, string $businessObjectType, string $functionName, string $methodname): void {
+function doCreateOrUpdateBusinessObject(array $json, array $afpsConfig, string $businessObjectType, string $functionName, string $methodname): void {
     $xml = createXML($json, $functionName, $methodname, $afpsConfig, $businessObjectType);
     $tempZip = createTmpZipFile($xml);
 
@@ -267,6 +274,9 @@ function createXmlBusinessObject(SimpleXMLElement $param, array $json, string $b
             break;
         default:
     }
+
+    // id of Business Object only needed in update Case...
+    addCleanString("Nr", $fields, $json);
 
     addCleanString("GpartnerNr", $fields, $json, false, "20");
     addCleanString("Lieferzeit", $fields, $json);
