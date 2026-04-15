@@ -74,7 +74,8 @@
                 <div class="inputElement">
                     <img id="animationWaitStribeBusinessNummer" style="display: none" src="img/animationWaitStribe.png" alt="Waiting Animation">
                     <input type="text" id="BusinessNummer" name="BusinessNummer" disabled="disabled"/>
-                    <input style="display: none; margin-left: 10px" type="text" id="BusinessType" name="BusinessType" disabled="disabled"/>
+                    <input style="display: none; margin-left: 10px" type="text" id="BusinessTypeGerman" name="BusinessTypeGerman" disabled="disabled"/>
+                    <input type="hidden" id="BusinessType" name="BusinessType"/>
                 </div>
             </div>
         </div>

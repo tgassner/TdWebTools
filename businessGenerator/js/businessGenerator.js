@@ -3,12 +3,24 @@ const BusinessTypes = Object.freeze({
     ORDER: Symbol("ORDER")
 });
 
+
 const isBlank = (str) => !str?.toString().trim();
 
 const isEmptyOrZero = (val) => {
     const trimmed = String(val || "").trim();
     return trimmed === "" || trimmed === "0" || Number(trimmed) === 0;
 };
+
+function getBusinessObjectGermanName(businessObject) {
+    switch (businessObject) {
+        case BusinessTypes.OFFER:
+            return "Angebot";
+        case BusinessTypes.ORDER:
+            return "Auftrag";
+        default:
+            return "undefiniertes Businessobject";
+    }
+}
 
 function businessTypeFromString(businessTypeString) {
     switch (businessTypeString) {
@@ -246,9 +258,8 @@ function calcGesamtPreis(posNumber) {
 
     let rabattMultiplier = 1 - (rabattValueNumber / 100);
 
-    let gesamtPreisNumber = (mengeValueNumber * preisValueNumber * anzahlValueNumber) * rabattMultiplier;
-
-    document.getElementById("positionGesamtpreisInput" + posNumber).value = gesamtPreisNumber;
+    document.getElementById("positionGesamtpreisInput" + posNumber).value =
+        (mengeValueNumber * preisValueNumber * anzahlValueNumber) * rabattMultiplier;
 }
 
 function addPosition() {
@@ -451,7 +462,7 @@ function doCreateAngebotInERP() {
     const businessObjectJSON = doCreateBusinessObjectJson(BusinessTypes.OFFER);
     const jsonText = JSON.stringify(businessObjectJSON);
     sendJsonToAfpsHttpClient(jsonText, "createAngebot").then(response => {
-        createBusinessObjectHandleRespopnse(response, "Angebot", "erstellt");
+        createBusinessObjectHandleRespopnse(response, BusinessTypes.OFFER, "erstellt");
     });
 }
 
@@ -462,7 +473,7 @@ function doUpdateAngebotInERP() {
     const businessObjectJSON = doCreateBusinessObjectJson(BusinessTypes.OFFER);
     const jsonText = JSON.stringify(businessObjectJSON);
     sendJsonToAfpsHttpClient(jsonText, "updateAngebot").then(response => {
-        createBusinessObjectHandleRespopnse(response, "Angebot", "geupdated");
+        createBusinessObjectHandleRespopnse(response, BusinessTypes.OFFER, "geupdated");
     });
 }
 
@@ -473,7 +484,7 @@ function doCreateAuftragInERP() {
     const businessObjectJSON = doCreateBusinessObjectJson(BusinessTypes.ORDER);
     const jsonText = JSON.stringify(businessObjectJSON);
     sendJsonToAfpsHttpClient(jsonText, "createAuftrag").then(response => {
-        createBusinessObjectHandleRespopnse(response, "Auftrag", "erstellt");
+        createBusinessObjectHandleRespopnse(response, BusinessTypes.ORDER, "erstellt");
     });
 }
 
@@ -484,26 +495,31 @@ function doUpdateAuftragInERP() {
     const businessObjectJSON = doCreateBusinessObjectJson(BusinessTypes.ORDER);
     const jsonText = JSON.stringify(businessObjectJSON);
     sendJsonToAfpsHttpClient(jsonText, "updateAuftrag").then(response => {
-        createBusinessObjectHandleRespopnse(response, "Auftrag", "geupdated");
+        createBusinessObjectHandleRespopnse(response, BusinessTypes.ORDER, "geupdated");
     });
 }
 
-function createBusinessObjectHandleRespopnse(response, businessObjectName, actionForUserMessage) {
+function createBusinessObjectHandleRespopnse(response, businessObjectType, actionForUserMessage) {
     if (response) {
         if (response.ok) {
             document.getElementById("sendOfferToERPButton").style.display = 'none';
             document.getElementById("sendOrderToERPButton").style.display = 'none';
             if (response.value && response.value.attributes && response.value.attributes.result && response.value.attributes.result.value) {
                 document.getElementById("BusinessNummer").value = response.value.attributes.result.value;
-                document.getElementById("BusinessType").style.display = "block";
-                document.getElementById("BusinessType").value = businessObjectName;
-                if (businessObjectName === "Angebot") {
-                    document.getElementById("updateOfferInERPButton").style.display = "inline-flex";
-                } else if (businessObjectName === "Auftrag") {
-                    document.getElementById("updateOrderInERPButton").style.display = "inline-flex";
+                document.getElementById("BusinessTypeGerman").style.display = "block";
+                document.getElementById("BusinessTypeGerman").value = getBusinessObjectGermanName(businessObjectType);
+                document.getElementById("BusinessType").value = Object(businessObjectType).description;
+                console.log(businessObjectType);
+;                switch (businessObjectType) {
+                    case BusinessTypes.OFFER:
+                        document.getElementById("updateOfferInERPButton").style.display = "inline-flex";
+                        break;
+                    case BusinessTypes.ORDER:
+                        document.getElementById("updateOrderInERPButton").style.display = "inline-flex";
+                        break;
                 }
             }
-            addSuccessMessage("Hurra!!  " + businessObjectName + " erfolgreich in Sou.Matrixx " + actionForUserMessage);
+            addSuccessMessage("Hurra!!  " + getBusinessObjectGermanName(businessObjectType) + " erfolgreich in Sou.Matrixx " + actionForUserMessage);
         } else {
             if (response.pureMsg) {
                 addErrorMessage("Sou.Matrixx meldet:\n" + response.pureMsg);
@@ -787,7 +803,8 @@ function doReset() {
     document.getElementById("BusinessNummer").style.display = "inline-flex";
     document.getElementById("BusinessNummer").value = "";
 
-    document.getElementById("BusinessType").style.display = "none";
+    document.getElementById("BusinessTypeGerman").style.display = "none";
+    document.getElementById("BusinessTypeGerman").value = "";
     document.getElementById("BusinessType").value = "";
 
     document.getElementById("GpartnerNr").value = "20";
@@ -1112,23 +1129,18 @@ function sendSketch() {
     const dataURL = canvas.toDataURL("image/jpeg", 0.9);
 
     const businessObjectJSON = {};
-    businessObjectJSON["BusinessObjectId"] = ""; // TODO
+    //businessObjectJSON["BusinessObjectId"] = "";
     businessObjectJSON["BusinessObjectNr"] = document.getElementById("BusinessNummer").value;
     businessObjectJSON["AnlageDateiName"] = "Skizze.jpg";
     businessObjectJSON["Binary"] = "Skizze.jpg";
     businessObjectJSON["DataURL"] = dataURL;
-
+    businessObjectJSON["BusinessType"] = document.getElementById("BusinessType").value;
     const jsonText = JSON.stringify(businessObjectJSON);
 
     sendJsonToAfpsHttpClient(jsonText, "updateAnlage").then(response => {
         if (response) {
             if (response.ok) {
-                document.getElementById("sendOfferToERPButton").style.display = 'none';
-                document.getElementById("sendOrderToERPButton").style.display = 'none';
                 if (response.value && response.value.attributes && response.value.attributes.result && response.value.attributes.result.value) {
-                    document.getElementById("BusinessNummer").value = response.value.attributes.result.value;
-                    document.getElementById("BusinessType").style.display = "block";
-                    document.getElementById("BusinessType").value = businessObjectName;
                     if (businessObjectName === "Angebot") {
                         document.getElementById("updateOfferInERPButton").style.display = "inline-flex";
                     } else if (businessObjectName === "Auftrag") {
@@ -1138,7 +1150,11 @@ function sendSketch() {
                 addSuccessMessage("Hurra Skizze erfolgreich in Sou.Matrixx gespeichert.");
             } else {
                 saveLocalBackup();
-                addErrorMessage(response.msg + "\n" + "Skizze lokal gesichert");
+                if (response.pureMsg) {
+                    addErrorMessage("Sou.Matrixx meldet:\n" + response.pureMsg);
+                } else if (response.msg) {
+                    addErrorMessage(response.msg);
+                }
             }
         }
     });

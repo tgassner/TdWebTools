@@ -294,6 +294,8 @@ function createXML(array $json, string $functionname, string $methodname, array 
 
 function createXmlAnlage(SimpleXMLElement $reQuestParam, array $json) {
     $fields = [];
+    // TODO determine BusinessObjectId
+    // BusinessType
     addCleanInteger("BusinessObjectId", $fields, $json);
     addCleanString("BusinessObjectNr", $fields, $json, false, "20");
     addCleanString("AnlageDateiName", $fields, $json);
