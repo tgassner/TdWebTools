@@ -1,4 +1,14 @@
 <?php
+
+// de.ibees.afps.connector.http.server.ConnectorServlet.ConnectorServlet()
+// de.ibees.afps.connector.http.server.connector." + functionName + "Connector"
+// de.ibees.afps.connector.http.server.connector.custom." + functionName + "Connector"
+
+// de.ibees.afps.connector.http.server.connector.AuftragConnector
+// de.ibees.afps.connector.http.server.connector.AngebotConnector
+// de.ibees.afps.connector.http.server.connector.AnlageConnector
+// de.ibees.afps.connector.http.server.connector.ArtikelConnector
+
 require_once "include/constants.php";
 
 $action = $_GET["action"] ?? 'ERROR';
@@ -36,6 +46,9 @@ switch ($action) {
     case "updateAuftrag":
         doUpdateAuftrag($json, $afpsConfig);
         break;
+    case "updateAnlage":
+        doUpdateAnlage($json, $afpsConfig);
+        break;
     case "instanceInfo":
         doReturnInstanceInfo($afpsConfig);
         break;
@@ -68,14 +81,27 @@ function doUpdateAuftrag (array $json, array $afpsConfig) :void {
     doCreateOrUpdateBusinessObject($json, $afpsConfig, "Auftrag", "Auftrag", "updateAuftrag");
 }
 
-function doCreateOrUpdateBusinessObject(array $json, array $afpsConfig, string $businessObjectType, string $functionName, string $methodname): void {
-    $xml = createXML($json, $functionName, $methodname, $afpsConfig, $businessObjectType);
-    $tempZip = createTmpZipFile($xml);
+function doUpdateAnlage(array $json, array $afpsConfig) :void {
+    $xmlString = createXML($json, "Anlage", "updateAnlage", $afpsConfig, function($param, $data) {
+        createXmlAnlage($param, $data);
+    });
 
-    handleWsCall($tempZip, $afpsConfig, $xml);
+    $tempZip = createTmpZipFile($xmlString);
+
+    handleWsCall($tempZip, $afpsConfig, $xmlString);
 }
 
-function handleWsCall(string $tempZip, array $afpsConfig, string $xml): void {
+function doCreateOrUpdateBusinessObject(array $json, array $afpsConfig, string $businessObjectType, string $functionName, string $methodname): void {
+    $xmlString = createXML($json, $functionName, $methodname, $afpsConfig, function($param, $data) use ($businessObjectType) {
+        createXmlBusinessObject($param, $data, $businessObjectType);
+    });
+
+    $tempZip = createTmpZipFile($xmlString);
+
+    handleWsCall($tempZip, $afpsConfig, $xmlString);
+}
+
+function handleWsCall(string $tempZip, array $afpsConfig, string $xmlString): void {
     $responseXMLString = doSyncWsCall($tempZip, $afpsConfig);
 
     $ret["ok"] = false;
@@ -83,11 +109,14 @@ function handleWsCall(string $tempZip, array $afpsConfig, string $xml): void {
     $ret["msg"] = "";
 
     // Ersetzt den Wert von userpassword="..." durch "******"
-    $patterns = [
-        '/username="[^"]+"/',
-        '/password="[^"]+"/'
+    $patternUserName = [
+        '/username="[^"]+"/'
     ];
-    $loggerXml = preg_replace($patterns, 'password="************"', $xml);
+    $patternUserPassword = [
+        '/userpassword="[^"]+"/'
+    ];
+    $loggerXml = preg_replace($patternUserName, 'username="************"', $xmlString);
+    $loggerXml = preg_replace($patternUserPassword, 'userpassword="************"', $xmlString);
     $ret["xmlToErp"] = $loggerXml;
 
     $responseXML = extractXmlStructureFromString($responseXMLString);
@@ -248,7 +277,7 @@ function createTmpZipFile(string $xml): string
     return $tempZip;
 }
 
-function createXML(array $json, string $functionname, string $methodname, array $afpsConfig, string $businessObjectType): string {
+function createXML(array $json, string $functionname, string $methodname, array $afpsConfig, callable $contentGenerator): string {
     $xml = new SimpleXMLElement('<soap-request/>');
     // <request ... > Request Metadata
     $request = $xml->addChild('request');
@@ -259,8 +288,18 @@ function createXML(array $json, string $functionname, string $methodname, array 
 
     //<request-parameter>
     $param = $xml->addChild('request-parameter');
-    createXmlBusinessObject($param, $json, $businessObjectType);
+    $contentGenerator($param, $json);
     return $xml->asXML();
+}
+
+function createXmlAnlage(SimpleXMLElement $reQuestParam, array $json) {
+    $fields = [];
+    addCleanInteger("BusinessObjectId", $fields, $json);
+    addCleanString("BusinessObjectNr", $fields, $json, false, "20");
+    addCleanString("AnlageDateiName", $fields, $json);
+    addHardCodedInteger("AnlageArt", $fields, 0);
+    addCleanBinary("Binary", $fields, $json);
+    convertMapToXml($fields, $reQuestParam);
 }
 
 function createXmlBusinessObject(SimpleXMLElement $param, array $json, string $businessObjectType): void {
@@ -416,6 +455,17 @@ function convertMapToXml(array $fields, SimpleXMLElement $obj): void
         $attr->addAttribute('type', $info['type']);
         $attr->addAttribute('value', $info['value']);
     }
+}
+
+function addCleanBinary(string $arraySchluessel, array &$fields, array $json, bool $omitIfnotSet = true, string $defaultValue = ''): void
+{
+    $value = $defaultValue;
+    if (isset($json[$arraySchluessel])) {
+        $value = strip_tags($json[$arraySchluessel]);
+    } else if ($omitIfnotSet) {
+        return;
+    }
+    $fields[$arraySchluessel] =  ['type' => "binary", 'value' => $value];
 }
 
 function addCleanString(string $arraySchluessel, array &$fields, array $json, bool $omitIfnotSet = true, string $defaultValue = ''): void

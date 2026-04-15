@@ -1096,30 +1096,52 @@ function loadLocalBackup() {
 /* ================= Netzwerk-Upload ================= */
 
 function sendSketch() {
+
     if (signaturePad.isEmpty()) {
-        alert("Keine Skizze vorhanden");
+        addWarningMessage("Keine Skizze vorhanden");
+        return;
+    }
+
+    const businessNr = document.getElementById("BusinessNummer") ? document.getElementById("BusinessNummer").value : "";
+
+    if (isBlank(businessNr)) {
+        addWarningMessage("Skizze nicht gespeichert! - geht erst, wenn das BusinessObjekt gespeichert ist.");
         return;
     }
 
     const dataURL = canvas.toDataURL("image/jpeg", 0.9);
 
-    fetch("/api/save_sketch.php", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({image: dataURL})
-    })
-        .then(r => {
-            if (!r.ok) throw new Error("Upload fehlgeschlagen");
-            return r.json();
-        })
-        .then(() => {
-            alert("Skizze erfolgreich gespeichert");
-            localStorage.removeItem(STORAGE_KEY);
-        })
-        .catch(() => {
-            alert("⚠️ Kein Netzwerk – Skizze lokal gesichert");
-            saveLocalBackup();
-        });
+    const businessObjectJSON = {};
+    businessObjectJSON["BusinessObjectId"] = ""; // TODO
+    businessObjectJSON["BusinessObjectNr"] = document.getElementById("BusinessNummer").value;
+    businessObjectJSON["AnlageDateiName"] = "Skizze.jpg";
+    businessObjectJSON["Binary"] = "Skizze.jpg";
+    businessObjectJSON["DataURL"] = dataURL;
+
+    const jsonText = JSON.stringify(businessObjectJSON);
+
+    sendJsonToAfpsHttpClient(jsonText, "updateAnlage").then(response => {
+        if (response) {
+            if (response.ok) {
+                document.getElementById("sendOfferToERPButton").style.display = 'none';
+                document.getElementById("sendOrderToERPButton").style.display = 'none';
+                if (response.value && response.value.attributes && response.value.attributes.result && response.value.attributes.result.value) {
+                    document.getElementById("BusinessNummer").value = response.value.attributes.result.value;
+                    document.getElementById("BusinessType").style.display = "block";
+                    document.getElementById("BusinessType").value = businessObjectName;
+                    if (businessObjectName === "Angebot") {
+                        document.getElementById("updateOfferInERPButton").style.display = "inline-flex";
+                    } else if (businessObjectName === "Auftrag") {
+                        document.getElementById("updateOrderInERPButton").style.display = "inline-flex";
+                    }
+                }
+                addSuccessMessage("Hurra Skizze erfolgreich in Sou.Matrixx gespeichert.");
+            } else {
+                saveLocalBackup();
+                addErrorMessage(response.msg + "\n" + "Skizze lokal gesichert");
+            }
+        }
+    });
 }
 
 var instanceSouDbService = "UNDEFINED";
