@@ -33,6 +33,9 @@ switch ($action) {
     case "updateAngebot":
         doUpdateAngebot($json, $afpsConfig);
         break;
+    case "updateAuftrag":
+        doUpdateAuftrag($json, $afpsConfig);
+        break;
     case "instanceInfo":
         doReturnInstanceInfo($afpsConfig);
         break;
@@ -59,6 +62,10 @@ function doUpdateAngebot (array $json, array $afpsConfig) :void {
 
 function doCreateAuftrag(array $json, array $afpsConfig) :void {
     doCreateOrUpdateBusinessObject($json, $afpsConfig, "Auftrag", "Auftrag", "createAuftrag");
+}
+
+function doUpdateAuftrag (array $json, array $afpsConfig) :void {
+    doCreateOrUpdateBusinessObject($json, $afpsConfig, "Auftrag", "Auftrag", "updateAuftrag");
 }
 
 function doCreateOrUpdateBusinessObject(array $json, array $afpsConfig, string $businessObjectType, string $functionName, string $methodname): void {

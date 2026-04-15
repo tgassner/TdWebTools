@@ -34,7 +34,7 @@
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">TD Business Generator</h1>
         <div id="headerLowerDiv" style="display: flex; margin-top: 0px;margin-bottom: 15px;">
-            Version 0.15.0&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;14.04.2026
+            Version 0.16.0&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;15.04.2026
             <span id="statusSpan" style="margin-left: 10px"> </span>
             <span id="statusSpanEnvironmentSouDbService" style="margin-left: 10px"> </span>
             <span id="statusSpanEnvironmentAfpsHttpClient" style="margin-left: 10px"> </span>
@@ -609,10 +609,8 @@
     </div> <!-- END tabContentZeichnungDiv -->
 
     <div id="ButtonsOfferOrOrderDiv" style="" class="buttonsDivClass">
-        <!--<button id="prepareOfferButton" onclick="doPrepareOffer()" class="defaultButtonClass">Angebot</button>-->
-        <!--<button id="prepareOrderButton" onclick="doPrepareOrder()" class="defaultButtonClass">Auftrag</button>-->
-        <button id="sendOfferToERPButton" onclick="doSendAngebotToERP()" class="defaultButtonClass">Send To Angebot ERP</button>
-        <button id="sendOrderToERPButton" onclick="doSendAuftragToERP()" class="defaultButtonClass">Send To Auftrag ERP</button>
+        <button id="sendOfferToERPButton" onclick="doCreateAngebotInERP()" class="defaultButtonClass">Send To Angebot ERP</button>
+        <button id="sendOrderToERPButton" onclick="doCreateAuftragInERP()" class="defaultButtonClass">Send To Auftrag ERP</button>
         <button id="updateOfferInERPButton" onclick="doUpdateAngebotInERP()" class="defaultButtonClass" style="display: none">Update Angebot in ERP</button>
         <button id="updateOrderInERPButton" onclick="doUpdateAuftragInERP()" class="defaultButtonClass" style="display: none">Update Auftrag in ERP</button>
         <button id="resetButton1" onclick="doReset()" class="defaultButtonClass">Reset</button>
