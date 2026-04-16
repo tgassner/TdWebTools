@@ -34,7 +34,7 @@
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">TD Business Generator</h1>
         <div id="headerLowerDiv" style="display: flex; margin-top: 0px;margin-bottom: 15px;">
-            Version 0.16.0&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;15.04.2026
+            Version 0.17.0&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;16.04.2026
             <span id="statusSpan" style="margin-left: 10px"> </span>
             <span id="statusSpanEnvironmentSouDbService" style="margin-left: 10px"> </span>
             <span id="statusSpanEnvironmentAfpsHttpClient" style="margin-left: 10px"> </span>
@@ -76,6 +76,7 @@
                     <input type="text" id="BusinessNummer" name="BusinessNummer" disabled="disabled"/>
                     <input style="display: none; margin-left: 10px" type="text" id="BusinessTypeGerman" name="BusinessTypeGerman" disabled="disabled"/>
                     <input type="hidden" id="BusinessType" name="BusinessType"/>
+                    <input type="hidden" id="BusinessObjectId" name="BusinessObjectId"/>
                 </div>
             </div>
         </div>

@@ -22,6 +22,17 @@ function getBusinessObjectGermanName(businessObject) {
     }
 }
 
+function getBusinessObjectId(businessObject) {
+    switch (businessObject) {
+        case BusinessTypes.OFFER:
+            return 32;
+        case BusinessTypes.ORDER:
+            return 33;
+        default:
+            return 0;
+    }
+}
+
 function businessTypeFromString(businessTypeString) {
     switch (businessTypeString) {
         case Object(BusinessTypes.OFFER).description:
@@ -509,6 +520,7 @@ function createBusinessObjectHandleRespopnse(response, businessObjectType, actio
                 document.getElementById("BusinessTypeGerman").style.display = "block";
                 document.getElementById("BusinessTypeGerman").value = getBusinessObjectGermanName(businessObjectType);
                 document.getElementById("BusinessType").value = Object(businessObjectType).description;
+                document.getElementById("BusinessObjectId").value = getBusinessObjectId(businessObjectType);
                 console.log(businessObjectType);
 ;                switch (businessObjectType) {
                     case BusinessTypes.OFFER:
@@ -806,6 +818,7 @@ function doReset() {
     document.getElementById("BusinessTypeGerman").style.display = "none";
     document.getElementById("BusinessTypeGerman").value = "";
     document.getElementById("BusinessType").value = "";
+    document.getElementById("BusinessObjectId").value =  "";
 
     document.getElementById("GpartnerNr").value = "20";
 
@@ -1129,12 +1142,12 @@ function sendSketch() {
     const dataURL = canvas.toDataURL("image/jpeg", 0.9);
 
     const businessObjectJSON = {};
-    //businessObjectJSON["BusinessObjectId"] = "";
     businessObjectJSON["BusinessObjectNr"] = document.getElementById("BusinessNummer").value;
     businessObjectJSON["AnlageDateiName"] = "Skizze.jpg";
     businessObjectJSON["Binary"] = "Skizze.jpg";
     businessObjectJSON["DataURL"] = dataURL;
-    businessObjectJSON["BusinessType"] = document.getElementById("BusinessType").value;
+    businessObjectJSON["BusinessObjectId"] = document.getElementById("BusinessObjectId").value;
+
     const jsonText = JSON.stringify(businessObjectJSON);
 
     sendJsonToAfpsHttpClient(jsonText, "updateAnlage").then(response => {

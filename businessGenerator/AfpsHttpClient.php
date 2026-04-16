@@ -1,5 +1,7 @@
 <?php
 
+//C:\temp\sou_matrixx_5-12-012-002-001-build3\setup\modules\AfpsHttpConnector.war
+
 // de.ibees.afps.connector.http.server.ConnectorServlet.ConnectorServlet()
 // de.ibees.afps.connector.http.server.connector." + functionName + "Connector"
 // de.ibees.afps.connector.http.server.connector.custom." + functionName + "Connector"
@@ -86,7 +88,7 @@ function doUpdateAnlage(array $json, array $afpsConfig) :void {
         createXmlAnlage($param, $data);
     });
 
-    $tempZip = createTmpZipFile($xmlString);
+    $tempZip = createTmpZipFile($xmlString, $json["Binary"], $json["DataURL"]);
 
     handleWsCall($tempZip, $afpsConfig, $xmlString);
 }
@@ -254,7 +256,7 @@ function getZipErrorMessage($errno) {
     return $zipErrors[$errno] ?? 'Unbekannter Fehler';
 }
 
-function createTmpZipFile(string $xml): string
+function createTmpZipFile(string $xml, string $filenameAnlage = null, string $dataURL = null): string
 {
     $tempZip = tempnam(sys_get_temp_dir(), 'sou');
 
@@ -265,11 +267,22 @@ function createTmpZipFile(string $xml): string
     $zip = new ZipArchive();
     $zip->open($tempZip, ZipArchive::OVERWRITE);
 
-// Falls ein Bild mitkommt (Base64 vom Signature Pad)
-//if (isset($input['image'])) {
-//    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $input['image']));
-//    $zip->addFromString('unterschrift.png', $imageData);
-//}
+    if (!empty($dataURL)) {
+        $binaryImage = null;
+        $parts = explode(',', $dataURL);
+        if (count($parts) === 2) {
+            //$header = $parts[0]; // z.B. "data:image/jpeg;base64"
+            $base64Data = $parts[1]; // Der eigentliche Inhalt
+
+            //$extension = 'jpg'; // Default
+            //if (strpos($header, 'image/png') !== false) $extension = 'png';
+
+            $binaryImage = base64_decode($base64Data);
+            if ($binaryImage) {
+                $zip->addFromString($filenameAnlage, $binaryImage);
+            }
+        }
+    }
 
     $zip->addFromString('requestXML', $xml);
 
@@ -294,8 +307,6 @@ function createXML(array $json, string $functionname, string $methodname, array 
 
 function createXmlAnlage(SimpleXMLElement $reQuestParam, array $json) {
     $fields = [];
-    // TODO determine BusinessObjectId
-    // BusinessType
     addCleanInteger("BusinessObjectId", $fields, $json);
     addCleanString("BusinessObjectNr", $fields, $json, false, "20");
     addCleanString("AnlageDateiName", $fields, $json);
@@ -526,4 +537,38 @@ function doErrorAndDie(string $message): void
     header("Content-type: application/json; charset=utf-8");
     echo(json_encode($ret, JSON_UNESCAPED_UNICODE));
     die;
+}
+
+enum DocumentType: int {
+    case OFFER = 32;
+    case ORDER = 33;
+
+    // Liefert den deutschen Namen basierend auf dem Case
+    public function labelDe(): string {
+        return match($this) {
+            self::OFFER => 'Angebot',
+            self::ORDER => 'Auftrag',
+        };
+    }
+
+    // Liefert den englischen Namen (Property Name)
+    public function labelEn(): string {
+        return $this->name; // Gibt 'OFFER' oder 'ORDER' zurück
+    }
+
+    /**
+     * Die "Allesfresser"-Suche: Findet den Case anhand von ID, DE oder EN Name
+     */
+    public static function parse(int|string $value): ?self {
+        foreach (self::cases() as $case) {
+            if (
+                $case->value == $value ||           // Suche nach ID (32)
+                $case->name === strtoupper($value) || // Suche nach EN (OFFER)
+                strcasecmp($case->labelDe(), $value) === 0 // Suche nach DE (Angebot) - ignoriert Groß/Kleinschreibung
+            ) {
+                return $case;
+            }
+        }
+        return null;
+    }
 }
