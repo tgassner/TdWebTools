@@ -51,16 +51,16 @@
 
     <div id="mainTabTabButtonsContainer" class="mainTabTabButtonsContainerClass">
         <div id="mainTabTabButtonBusinessWerteDiv" class="reiterElementDiv reiterSelectedElementDiv" onclick="onClickMainTabBusinessDaten()">
-            Business Werte
+            📊 Business Werte
         </div>
         <div id="mainTabTabButtonAdressenDiv" class="reiterElementDiv" onclick="onClickMainTabAdressen()">
-            Adressen
+            📍 Adressen
         </div>
         <div id="mainTabTabButtonArtikelDiv" class="reiterElementDiv" onclick="onClickMainTabArtikel()">
-            Artikel
+            📦 Artikel
         </div>
         <div id="mainTabTabButtonZeichnungDiv" class="reiterElementDiv" onclick="onClickMainTabZeichnung()">
-            Zeichnung
+            ✍️ Skizze
         </div>
     </div>
 
@@ -249,14 +249,14 @@
         <!-- BEGIN Adress Reiter Container -->
         <div style="" class="adressContainerDivClass">
             <div style="" class="reiterButtonContainerDiv">
-                <div id="reiterAdresse" style="" class="reiterElementDiv reiterSelectedElementDiv" onclick="onClickAdresseReiter()">
-                    Adresse
+                <div id="reiterAdresse" style="text-transform:none" class="reiterElementDiv reiterSelectedElementDiv" onclick="onClickAdresseReiter()">
+                    🏠 Adresse
                 </div>
-                <div id="reiterLieferanschrift" style="" class="reiterElementDiv" onclick="onClickLieferanschriftReiter()">
-                    Lieferanschrift
+                <div id="reiterLieferanschrift" style="text-transform:none" class="reiterElementDiv" onclick="onClickLieferanschriftReiter()">
+                    🚚 Lieferanschrift
                 </div>
-                <div id="reiterRechnungsanschrift" style="" class="reiterElementDiv" onclick="onClickRechnungsanschriftReiter()">
-                    Rechnungsanschrift
+                <div id="reiterRechnungsanschrift" style="text-transform:none" class="reiterElementDiv" onclick="onClickRechnungsanschriftReiter()">
+                    🧾 Rechnungsanschrift
                 </div>
             </div>
             <!-- BEGIN Adresse Reiter -->
@@ -592,30 +592,34 @@
             </div>
         </div>
     </div> <!-- END tabContentArtikelDiv -->
-    <div id="tabContentZeichnungDiv" class="tabContentGeneralClass" style="display: none">
+    <div id="tabContentZeichnungDiv" class="tabContentGeneralClass" style="display: none; gap: 5px;">
         <div class="toolbarSketchClass">
-            <button onclick="undo()">↶ Undo</button>
-            <button onclick="redo()">↷ Redo</button>
-            <button onclick="clearCanvas()">Löschen</button>
-
-            <div class="colorSketchClass" style="background:black" onclick="setColor('black')"></div>
-            <div class="colorSketchClass" style="background:red" onclick="setColor('red')"></div>
-            <div class="colorSketchClass" style="background:blue" onclick="setColor('blue')"></div>
-            <div class="colorSketchClass" style="background:green" onclick="setColor('green')"></div>
-
-            <button onclick="sendSketch()">📡 Senden</button>
-            <button id="buttonLoadLocalBackup" onclick="loadLocalBackup()">Load local Backup</button>
+            <div style="display: flex; flex-direction: column;gap: 10px; width: 100%;">
+                <div style="display: flex; flex-direction: row; gap: 10px; width: 100%;">
+                    <button id="undoSketchButton" onclick="undo()" class="defaultButtonClass" style="flex-basis: 11%; text-transform:none" disabled="disabled">↶ Undo</button>
+                    <button id="redoSketchButton" onclick="redo()" class="defaultButtonClass" style="flex-basis: 11%; text-transform:none"  disabled="disabled">↷ Redo</button>
+                    <button id="deleteSketchButton" onclick="clearCanvas()" class="defaultButtonClass" style="flex-basis: 15%; text-transform:none" disabled="disabled">❌ Löschen</button>
+                    <button id="saveSketchToErpButton" onclick="sendSketch()" class="defaultButtonClass" style="flex-basis: 43%; text-transform:none" disabled="disabled">💾 Auf Business Objekt in Sou.Matrixx Speichern</button>
+                    <button id="loadLocalSketchBackupButton" onclick="loadLocalBackup()" class="defaultButtonClass" style="flex-basis: 22%; text-transform:none">📂 Load local Backup</button>
+                </div>
+                <div style="display: flex; flex-direction: row; gap: 10px;">
+                    <div class="colorSketchClass" style="background:black" onclick="setColor('black')"></div>
+                    <div class="colorSketchClass" style="background:red" onclick="setColor('red')"></div>
+                    <div class="colorSketchClass" style="background:blue" onclick="setColor('blue')"></div>
+                    <div class="colorSketchClass" style="background:green" onclick="setColor('green')"></div>
+                </div>
+            </div>
         </div>
 
         <canvas id="canvasSketch" class="canvasSketchClass"></canvas>
     </div> <!-- END tabContentZeichnungDiv -->
 
     <div id="ButtonsOfferOrOrderDiv" style="" class="buttonsDivClass">
-        <button id="sendOfferToERPButton" onclick="doCreateAngebotInERP()" class="defaultButtonClass">Send To Angebot ERP</button>
-        <button id="sendOrderToERPButton" onclick="doCreateAuftragInERP()" class="defaultButtonClass">Send To Auftrag ERP</button>
-        <button id="updateOfferInERPButton" onclick="doUpdateAngebotInERP()" class="defaultButtonClass" style="display: none">Update Angebot in ERP</button>
-        <button id="updateOrderInERPButton" onclick="doUpdateAuftragInERP()" class="defaultButtonClass" style="display: none">Update Auftrag in ERP</button>
-        <button id="resetButton1" onclick="doReset()" class="defaultButtonClass">Reset</button>
+        <button id="sendOfferToERPButton" onclick="doCreateAngebotInERP()" class="defaultButtonClass" style="text-transform:none">💾 Speichen 📋 Angebot Sou.Matrixx</button>
+        <button id="sendOrderToERPButton" onclick="doCreateAuftragInERP()" class="defaultButtonClass" style="text-transform:none">💾 Speichen 📦 Auftrag Sou.Matrixx</button>
+        <button id="updateOfferInERPButton" onclick="doUpdateAngebotInERP()" class="defaultButtonClass" style="display: none; text-transform:none">🔄 Update 📋 Angebot in Sou.Matrixx</button>
+        <button id="updateOrderInERPButton" onclick="doUpdateAuftragInERP()" class="defaultButtonClass" style="display: none; text-transform:none">🔄 Update 📦 Auftrag in Sou.Matrixx</button>
+        <button id="resetButton1" onclick="doReset()" class="defaultButtonClass">❌ Reset</button>
     </div>
 <!--
     <div  id="ButtonsDownloadOrShowDiv" style="display: none" class="buttonsDivClass">

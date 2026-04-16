@@ -487,6 +487,7 @@ canvas {
     height: 800px;
 }
 
+.defaultButtonClass:hover:disabled,
 .defaultButtonClass:disabled {
     background-color: rgba(0,0,0,0.12);
     color: rgba(0,0,0,0.38);
@@ -644,8 +645,8 @@ canvas {
 }
 
 .colorSketchClass {
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 2px solid #555;
     cursor: pointer;

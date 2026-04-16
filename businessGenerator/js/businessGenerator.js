@@ -69,6 +69,22 @@ function einheitFromString(einheitString) {
     }
 }
 
+function isBusinessObjectStored() {
+    return !isBlank(document.getElementById("BusinessNummer").value);
+}
+
+function isSketchAvailable() {
+    return !signaturePad.isEmpty();
+}
+
+function sketchButtonsEnableDisable() {
+    document.getElementById("saveSketchToErpButton").disabled = !(isBusinessObjectStored() && isSketchAvailable());
+    document.getElementById("undoSketchButton").disabled = signaturePad.toData().length <= 0;
+    document.getElementById("redoSketchButton").disabled = redoStack.length <= 0;
+    document.getElementById("loadLocalSketchBackupButton").disabled = (!(localStorage.getItem(STORAGE_KEY_SKETCH)));
+    document.getElementById("deleteSketchButton").disabled = (signaturePad.toData().length <= 0) && redoStack.length <= 0;;
+}
+
 window.addEventListener("beforeunload", function (event) {
     event.preventDefault();
     saveLocalBackup();
@@ -530,6 +546,7 @@ function createBusinessObjectHandleRespopnse(response, businessObjectType, actio
                         document.getElementById("updateOrderInERPButton").style.display = "inline-flex";
                         break;
                 }
+                sketchButtonsEnableDisable()
             }
             addSuccessMessage("Hurra!!  " + getBusinessObjectGermanName(businessObjectType) + " erfolgreich in Sou.Matrixx " + actionForUserMessage);
         } else {
@@ -840,6 +857,7 @@ function doReset() {
     clearCanvas();
 
     document.getElementById("messageZoneDiv").replaceChildren();
+    sketchButtonsEnableDisable();
 }
 
 
@@ -1072,6 +1090,7 @@ let redoStack = [];
 function saveState() {
     redoStack = [];
     saveLocalBackup();
+    sketchButtonsEnableDisable();
 }
 
 
@@ -1082,6 +1101,7 @@ function undo() {
         signaturePad.fromData(data); // Zeichnet die verbleibenden Striche neu
     }
     saveLocalBackup();
+    sketchButtonsEnableDisable();
 }
 
 function redo() {
@@ -1090,6 +1110,7 @@ function redo() {
     data.push(redoStack.pop());
     signaturePad.fromData(data);
     saveLocalBackup();
+    sketchButtonsEnableDisable();
 }
 
 /* ================= Farben ================= */
@@ -1103,20 +1124,26 @@ function setColor(color) {
 function clearCanvas() {
     saveState();
     signaturePad.clear();
+    redoStack = [];
     saveLocalBackup();
+    sketchButtonsEnableDisable();
 }
 
 /* ================= LocalStorage Backup ================= */
 
-const STORAGE_KEY = "kundenskizze_backup";
+const STORAGE_KEY_SKETCH = "kundenskizze_backup";
 
 function saveLocalBackup() {
     const meinSkizzenData = signaturePad.toData();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(meinSkizzenData));
+    if (meinSkizzenData.length > 0 || redoStack.length > 0) {
+        localStorage.setItem(STORAGE_KEY_SKETCH, JSON.stringify(meinSkizzenData));
+    } else {
+        localStorage.removeItem(STORAGE_KEY_SKETCH);
+    }
 }
 
 function loadLocalBackup() {
-    const gespeicherterString = localStorage.getItem(STORAGE_KEY);
+    const gespeicherterString = localStorage.getItem(STORAGE_KEY_SKETCH);
     if (gespeicherterString) {
         const datenObjekt = JSON.parse(gespeicherterString);
         signaturePad.fromData(datenObjekt);
@@ -1127,7 +1154,7 @@ function loadLocalBackup() {
 
 function sendSketch() {
 
-    if (signaturePad.isEmpty()) {
+    if (!isSketchAvailable()) {
         addWarningMessage("Keine Skizze vorhanden");
         return;
     }
@@ -1153,13 +1180,6 @@ function sendSketch() {
     sendJsonToAfpsHttpClient(jsonText, "updateAnlage").then(response => {
         if (response) {
             if (response.ok) {
-                if (response.value && response.value.attributes && response.value.attributes.result && response.value.attributes.result.value) {
-                    if (businessObjectName === "Angebot") {
-                        document.getElementById("updateOfferInERPButton").style.display = "inline-flex";
-                    } else if (businessObjectName === "Auftrag") {
-                        document.getElementById("updateOrderInERPButton").style.display = "inline-flex";
-                    }
-                }
                 addSuccessMessage("Hurra Skizze erfolgreich in Sou.Matrixx gespeichert.");
             } else {
                 saveLocalBackup();
@@ -1177,8 +1197,6 @@ var instanceSouDbService = "UNDEFINED";
 var instanceAfpsHttpClient = "UNDEFINED";
 
 document.addEventListener("DOMContentLoaded", function () {
-
-
     console.log(
         "window.screen= " + window.screen.width + " x " + window.screen.height + "\n" +
         "window.inner= " + window.innerWidth + " x " + window.innerHeight + "\n" +
@@ -1235,13 +1253,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 200); // Wartet 200ms, bis der User fertig mit Ziehen ist
     });
 
-
-    const backupSketch = localStorage.getItem(STORAGE_KEY);
-    if (!backupSketch) {
-        document.getElementById("buttonLoadLocalBackup").style.display = "none";
-    }
-
     document.getElementById("tabContentZeichnungDiv").style.display = "none";
+    document.getElementById("loadLocalSketchBackupButton").disabled = (!(localStorage.getItem(STORAGE_KEY_SKETCH)));
 })
 
 function fillMitarbeiterSelect() {
