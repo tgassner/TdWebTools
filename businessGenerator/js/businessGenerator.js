@@ -22,6 +22,17 @@ function getBusinessObjectGermanName(businessObject) {
     }
 }
 
+function getBusinessObjectByGermanNameString(germanNameString) {
+    switch (germanNameString) {
+        case "Angebot":
+            return BusinessTypes.OFFER;
+        case "Auftrag":
+            return BusinessTypes.ORDER;
+        default:
+            return null;
+    }
+}
+
 function getBusinessObjectId(businessObject) {
     switch (businessObject) {
         case BusinessTypes.OFFER:
@@ -529,24 +540,10 @@ function doUpdateAuftragInERP() {
 function createBusinessObjectHandleRespopnse(response, businessObjectType, actionForUserMessage) {
     if (response) {
         if (response.ok) {
-            document.getElementById("sendOfferToERPButton").style.display = 'none';
-            document.getElementById("sendOrderToERPButton").style.display = 'none';
             if (response.value && response.value.attributes && response.value.attributes.result && response.value.attributes.result.value) {
-                document.getElementById("BusinessNummer").value = response.value.attributes.result.value;
-                document.getElementById("BusinessTypeGerman").style.display = "block";
-                document.getElementById("BusinessTypeGerman").value = getBusinessObjectGermanName(businessObjectType);
-                document.getElementById("BusinessType").value = Object(businessObjectType).description;
-                document.getElementById("BusinessObjectId").value = getBusinessObjectId(businessObjectType);
-                console.log(businessObjectType);
-;                switch (businessObjectType) {
-                    case BusinessTypes.OFFER:
-                        document.getElementById("updateOfferInERPButton").style.display = "inline-flex";
-                        break;
-                    case BusinessTypes.ORDER:
-                        document.getElementById("updateOrderInERPButton").style.display = "inline-flex";
-                        break;
-                }
-                sketchButtonsEnableDisable()
+                businessObjectCreatesInErpGuiAdaptions(response.value.attributes.result.value, businessObjectType);
+                doLocalGuiFormValuesBackup();
+                sketchButtonsEnableDisable();
             }
             addSuccessMessage("Hurra!!  " + getBusinessObjectGermanName(businessObjectType) + " erfolgreich in Sou.Matrixx " + actionForUserMessage);
         } else {
@@ -556,6 +553,25 @@ function createBusinessObjectHandleRespopnse(response, businessObjectType, actio
                 addErrorMessage(response.msg);
             }
         }
+    }
+}
+
+function businessObjectCreatesInErpGuiAdaptions(businessNummer, businessObjectType) {
+    document.getElementById("sendOfferToERPButton").style.display = 'none';
+    document.getElementById("sendOrderToERPButton").style.display = 'none';
+    document.getElementById("BusinessNummer").value = businessNummer;
+    document.getElementById("BusinessTypeGerman").style.display = "block";
+    document.getElementById("BusinessTypeGerman").value = getBusinessObjectGermanName(businessObjectType);
+    document.getElementById("BusinessType").value = Object(businessObjectType).description;
+    document.getElementById("BusinessObjectId").value = getBusinessObjectId(businessObjectType);
+    console.log(businessObjectType);
+    switch (businessObjectType) {
+        case BusinessTypes.OFFER:
+            document.getElementById("updateOfferInERPButton").style.display = "inline-flex";
+            break;
+        case BusinessTypes.ORDER:
+            document.getElementById("updateOrderInERPButton").style.display = "inline-flex";
+            break;
     }
 }
 
@@ -733,6 +749,10 @@ function parseArticlePositionsDomToJson() {
 function doCreateBusinessObjectJson(businessType) {
     let businessObjectJSON = {};
 
+    if (!businessType) {
+        businessType = businessTypeFromString(document.getElementById("BusinessType")?.value);
+    }
+
     switch (businessType) {
         case BusinessTypes.OFFER:
             businessObjectJSON["ObjectName"] = "Angebot";
@@ -742,11 +762,15 @@ function doCreateBusinessObjectJson(businessType) {
             break;
         default:
             // alles Cool ist halt noch undefined...
-            return;
+            break; //return;
     }
     if (document.getElementById("BusinessNummer") && document.getElementById("BusinessNummer").value)
     {
         businessObjectJSON["Nr"] = document.getElementById("BusinessNummer").value;
+    }
+    if (document.getElementById("BusinessObjectId") && document.getElementById("BusinessObjectId").value)
+    {
+        businessObjectJSON["BusinessObjectId"] = document.getElementById("BusinessObjectId").value;
     }
     businessObjectJSON["Lieferzeit"] = document.getElementById("Lieferzeit").value;
     businessObjectJSON["Liefertermin"] = document.getElementById("Liefertermin").value;
@@ -809,6 +833,29 @@ function doCreateBusinessObjectJson(businessType) {
     return businessObjectJSON;
 }
 
+function restoreFormDateFromJson(restoreJSON) {
+    debugger;
+    console.log("Recovery startet...");
+    if (restoreJSON["ObjectName"]) {
+        const businessObjectType = getBusinessObjectByGermanNameString(restoreJSON["ObjectName"] ?? "")
+        if (businessObjectType) {
+            businessObjectCreatesInErpGuiAdaptions(restoreJSON["Nr"] ?? "", businessObjectType);
+        }
+    }
+
+    //document.getElementById("BusinessNummer").value = restoreJSON["Nr"] ?? "";
+    document.getElementById("BusinessObjectId").value = restoreJSON["BusinessObjectId"] ?? "";
+    document.getElementById("Lieferzeit").value = restoreJSON["Lieferzeit"] ?? "";
+    document.getElementById("Liefertermin").value = restoreJSON["Liefertermin"] ?? "";
+    document.getElementById("IhreZeichen").value = restoreJSON["IhreZeichen"] ?? "";
+    document.getElementById("GpartnerNr").value = restoreJSON["GpartnerNr"] ?? "";
+    document.getElementById("MitarbeiterNr").value = restoreJSON["MitarbeiterNr"] ?? "";
+    document.getElementById("LiefBedText").value = restoreJSON["LiefBedText"] ?? "";
+    document.getElementById("Versandart").value = restoreJSON["Versandart"] ?? "";
+    document.getElementById("Versandvermerk").value = restoreJSON["Versandvermerk"] ?? "";
+    setSelectByText("ZahlBedText", restoreJSON["ZahlBedText"] ?? "");
+}
+
 function doReset() {
     Array.from(document.getElementsByClassName("singlePositionContainerDivClass")).forEach(element => {
         element.remove();
@@ -855,6 +902,8 @@ function doReset() {
     addPosition();
 
     clearCanvas();
+
+    localStorage.removeItem(STORAGE_KEY_FORM_DATA);
 
     document.getElementById("messageZoneDiv").replaceChildren();
     sketchButtonsEnableDisable();
@@ -1132,6 +1181,7 @@ function clearCanvas() {
 /* ================= LocalStorage Backup ================= */
 
 const STORAGE_KEY_SKETCH = "kundenskizze_backup";
+const STORAGE_KEY_FORM_DATA = "formdata_backup";
 
 function saveLocalBackup() {
     const meinSkizzenData = signaturePad.toData();
@@ -1144,7 +1194,7 @@ function saveLocalBackup() {
 
 function loadLocalBackup() {
     const gespeicherterString = localStorage.getItem(STORAGE_KEY_SKETCH);
-    if (gespeicherterString) {
+    if (gespeicherterString && gespeicherterString !== "undefined" && gespeicherterString !== "null") {
         const datenObjekt = JSON.parse(gespeicherterString);
         signaturePad.fromData(datenObjekt);
     }
@@ -1195,6 +1245,10 @@ function sendSketch() {
 
 var instanceSouDbService = "UNDEFINED";
 var instanceAfpsHttpClient = "UNDEFINED";
+
+function doLocalGuiFormValuesBackup() {
+    localStorage.setItem(STORAGE_KEY_FORM_DATA, JSON.stringify(doCreateBusinessObjectJson(null)));
+}
 
 document.addEventListener("DOMContentLoaded", function () {
     console.log(
@@ -1255,6 +1309,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("tabContentZeichnungDiv").style.display = "none";
     document.getElementById("loadLocalSketchBackupButton").disabled = (!(localStorage.getItem(STORAGE_KEY_SKETCH)));
+
+
+    const savedLocalFormDateValues = localStorage.getItem(STORAGE_KEY_FORM_DATA);
+    if (savedLocalFormDateValues && savedLocalFormDateValues !== "undefined" && savedLocalFormDateValues !== "null") {
+        restoreFormDateFromJson(JSON.parse(savedLocalFormDateValues));
+    }
+
+    // local storage Form Data backup if browser gets killed or something else...
+    let saveLocalFormDataTimeout;
+    document.addEventListener('input', () => {
+        clearTimeout(saveLocalFormDataTimeout);
+        // Erst wenn der User 500ms nicht mehr tippt, speichern wir
+        saveLocalFormDataTimeout = setTimeout(() => {
+            doLocalGuiFormValuesBackup();
+        }, 500);
+    });
 })
 
 function fillMitarbeiterSelect() {
@@ -1286,7 +1356,12 @@ function fillMitarbeiterSelect() {
         option.value = mrNr;
         mitarbeiterNrSelect.appendChild(option);
     }
-}
+
+    const savedLocalFormDateValues = localStorage.getItem(STORAGE_KEY_FORM_DATA);
+    if (savedLocalFormDateValues && savedLocalFormDateValues !== "undefined" && savedLocalFormDateValues !== "null") {
+            document.getElementById("MitarbeiterNr").value = JSON.parse(savedLocalFormDateValues)["MitarbeiterNr"] ?? "";
+    }
+ }
 
 function addSuccessMessage(text) {
     addMessage(
@@ -1343,4 +1418,29 @@ function fadeOutAndRemove(element) {
 
     // Warten, bis die Animation fertig ist, dann aus dem DOM löschen
     setTimeout(() => element.remove(), 500);
+}
+
+function setSelectByText(selectId, textToFind) {
+    const el = document.getElementById(selectId);
+    if (!el || textToFind === undefined || textToFind === null) return;
+
+    const textNormalisiert = textToFind.trim();
+
+    // Wir suchen den Index (die Position) der Option
+    let foundIndex = -1;
+    for (let i = 0; i < el.options.length; i++) {
+        if (el.options[i].text.trim() === textNormalisiert) {
+            foundIndex = i;
+            break;
+        }
+    }
+
+    if (foundIndex !== -1) {
+        el.selectedIndex = foundIndex;
+
+        // Event feuern nicht vergessen
+        //el.dispatchEvent(new Event('change'));
+    } else {
+        console.warn(`Text "${textToFind}" im Dropdown ${selectId} nicht gefunden.`);
+    }
 }
