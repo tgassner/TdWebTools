@@ -93,7 +93,7 @@ function sketchButtonsEnableDisable() {
     document.getElementById("undoSketchButton").disabled = signaturePad.toData().length <= 0;
     document.getElementById("redoSketchButton").disabled = redoStack.length <= 0;
     document.getElementById("loadLocalSketchBackupButton").disabled = (!(localStorage.getItem(STORAGE_KEY_SKETCH)));
-    document.getElementById("deleteSketchButton").disabled = (signaturePad.toData().length <= 0) && redoStack.length <= 0;;
+    document.getElementById("deleteSketchButton").disabled = (signaturePad.toData().length <= 0) && redoStack.length <= 0;
 }
 
 window.addEventListener("beforeunload", function (event) {
@@ -817,7 +817,7 @@ function doCreateBusinessObjectJson(businessType) {
     // Lieferanschrift END
 
     // Rechnungsanschrift BEGIN
-    rechnadresseJson = {};
+    let rechnadresseJson = {};
     rechnadresseJson["ApartnerName"] = document.getElementById("rechnungsanschriftApartnerName").value;
     rechnadresseJson["Email"] = document.getElementById("rechnungsanschriftemail").value;
     rechnadresseJson["Firma1"] = document.getElementById("rechnungsanschriftFirma1").value;
@@ -854,6 +854,51 @@ function restoreFormDateFromJson(restoreJSON) {
     document.getElementById("Versandart").value = restoreJSON["Versandart"] ?? "";
     document.getElementById("Versandvermerk").value = restoreJSON["Versandvermerk"] ?? "";
     setSelectByText("ZahlBedText", restoreJSON["ZahlBedText"] ?? "");
+
+    // TODO article!!
+
+    // Adresse BEGIN
+    let adresseJson = restoreJSON["adresse"];
+    document.getElementById("adresseApartnerName").value = adresseJson["ApartnerName"] ?? "";
+    document.getElementById("adresseemail").value = adresseJson["Email"] ?? "";
+    document.getElementById("adresseFirma1").value = adresseJson["Firma1"] ?? "";
+    document.getElementById("adresseFirma2").value = adresseJson["Firma2"] ?? "";
+    document.getElementById("adresseLkz").value = adresseJson["Lkz"] ?? "";
+    document.getElementById("adresseOrt").value = adresseJson["Ort"] ?? "";
+    document.getElementById("adressePlz").value = adresseJson["Plz"] ?? "";
+    document.getElementById("adresseStrasse").value = adresseJson["Strasse"] ?? "";
+    document.getElementById("adresseTel").value = adresseJson["Telefon"] ?? "";
+
+    // Adresse END
+
+    // Lieferanschrift BEGIN
+    let lieferadresseJson = restoreJSON["lieferadresse"];
+    document.getElementById("lieferanschriftApartnerName").value = lieferadresseJson["ApartnerName"] ?? "";
+    document.getElementById("lieferanschriftemail").value = lieferadresseJson["Email"] ?? "";
+    document.getElementById("lieferanschriftFirma1").value = lieferadresseJson["Firma1"] ?? "";
+    document.getElementById("lieferanschriftFirma2").value = lieferadresseJson["Firma2"] ?? "";
+    document.getElementById("lieferanschriftLkz").value = lieferadresseJson["Lkz"] ?? "";
+    document.getElementById("lieferanschriftOrt").value = lieferadresseJson["Ort"] ?? "";
+    document.getElementById("lieferanschriftPlz").value = lieferadresseJson["Plz"] ?? "";
+    document.getElementById("lieferanschriftStrasse").value = lieferadresseJson["Strasse"] ?? "";
+    document.getElementById("lieferanschriftTel").value = lieferadresseJson["Telefon"] ?? "";
+    // Lieferanschrift END
+
+    // Rechnungsanschrift BEGIN
+    let rechnadresseJson = restoreJSON["rechnadresse"];
+    document.getElementById("rechnungsanschriftApartnerName").value = rechnadresseJson["ApartnerName"] ?? "";
+    document.getElementById("rechnungsanschriftemail").value = rechnadresseJson["Email"] ?? "";
+    document.getElementById("rechnungsanschriftFirma1").value = rechnadresseJson["Firma1"] ?? "";
+    document.getElementById("rechnungsanschriftFirma2").value = rechnadresseJson["Firma2"] ?? "";
+    document.getElementById("rechnungsanschriftLkz").value = rechnadresseJson["Lkz"] ?? "";
+    document.getElementById("rechnungsanschriftOrt").value = rechnadresseJson["Ort"] ?? "";
+    document.getElementById("rechnungsanschriftPlz").value = rechnadresseJson["Plz"] ?? "";
+    document.getElementById("rechnungsanschriftStrasse").value = rechnadresseJson["Strasse"] ?? "";
+    document.getElementById("rechnungsanschriftTel").value = rechnadresseJson["Telefon"] ?? "";
+    // Rechnungsanschrift END
+
+
+
 }
 
 function doReset() {
