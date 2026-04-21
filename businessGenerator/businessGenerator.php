@@ -34,7 +34,7 @@
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">TD Business Generator</h1>
         <div id="headerLowerDiv" style="display: flex; margin-top: 0px;margin-bottom: 15px;">
-            Version 1.0.0&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;21.04.2026
+            Version 1.0.1&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;21.04.2026
             <span id="statusSpan" style="margin-left: 10px"> </span>
             <span id="statusSpanEnvironmentSouDbService" style="margin-left: 10px"> </span>
             <span id="statusSpanEnvironmentAfpsHttpClient" style="margin-left: 10px"> </span>

@@ -92,7 +92,7 @@ function sketchButtonsEnableDisable() {
     document.getElementById("saveSketchToErpButton").disabled = !(isBusinessObjectStored() && isSketchAvailable());
     document.getElementById("undoSketchButton").disabled = signaturePad.toData().length <= 0;
     document.getElementById("redoSketchButton").disabled = redoStack.length <= 0;
-    document.getElementById("loadLocalSketchBackupButton").disabled = (!(localStorage.getItem(STORAGE_KEY_SKETCH)));
+    document.getElementById("loadLocalSketchBackupButton").disabled = !getSafeJson(STORAGE_KEY_SKETCH);
     document.getElementById("deleteSketchButton").disabled = (signaturePad.toData().length <= 0) && redoStack.length <= 0;
 }
 
@@ -839,12 +839,11 @@ function doCreateBusinessObjectJson(businessType) {
 }
 
 function doPosArticleRecovery() {
-    const savedLocalFormDateValues = localStorage.getItem(STORAGE_KEY_FORM_DATA);
-    if (!savedLocalFormDateValues || savedLocalFormDateValues === "undefined" || savedLocalFormDateValues === "null") {
+    const restoreJSON = getSafeJson(STORAGE_KEY_FORM_DATA);
+    if (!restoreJSON) {
         return;
     }
 
-    const restoreJSON = JSON.parse(savedLocalFormDateValues);
     const restorePosElements = restoreJSON["pos"]
 
     if (!restorePosElements || !Array.isArray(restorePosElements) || restorePosElements.length <= 0) {
@@ -892,12 +891,10 @@ function doPosArticleRecovery() {
 }
 
 function restoreFormDateFromJson() {
-    const savedLocalFormDateValues = localStorage.getItem(STORAGE_KEY_FORM_DATA);
-    if (!(savedLocalFormDateValues && savedLocalFormDateValues !== "undefined" && savedLocalFormDateValues !== "null")) {
+    const restoreJSON = getSafeJson(STORAGE_KEY_FORM_DATA);
+    if (!restoreJSON) {
         return;
     }
-
-    const restoreJSON = JSON.parse(savedLocalFormDateValues);
 
     console.log("GUI Form Recovery startet... (but not Article Pos Data)");
     if (restoreJSON["ObjectName"]) {
@@ -1302,17 +1299,16 @@ const STORAGE_KEY_FORM_DATA = "formdata_backup";
 function saveLocalBackup() {
     const meinSkizzenData = signaturePad.toData();
     if (meinSkizzenData.length > 0 || redoStack.length > 0) {
-        localStorage.setItem(STORAGE_KEY_SKETCH, JSON.stringify(meinSkizzenData));
+        saveStoreJson(meinSkizzenData, STORAGE_KEY_SKETCH);
     } else {
         localStorage.removeItem(STORAGE_KEY_SKETCH);
     }
 }
 
 function loadLocalBackup() {
-    const gespeicherterString = localStorage.getItem(STORAGE_KEY_SKETCH);
-    if (gespeicherterString && gespeicherterString !== "undefined" && gespeicherterString !== "null") {
-        const datenObjekt = JSON.parse(gespeicherterString);
-        signaturePad.fromData(datenObjekt);
+    const localStoredSketchJson = getSafeJson(STORAGE_KEY_SKETCH);
+    if (localStoredSketchJson) {
+        signaturePad.fromData(localStoredSketchJson);
     }
 }
 
@@ -1363,9 +1359,7 @@ var instanceSouDbService = "UNDEFINED";
 var instanceAfpsHttpClient = "UNDEFINED";
 
 function doLocalGuiFormValuesBackup() {
-    const jsonToBackup = JSON.stringify(doCreateBusinessObjectJson(null));
-    console.log(jsonToBackup);
-    localStorage.setItem(STORAGE_KEY_FORM_DATA, jsonToBackup);
+    saveStoreJson(doCreateBusinessObjectJson(null), STORAGE_KEY_FORM_DATA);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -1429,7 +1423,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.getElementById("tabContentZeichnungDiv").style.display = "none";
-    document.getElementById("loadLocalSketchBackupButton").disabled = (!(localStorage.getItem(STORAGE_KEY_SKETCH)));
+    document.getElementById("loadLocalSketchBackupButton").disabled = !getSafeJson(STORAGE_KEY_SKETCH);
 
     restoreFormDateFromJson();
 
@@ -1474,9 +1468,9 @@ function fillMitarbeiterSelect() {
         mitarbeiterNrSelect.appendChild(option);
     }
 
-    const savedLocalFormDateValues = localStorage.getItem(STORAGE_KEY_FORM_DATA);
-    if (savedLocalFormDateValues && savedLocalFormDateValues !== "undefined" && savedLocalFormDateValues !== "null") {
-            document.getElementById("MitarbeiterNr").value = JSON.parse(savedLocalFormDateValues)["MitarbeiterNr"] ?? "";
+    const savedLocalFormDateValues = getSafeJson(STORAGE_KEY_FORM_DATA);
+    if (savedLocalFormDateValues) {
+        document.getElementById("MitarbeiterNr").value = savedLocalFormDateValues["MitarbeiterNr"] ?? "";
     }
  }
 
@@ -1559,5 +1553,50 @@ function setSelectByText(selectId, textToFind) {
         //el.dispatchEvent(new Event('change'));
     } else {
         console.warn(`Text "${textToFind}" im Dropdown ${selectId} nicht gefunden.`);
+    }
+}
+
+function getSafeJson(storageKey) {
+
+    const savedLocalStorageString = localStorage.getItem(storageKey);
+    if (!savedLocalStorageString || savedLocalStorageString === "undefined" || savedLocalStorageString === "null") {
+        return;
+    }
+
+    try {
+        const obj = JSON.parse(savedLocalStorageString);
+        // Sicherstellen, dass es wirklich ein Objekt ist (nicht nur eine Zahl/String)
+        return (obj && typeof obj === 'object') ? obj : null;
+    } catch (e) {
+        console.error("Backup-Daten sind korrupt. Lösche fehlerhaften LocalStorage.", e);
+        localStorage.removeItem(storageKey); // Wichtig: Müll entfernen!
+        return null;
+    }
+}
+
+
+function saveStoreJson(dataToStore, storageKey) {
+    try {
+        const jsonString = JSON.stringify(dataToStore);
+
+        localStorage.setItem(storageKey, jsonString);
+    } catch (e) {
+        // Der QuotaExceededError tritt auf, wenn der Speicher voll ist
+        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+            console.info("LocalStorage ist voll! Versuche Platz zu schaffen...");
+
+            // 1. Notfall-Plan: Speicher komplett leeren
+            localStorage.clear();
+
+            // 2. Versuch: Nur die nötigsten Daten ohne die große Skizze speichern
+            try {
+                localStorage.setItem(storageKey, jsonString);
+                console.info("Backup neu nach vorangegangenem Löschen..");
+            } catch (retryError) {
+                console.info("Speichern auch mit löschen nicht gegangen.");
+            }
+        } else {
+            console.info("Unbekannter Fehler beim Speichern im LocalStorage:", e);
+        }
     }
 }
