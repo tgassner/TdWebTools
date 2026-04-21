@@ -256,6 +256,7 @@ function calcMenge(posNumber) {
             let flaecheM2 = (laenge * breite * anzahl) / (1000 * 1000);
             mengeElement.value = flaecheM2;
             mengeElement.dispatchEvent(new Event('change'));
+            mengeElement.dispatchEvent(new Event('input', { bubbles: true }));
             break;
         case Einheiten.METER:
             if (laenge <= 0 && breite <= 0) {
@@ -263,6 +264,7 @@ function calcMenge(posNumber) {
             }
             mengeElement.value = laenge * anzahl / 1000;
             mengeElement.dispatchEvent(new Event('change'));
+            mengeElement.dispatchEvent(new Event('input', { bubbles: true }));
             break;
         default:
             break;
@@ -296,8 +298,10 @@ function calcGesamtPreis(posNumber) {
 
     let rabattMultiplier = 1 - (rabattValueNumber / 100);
 
-    document.getElementById("positionGesamtpreisInput" + posNumber).value =
-        (mengeValueNumber * preisValueNumber * anzahlValueNumber) * rabattMultiplier;
+    const gesamtPreisElement = document.getElementById("positionGesamtpreisInput" + posNumber);
+    gesamtPreisElement.value = (mengeValueNumber * preisValueNumber * anzahlValueNumber) * rabattMultiplier;
+    gesamtPreisElement.dispatchEvent(new Event('change'));
+    gesamtPreisElement.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function addPosition() {
@@ -736,6 +740,7 @@ function parseArticlePositionsDomToJson() {
             posElement["Rabatt"] = document.getElementById("positionRabattInput" + posNumber).value;
             posElement["Gesamtpreis"] = document.getElementById("positionGesamtpreisInput" + posNumber).value;
             posElement["LangtextHtml"] = processLangtextHtml(document.getElementById("posLangTextTextArea" + posNumber).value);
+            posElement["Langtext"] = document.getElementById("posLangTextTextArea" + posNumber).value;
             posElement["MwStNr"] = "20"
             posElement["MwStSatz"] = "20";
             posElement["SachkontoNr"] = "4022";
@@ -833,9 +838,68 @@ function doCreateBusinessObjectJson(businessType) {
     return businessObjectJSON;
 }
 
-function restoreFormDateFromJson(restoreJSON) {
-    debugger;
-    console.log("Recovery startet...");
+function doPosArticleRecovery() {
+    const savedLocalFormDateValues = localStorage.getItem(STORAGE_KEY_FORM_DATA);
+    if (!savedLocalFormDateValues || savedLocalFormDateValues === "undefined" || savedLocalFormDateValues === "null") {
+        return;
+    }
+
+    const restoreJSON = JSON.parse(savedLocalFormDateValues);
+    const restorePosElements = restoreJSON["pos"]
+
+    if (!restorePosElements || !Array.isArray(restorePosElements) || restorePosElements.length <= 0) {
+        return;
+    }
+
+    console.log("GUI Form Article Pos Data Recovery startet...");
+
+    let noOfPos = restorePosElements.length;
+    for (let i = 0; i < noOfPos; i++) {
+        addPosition();
+    }
+
+    for (const restorePosElement of restorePosElements) {
+        const posNr = restorePosElement["PosNr"];
+        document.getElementById("positionBausteinSelect" + posNr).value = restorePosElement["Baustein"] ?? "";
+        document.getElementById("positionArtikelNrInput" + posNr).value = restorePosElement["ArtikelNr"] ?? "";
+        document.getElementById("positionBezeichnungInput" + posNr).value = restorePosElement["Bezeichnung"] ?? "";
+        document.getElementById("positionMengeInput" + posNr).value = restorePosElement["Menge"] ?? "";
+        document.getElementById("positionEinheitSelect" + posNr).value = restorePosElement["Einheit"] ?? "";
+        document.getElementById("positionPreisInput" + posNr).value = restorePosElement["Preis"] ?? "";
+        document.getElementById("positionRabattInput" + posNr).value = restorePosElement["Rabatt"] ?? "";
+        document.getElementById("positionGesamtpreisInput" + posNr).value = restorePosElement["Gesamtpreis"] ?? "";
+        document.getElementById("posLangTextTextArea" + posNr).value = restorePosElement["Langtext"] ?? "";
+
+        for (const freiesFeld of restorePosElement["FreieFelder"]) {
+            const freiesFeldName = freiesFeld["Name"];
+            const freiesFeldWert = freiesFeld["Wert"];
+            switch (freiesFeldName) {
+                case "PosLaenge":
+                    document.getElementById("positionLengthInput" + posNr).value = freiesFeldWert;
+                    break;
+                case "PosBreite":
+                    document.getElementById("positionWidthInput" + posNr).value = freiesFeldWert;
+                    break;
+                case "PosAnzahl":
+                    document.getElementById("positionAnzahlInput" + posNr).value = freiesFeldWert;
+                    break;
+                default:
+                    // not needed...
+                    break;
+            }
+        }
+    }
+}
+
+function restoreFormDateFromJson() {
+    const savedLocalFormDateValues = localStorage.getItem(STORAGE_KEY_FORM_DATA);
+    if (!(savedLocalFormDateValues && savedLocalFormDateValues !== "undefined" && savedLocalFormDateValues !== "null")) {
+        return;
+    }
+
+    const restoreJSON = JSON.parse(savedLocalFormDateValues);
+
+    console.log("GUI Form Recovery startet... (but not Article Pos Data)");
     if (restoreJSON["ObjectName"]) {
         const businessObjectType = getBusinessObjectByGermanNameString(restoreJSON["ObjectName"] ?? "")
         if (businessObjectType) {
@@ -855,7 +919,7 @@ function restoreFormDateFromJson(restoreJSON) {
     document.getElementById("Versandvermerk").value = restoreJSON["Versandvermerk"] ?? "";
     setSelectByText("ZahlBedText", restoreJSON["ZahlBedText"] ?? "");
 
-    // TODO article!!
+    // Pos article Recovery is done in Eventhandler after Articles are retrieved from Server to enable auto Completion.
 
     // Adresse BEGIN
     let adresseJson = restoreJSON["adresse"];
@@ -896,12 +960,14 @@ function restoreFormDateFromJson(restoreJSON) {
     document.getElementById("rechnungsanschriftStrasse").value = rechnadresseJson["Strasse"] ?? "";
     document.getElementById("rechnungsanschriftTel").value = rechnadresseJson["Telefon"] ?? "";
     // Rechnungsanschrift END
-
-
-
 }
 
 function doReset() {
+
+    if (!confirm("Wirklich resetten?")) {
+        return;
+    }
+
     Array.from(document.getElementsByClassName("singlePositionContainerDivClass")).forEach(element => {
         element.remove();
     })
@@ -1127,16 +1193,19 @@ function fillArticleWithAutocompletion(
     let positionBausteinElement = document.getElementById(positionBausteinSelectElementId);
     if (positionBausteinElement) {
         positionBausteinElement.value = "D";
+        positionBausteinElement.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     let artikelNummerElement = document.getElementById(artikelNrInputElementId);
     if (artikelNummerElement) {
         artikelNummerElement.value = artikelNrValue;
+        artikelNummerElement.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     let artikelBezeichnungElement = document.getElementById(artikelBezeichnungInputElementId);
     if (artikelBezeichnungElement) {
         artikelBezeichnungElement.value = artikelBezeichnungValue;
+        artikelBezeichnungElement.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     let preisElement = document.getElementById(positionPreisInputElementId);
@@ -1145,6 +1214,7 @@ function fillArticleWithAutocompletion(
         let preis = parseFloat(artikelKalkpreisValue);
         if (preis !== Number.NaN) {
             preisElement.value = preis.toFixed(2);
+            preisElement.dispatchEvent(new Event('input', { bubbles: true }));
         }
     }
 
@@ -1155,6 +1225,7 @@ function fillArticleWithAutocompletion(
         einheitElement.value = artikelEinheitValue;
         if (oldEinheitValue !== newEinheitValue) {
             einheitElement.dispatchEvent(new Event('change'));
+            einheitElement.dispatchEvent(new Event('input', { bubbles: true }));
         }
     }
 }
@@ -1292,7 +1363,9 @@ var instanceSouDbService = "UNDEFINED";
 var instanceAfpsHttpClient = "UNDEFINED";
 
 function doLocalGuiFormValuesBackup() {
-    localStorage.setItem(STORAGE_KEY_FORM_DATA, JSON.stringify(doCreateBusinessObjectJson(null)));
+    const jsonToBackup = JSON.stringify(doCreateBusinessObjectJson(null));
+    console.log(jsonToBackup);
+    localStorage.setItem(STORAGE_KEY_FORM_DATA, jsonToBackup);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -1323,12 +1396,15 @@ document.addEventListener("DOMContentLoaded", function () {
             allArticleData = value;
 
             document.getElementById("statusSpan").appendChild(createStatusElement("ok", "Article Data loaded Successfully!", ""));
-            addPosition();
         })
         .catch(function (e) {
             document.getElementById("statusSpan").appendChild(createStatusElement("nok", "Sorry, Article prefetch not possible - something went wrong.\n" + e, ""));
         }).finally(function () {
-    });
+            // do doPosArticleRecovery after retrieving autocomplition article Data.
+            // if here an Error occured.. recovery them anyway without autocompletion..
+            doPosArticleRecovery();
+            addPosition(); // add new empty Article line
+        });
 
     document.getElementById("tabContentZeichnungDiv").style.display = "";
     canvas = document.getElementById("canvasSketch");
@@ -1355,11 +1431,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("tabContentZeichnungDiv").style.display = "none";
     document.getElementById("loadLocalSketchBackupButton").disabled = (!(localStorage.getItem(STORAGE_KEY_SKETCH)));
 
-
-    const savedLocalFormDateValues = localStorage.getItem(STORAGE_KEY_FORM_DATA);
-    if (savedLocalFormDateValues && savedLocalFormDateValues !== "undefined" && savedLocalFormDateValues !== "null") {
-        restoreFormDateFromJson(JSON.parse(savedLocalFormDateValues));
-    }
+    restoreFormDateFromJson();
 
     // local storage Form Data backup if browser gets killed or something else...
     let saveLocalFormDataTimeout;
