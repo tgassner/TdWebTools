@@ -36,16 +36,7 @@ class VariaTools
             }
         }
 
-        $opts = [
-            "http" => [
-                "method" => "GET",
-                "header" => "Accept-language: de-AT, de;q=0.9, en;q=0.7, *;q=0.2\r\n" .
-                    "Content-Type: application/json\r\n" .
-                    "User-Agent: Business Generator\r\n"
-            ]
-        ];
-
-        $context = stream_context_create($opts);
+        $context = stream_context_create($this->getRemoteServiceCallStreamContextOptions());
 
         set_error_handler(
             function ($severity, $message, $file, $line) {
@@ -58,10 +49,21 @@ class VariaTools
             }
         );
 
-        $offerNumberJson = file_get_contents($serviceEntpoint, false, $context);
+        $json = file_get_contents($serviceEntpoint, false, $context);
 
         restore_error_handler();
 
-        echo($offerNumberJson);
+        echo($json);
+    }
+
+    public function getRemoteServiceCallStreamContextOptions() {
+        return [
+            "http" => [
+                "method" => "GET",
+                "header" => "Accept-language: de-AT, de;q=0.9, en;q=0.7, *;q=0.2\r\n" .
+                    "Content-Type: application/json\r\n" .
+                    "User-Agent: Business Generator\r\n"
+            ]
+        ];
     }
 }
