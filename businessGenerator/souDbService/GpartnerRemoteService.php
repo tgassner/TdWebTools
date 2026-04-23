@@ -11,7 +11,8 @@ class GpartnerRemoteService extends AbstractBusinessObjectRemoteService
     public function findAllGpartner()
     {
 
-        $sql = "select Nr, Suchname From Gpartner where Suchname is not null and TRIM(Suchname) <> '' ";
+        $sql = "select Nr, Suchname From Gpartner";
+        //  where Suchname is not null and TRIM(Suchname) <> ''
 
         return $this->dbTool->runQueryList($sql, function ($row) {
             $gpartner = [];

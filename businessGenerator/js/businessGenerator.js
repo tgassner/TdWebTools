@@ -1091,7 +1091,9 @@ function createStatusElement(status, tooltip, text) {
     }
     okElementColor.title = tooltip;
     okElementColor.innerHTML = "&#xFFED;";
+    okElementColor.style.marginLeft = "10px";
     okElementContainer.appendChild(okElementColor);
+    okElementContainer.style.marginLeft = "10px";
     if (text) {
         okElementInfoText.innerHTML = "&nbsp;" + text;
         okElementInfoText.style.fontWeight = "bold";
@@ -1228,6 +1230,7 @@ function fillArticleWithAutocompletion(
 }
 
 var allArticleData = null;
+var allGpartnerData = null;
 
 /* ================= Canvas Setup ================= */
 
@@ -1371,7 +1374,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
     getInstanceFromAfpsHttpClient();
 
-    fetch("ArticleServiceRemoteCall.php?action=findAllProducts") // Call the fetch function passing the url of the API as a parameter
+    fetch("GpartnerServiceRemoteCall.php?action=findAllGpartner")
+        .then(res => res.json())
+        .then(function (res) {
+            let ok = res.ok;
+            let value = res.value;
+            let msg = res.msg;
+
+            if (!ok) {
+                document.getElementById("statusSpan").appendChild(createStatusElement("nok", msg, ""));
+                addErrorMessage("Error while loading Geschäftspartner Data:<br>" + msg);
+                return;
+            }
+
+            allGpartnerData = value;
+
+            document.getElementById("statusSpan").appendChild(createStatusElement("ok", "Gpartner Data loaded Successfully!", ""));
+        })
+        .catch(function (e) {
+            addErrorMessage("Error while loading Geschäftspartner Data:<br>" + e);
+            //document.getElementById("statusSpan").appendChild(createStatusElement("nok", "Sorry, Article prefetch not possible - something went wrong.\n" + e, ""));
+        }).finally(function () {
+        // do doGPartnerRecovery after retrieving autocomplition GPartner Data.
+        // if here an Error occured.. recovery them anyway without autocompletion..
+        //TODO doPosArticleRecovery();
+    });
+
+    fetch("ArticleServiceRemoteCall.php?action=findAllProducts")
         .then(res => res.json())
         .then(function (res) {
             let ok = res.ok;
@@ -1381,6 +1410,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!ok) {
                 document.getElementById("statusSpan").appendChild(createStatusElement("nok", msg, ""));
+                addErrorMessage("Error while loading Artikel Data:<br>" + msg);
                 return;
             }
 
@@ -1393,6 +1423,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(function (e) {
             document.getElementById("statusSpan").appendChild(createStatusElement("nok", "Sorry, Article prefetch not possible - something went wrong.\n" + e, ""));
+            addErrorMessage("Error while loading Artikel Data:<br>" + e);
         }).finally(function () {
             // do doPosArticleRecovery after retrieving autocomplition article Data.
             // if here an Error occured.. recovery them anyway without autocompletion..
