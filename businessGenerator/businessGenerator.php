@@ -34,7 +34,7 @@
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">TD Business Generator</h1>
         <div id="headerLowerDiv" style="display: flex; margin-top: 0px;margin-bottom: 15px;">
-            Version 1.0.2&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;23.04.2026
+            Version 1.1.0&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;23.04.2026
             <span id="statusSpan" style="margin-left: 10px"> </span>
             <span id="statusSpanEnvironmentSouDbService" style="margin-left: 10px"> </span>
             <span id="statusSpanEnvironmentAfpsHttpClient" style="margin-left: 10px"> </span>
@@ -238,7 +238,9 @@
                 <label for="GpartnerNr">Gesch. Partner Nr:</label>
             </div>
             <div style="" class="inputFormElementDiv">
-                <input type="number" id="GpartnerNr" name="GpartnerNr" value="20" class="inputElement" autocomplete="off" spellcheck="false" autocapitalize="sentences"/>
+                <input type="number" id="GpartnerNr" name="GpartnerNr" style="width: 100px; margin-right: 5px;height: calc(100% - 1px);" value="20" class="inputElement" autocomplete="off" spellcheck="false" autocapitalize="sentences"/>
+                <input type="text" id="GpartnerSearch" name="GpartnerSearch" style="margin-right: 5px; font-family: Arial,serif !important; font-size: 20px !important;" value="" placeholder="Geschäftspartner Suchfeld" class="inputElement" autocomplete="off" spellcheck="false" autocapitalize="sentences"/>
+                <button id="gpartnerDefaultButton" style="height: 29px;" onclick="doGpartnerDefault()" class="defaultButtonClass">Default: Webshop</button>
             </div>
         </div>
 

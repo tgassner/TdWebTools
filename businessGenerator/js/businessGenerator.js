@@ -479,7 +479,7 @@ function addPosition() {
 
     // ADDING autocompletion
     if (allArticleData) {
-        initAutoComplete(artikelNrInputElementId, artikelBezeichnungInputElementId, positionPreisInputElementId, positionEinheitSelectElementId, positionBausteinSelectElementId);
+        initAutoCompleteArticles(artikelNrInputElementId, artikelBezeichnungInputElementId, positionPreisInputElementId, positionEinheitSelectElementId, positionBausteinSelectElementId);
     }
 }
 
@@ -1124,8 +1124,113 @@ function viewEnvironmentStatusAfpsHttpClient() {
     }
 }
 
-function initAutoComplete(artikelNrInputElementId, artikelBezeichnungInputElementId, positionPreisInputElementId, positionEinheitSelectElementId, positionBausteinSelectElementId) {
-    const autoCompleteJS = new autoComplete({
+function fillGPartnerWithAutoCompletion(gpartnerSuchname, gpartnerNr) {
+    const gpartnerSearchInputElement = document.getElementById("GpartnerSearch");
+    if (gpartnerSearchInputElement) {
+        if (gpartnerSuchname) {
+            gpartnerSearchInputElement.value = gpartnerSuchname;
+        } else {
+            gpartnerSearchInputElement.value = "";
+        }
+    }
+
+    const gpartnerNrInputElement = document.getElementById("GpartnerNr");
+    if (gpartnerNrInputElement) {
+        if (gpartnerNr) {
+            gpartnerNrInputElement.value = gpartnerNr;
+        } else {
+            gpartnerNrInputElement.value = "";
+        }
+    }
+
+    gpartnerNrInputElement.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function initAutoCompleteGpartner() {
+    const autoCompleteJSGPartner = new autoComplete({
+        selector: "#GpartnerSearch",
+        data: {src: allGpartnerData, keys: ["Nr", "Suchname"]},
+        resultItem: {
+            highlight: true,
+            //selected: "autoComplete_selected"
+        },
+        resultsList: {
+            tabSelect: true,
+        }
+    });
+
+    document.getElementById("GpartnerSearch").addEventListener("selection", function (event) {
+        if (event && event.detail && event.detail.selection && event.detail.selection.value) {
+            const gpartnerSuchname = event.detail.selection.value.Suchname;
+            const gpartnerNr = event.detail.selection.value.Nr;
+            fillGPartnerWithAutoCompletion(gpartnerSuchname, gpartnerNr);
+        }
+    });
+
+    document.getElementById("GpartnerSearch").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === "Tab") {
+            const val = e.target.value.trim();
+            // 1. In den aktuell geladenen Daten suchen
+            const gpartner = allGpartnerData.find(a => a.Suchname.toLowerCase() === val.toLowerCase());
+            if (gpartner) {
+                if (e.key === "Enter") {
+                    e.preventDefault(); // verhindert, dass das Formular direkt abgeschickt wird
+                }
+
+                fillGPartnerWithAutoCompletion(gpartner.Suchname, gpartner.Nr);
+
+                autoCompleteJSGPartner.close();
+            }
+        }
+    });
+
+    document.getElementById("GpartnerNr").addEventListener("change", (e) => {
+        if (e && e.target && e.target.value) {
+            const gpartnerNrLowerCase = e.target.value.toLowerCase();  // .toLowerCase() not needed, but I'm a bit paranoid
+            const gpartner = allGpartnerData.find(a => a.Nr.toLowerCase() === gpartnerNrLowerCase);
+            if (gpartner) {
+                fillGPartnerWithAutoCompletion(gpartner.Suchname, gpartner.Nr)
+            } else {
+                const gpartnerSearchInputElement = document.getElementById("GpartnerSearch");
+                if (gpartnerSearchInputElement) {
+                    gpartnerSearchInputElement.value = "";
+                    gpartnerSearchInputElement.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+        }
+    });
+
+    if (allGpartnerData) {
+        const gpartnerNrInputElement = document.getElementById("GpartnerNr");
+        if (gpartnerNrInputElement) {
+            const gpartnerNr = gpartnerNrInputElement.value;
+            if (gpartnerNr && gpartnerNr.trim()) {
+                const gpartnerSearchInputElement = document.getElementById("GpartnerSearch");
+                if (gpartnerSearchInputElement) {
+                    const gpartnerSearch = gpartnerSearchInputElement.value
+                    if (!gpartnerSearch || !gpartnerSearch.trim()) {
+                        const gpartnerNrLowerCase = gpartnerNr.toLowerCase();  // .toLowerCase() not needed, but I'm a bit paranoid
+                        const gpartner = allGpartnerData.find(a => a.Nr.toLowerCase() === gpartnerNrLowerCase);
+                        if (gpartner) {
+                            fillGPartnerWithAutoCompletion(gpartner.Suchname, gpartner.Nr)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+function doGpartnerDefault() {
+    const gpartnerNrInputElement = document.getElementById("GpartnerNr");
+    if (gpartnerNrInputElement) {
+        gpartnerNrInputElement.value = "20";
+        gpartnerNrInputElement.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
+function initAutoCompleteArticles(artikelNrInputElementId, artikelBezeichnungInputElementId, positionPreisInputElementId, positionEinheitSelectElementId, positionBausteinSelectElementId) {
+    const autoCompleteJSArticle = new autoComplete({
         selector: "#" + artikelNrInputElementId,
         data: {src: allArticleData, keys: ["Nr", "Bezeichnung"]},
         resultItem: {
@@ -1172,7 +1277,7 @@ function initAutoComplete(artikelNrInputElementId, artikelBezeichnungInputElemen
                     artikel.Bezeichnung,
                     artikel.KalkPreis,
                     artikel.Einheit);
-                autoCompleteJS.close();
+                autoCompleteJSArticle.close();
             }
         }
     });
@@ -1389,15 +1494,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
             allGpartnerData = value;
 
+            initAutoCompleteGpartner();
+
             document.getElementById("statusSpan").appendChild(createStatusElement("ok", "Gpartner Data loaded Successfully!", ""));
         })
         .catch(function (e) {
             addErrorMessage("Error while loading Geschäftspartner Data:<br>" + e);
-            //document.getElementById("statusSpan").appendChild(createStatusElement("nok", "Sorry, Article prefetch not possible - something went wrong.\n" + e, ""));
+            document.getElementById("statusSpan").appendChild(createStatusElement("nok", "Sorry, Gpartner prefetch not possible - something went wrong.\n" + e, ""));
         }).finally(function () {
-        // do doGPartnerRecovery after retrieving autocomplition GPartner Data.
-        // if here an Error occured.. recovery them anyway without autocompletion..
-        //TODO doPosArticleRecovery();
     });
 
     fetch("ArticleServiceRemoteCall.php?action=findAllProducts")
@@ -1581,7 +1685,7 @@ function setSelectByText(selectId, textToFind) {
         el.selectedIndex = foundIndex;
 
         // Event feuern nicht vergessen
-        //el.dispatchEvent(new Event('change'));
+        //el.dispatchEvent(new Event('change')); // bewußt nicht!!
     } else {
         console.warn(`Text "${textToFind}" im Dropdown ${selectId} nicht gefunden.`);
     }
