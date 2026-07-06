@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Fenstereinsatz Generator</title>
+
+    <script src="lib/browser.maker.js"></script>
+    <script src="lib/bezier.js"></script>
+    <script src="lib/opentype.js"></script>
+
+    <link rel="icon" href="img/favicon114.png" sizes="32x32" />
+    <link rel="icon" href="img/favicon114.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="img/favicon114.png" />
+    <meta name="msapplication-TileImage" content="img/favicon114.png" />
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <script type="text/javascript">
+        var makerjs = require('makerjs');
+    </script>
+
+    <style>
+        div#allContent { display: flex; flex-direction: row; }
+        div#guiElements {display: flex; flex-direction: column;}
+        div#settings {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 350px;
+            padding: 20px;
+        }
+        div.form-row {display:flex; flex-direction: row; align-items: center;}
+        .form-row label,
+        .form-row .input-unit-wrapper,
+        .form-row .checkbox-wrapper {
+            box-sizing: border-box; /* Wichtig, damit Padding das Layout nicht zerschießt */
+            display: flex;
+            justify-content: start;
+        }
+
+        .form-row .input-unit-wrapper,
+        .form-row .checkbox-wrapper {
+            flex-basis: 30%;
+        }
+
+        .form-row label {
+            padding-right: 10px; /* Kleiner Puffer zur rechten Spalte */
+            flex-basis: 70%;
+        }
+
+        .input-unit-wrapper input {
+            flex-grow: 1;
+            width: 100%; /* Damit es den Wrapper sauber ausfüllt */
+        }
+
+        .input-unit-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 5px; /* Abstand zwischen Input-Feld und "mm" */
+        }
+
+        .form-checkbox {
+            /* Verhindert, dass die Checkbox riesig wird */
+            width: max-content;
+
+            /* Schiebt den "unsichtbaren Rest" des 50%-Platzes nach rechts.
+               Dadurch klebt die Checkbox felsenfest am linken Rand ihrer Spalte. */
+            margin-right: auto;
+
+            /* Optional: Macht die Checkbox etwas größer und angenehmer zu klicken */
+            transform: scale(1.2);
+            cursor: pointer;
+            margin: 0; /* Verhindert, dass Browser-Standard-Margins stören */
+        }
+
+        .optionalSecondHole {
+            display: none !important;
+        }
+
+        #settings.show-second-hole .optionalSecondHole {
+            display: flex !important;
+        }
+
+        div#inleyPreviewDiv {
+            display: flex;
+        }
+
+        #inleyPreviewDiv {
+            max-height: 600px;
+            width: 100%;
+            overflow: hidden; /* Verhindert, dass Ränder herausragen */
+        }
+
+        #backgroundDiv {
+            max-height: 100%;
+            width: 100%;
+        }
+
+        #contentDiv {
+            height: 600px;
+            max-height: 600px;
+            box-sizing: border-box; /* Zwingt Margins/Paddings in die 600px hinein */
+            display: flex;
+            justify-content: start; /* Richtet das SVG linksbündig aus */
+            align-items: center;
+            padding: 22px;  /* 10px margin + 12px padding von vorher */
+            /* position: relative; */
+        }
+
+        #preViewSvg {
+            /* Wir überschreiben die harten width/height Attribute aus dem HTML */
+            width: auto !important;
+            height: auto !important;
+
+            /* Das SVG darf maximal so hoch werden wie das contentDiv (also 800px) */
+            max-height: 100%;
+            max-width: 100%;
+
+            /* Sorgt dafür, dass das Seitenverhältnis gewahrt bleibt und alles ins Bild passt */
+            object-fit: contain;
+            /* Sorgt dafür, dass es flüssig skaliert */
+            display: block;
+        }
+
+        svg#preViewSvg [id^="cuts"] path,
+        svg#preViewSvg path[id^="cuts"] {
+            stroke: #000000 !important;
+            stroke-width: 0.5mm !important;
+            stroke-dasharray: none !important;
+        }
+
+        svg#preViewSvg [id^="referenceLines"] path,
+        svg#preViewSvg path[id^="referenceLines"] {
+            stroke: #007bff !important;
+            stroke-width: 0.25mm !important;
+            stroke-dasharray: 4, 4 !important; /* Etwas längere Striche, damit man es bei osifont gut sieht */
+        }
+
+        svg#preViewSvg [id^="dimensioning"] path,
+        svg#preViewSvg path[id^="dimensioning"] {
+            stroke: #007bff !important;
+            stroke-width: 0.3mm !important;
+            stroke-dasharray: none !important; /* Text bleibt durchgezogen sauber lesbar */
+            fill: none !important;
+        }
+
+    </style>
+
+</head>
+<body style="margin: 0px; ">
+<div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
+    <div style="display: flex; flex-flow: column;">
+        <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Fenstereinsatz Generator</h1>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.1&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;06.07.2026 by Gassi</div>
+    </div>
+    <img src="img/td_header.png" height="150px" style="display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
+</div>
+
+<div id="allContent">
+    <div id="guiElements" style="display:flex;width: fit-content; flex-direction: column">
+        <div id="settings" style="display:flex; flex-direction: column">
+            <div class="form-row">
+                <label for="insetWidth"> Einsatz Breite: </label>
+                <div class="input-unit-wrapper">
+                    <input type="number" id="insetWidth" onchange="insetWidthChanged()" />
+                    <span class="unit">mm</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="insetHeight"> Einsatz Höhe: </label>
+                <div class="input-unit-wrapper">
+                    <input type="number" id="insetHeight" onchange="insetHeightChanged()">
+                    <span class="unit">mm</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="distanceX1">↦ Abstand X (von links) </label>
+                <div class="input-unit-wrapper">
+                    <input type="number" id="distanceX1" onchange="distanceX1Changed()">
+                    <span class="unit">mm</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="distanceY1">↧ Abstand Y (von oben) </label>
+                <div class="input-unit-wrapper">
+                    <input type="number" id="distanceY1" onchange="distanceY1Changed()">
+                    <span class="unit">mm</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="hole1Diameter">⌀ Durchmesser des Auslasses</label>
+                <div class="input-unit-wrapper">
+                    <input type="number" id="hole1Diameter" onchange="hole1DiameterChanged()">
+                    <span class="unit">mm</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="secondHole">Zweites Loch:</label>
+                <div class="checkbox-wrapper">
+                    <input type='checkbox' id='secondHole' class="form-checkbox" onChange='secondHoleChanged()'>
+                </div>
+            </div>
+            <div class="form-row optionalSecondHole">
+                <label for="distanceX2">↦ Abstand X (von links) 2. Loch</label>
+                <div class="input-unit-wrapper">
+                    <input type="number" id="distanceX2" onchange="distanceX2Changed()">
+                    <span class="unit">mm</span>
+                </div>
+            </div>
+            <div class="form-row optionalSecondHole">
+                <label for="distanceY2">↧ Abstand Y (von oben) 2. Loch</label>
+                <div class="input-unit-wrapper">
+                    <input type="number" id="distanceY2" onchange="distanceY2Changed()">
+                    <span class="unit">mm</span>
+                </div>
+            </div>
+            <div class="form-row optionalSecondHole">
+                <label for="hole2Diameter">⌀ Durchmesser des 2. Auslasses</label>
+                <div class="input-unit-wrapper">
+                    <input type="number" id="hole2Diameter" onchange="hole2DiameterChanged()">
+                    <span class="unit">mm</span>
+                </div>
+            </div>
+
+            <span id="FensterEinsatzInfo"></span><br>
+
+            <div style="width:45%;float: left;display:table-cell">
+                <div id="infoMessage" style="padding:10px;"></div>
+            </div>
+        </div>
+
+        <div id="exportButtons" style="background-color: cornsilk; width: 100%; margin-top:10px">
+            <div style="padding: 15px;">
+                <button id="downloadDXF" onclick="downloadDXF()" title="Generiere und download eine DXF Datei."> DXF Download</button>
+                <button id="downloadSVG" onclick="downloadSVG()" title="Generiere und download eine SVG Datei"> SVG Download</button>
+            </div>
+        </div>
+    </div>
+    <div id="inleyPreviewDiv">
+        <div id='backgroundDiv'>
+            <div id='contentDiv'></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var makerjs = require('makerjs');
+    var font;
+    var model;
+
+    var metadata = {
+        insetWidth: 800,
+        insetHeight: 1000,
+        distanceX1: 200,
+        distanceY1: 200,
+        hole1Diameter: 200,
+        secondHole: false,
+        distanceX2: 600,
+        distanceY2: 200,
+        hole2Diameter: 200,
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch('fonts/osifont.woff')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Netzwerk-Antwort war nicht ok: " + response.statusText);
+                }
+                return response.arrayBuffer(); // Die Datei als Binärdaten (Buffer) laden
+            })
+            .then(buffer => {
+                // Wir versuchen, opentype zu sagen, dass es nur die Kern-Geometrie parsen soll
+                // (Hinweis: Ob das hilft, hängt von der genauen Version deiner opentype.js ab)
+                font = opentype.parse(buffer);
+
+                // Ab hier läuft dein Code wie gewohnt weiter:
+                model = createModel();
+                drawPreview();
+
+                // Hinweis: Falls 'outerDiameter' nicht existiert, passe die ID hier an deine GUI an
+                const focusElement = document.getElementById('outerDiameter') || document.getElementById('insetWidth');
+                if (focusElement) focusElement.focus();
+            })
+            .catch(err => {
+                console.error("Schriftart konnte nicht geladen werden:", err);
+                alert("Fehler beim Laden der Schriftart: " + err.message);
+            });
+
+        metadataToGuiElements();
+        model = createModel();
+        drawPreview();
+    });
+
+    function createModel() {
+        var modelLocal = {
+            paths: {
+                //hole1 : new makerjs.paths.Circle([metadata.distanceX1, metadata.insetHeight - metadata.distanceY1], (metadata.hole1Diameter / 2)),
+            },
+            models: {
+                cuts: {
+                    layer: "cuts",
+                    paths: {
+                        hole1 : new makerjs.paths.Circle([metadata.distanceX1, metadata.insetHeight - metadata.distanceY1], (metadata.hole1Diameter / 2)),
+                    },
+                    models: {
+                        inlay: new makerjs.models.Rectangle(metadata.insetWidth, metadata.insetHeight),
+                    }
+                },
+
+                // empty Container for reference lines / Hilfslinien and dimensioning
+                referenceLines: {
+                    layer: "referenceLines",
+                    paths: {},
+                    models: {}
+                },
+                dimensioning: {
+                    layer: "dimensioning",
+                    paths: {},
+                    models: {}
+                }
+            }
+        };
+
+        /* TODO!!
+        if (metadata.secondHole) {
+            modelLocal.paths.hole2 = new makerjs.paths.Circle(
+                [metadata.distanceX2, metadata.insetHeight - metadata.distanceY2],
+                (metadata.hole2Diameter / 2)
+            );
+        } */
+
+        if (metadata.secondHole) {
+            modelLocal.models.cuts.paths.hole2 = new makerjs.paths.Circle(
+                [metadata.distanceX2, metadata.insetHeight - metadata.distanceY2],
+                (metadata.hole2Diameter / 2)
+            );
+        }
+
+        /******************** BEGIN Hilfslinien und Beschriftungen *****************/
+        // hilfslinie zum primären Loch X
+        let yPosPrimaryHoleCenter1 = metadata.insetHeight - metadata.distanceY1; // Vertikale Mitte des Lochs
+        modelLocal.models.referenceLines.paths.lineX1 = new makerjs.paths.Line(
+            [0, yPosPrimaryHoleCenter1],
+            [metadata.distanceX1, yPosPrimaryHoleCenter1]
+        );
+
+        if (font) {
+            modelLocal.models.dimensioning.models.textX1 = new makerjs.models.Text(
+                font,
+                metadata.distanceX1 + " mm",
+                30, // Schriftgröße in mm
+                false, false, 0
+            );
+            // Text ein Stück über der Linie platzieren
+            makerjs.model.move(modelLocal.models.dimensioning.models.textX1, [metadata.distanceX1 - (metadata.hole1Diameter / 2) - 55, yPosPrimaryHoleCenter1 + 5]);
+        }
+
+        // hilfslinie zum primären Loch Y
+        modelLocal.models.referenceLines.paths.lineY1 = new makerjs.paths.Line(
+            [metadata.distanceX1, metadata.insetHeight],
+            [metadata.distanceX1, yPosPrimaryHoleCenter1]
+        );
+
+        if (font) {
+            modelLocal.models.dimensioning.models.textY1 = new makerjs.models.Text(
+                font,
+                metadata.distanceY1 + " mm",
+                30, // Schriftgröße in mm
+                false, false, 0
+            );
+            makerjs.model.rotate(modelLocal.models.dimensioning.models.textY1, 90);
+            makerjs.model.move(modelLocal.models.dimensioning.models.textY1, [metadata.distanceX1 - 5, metadata.insetHeight - (metadata.distanceY1 / 2) - 55]);
+        }
+
+
+        let xCenter1 = metadata.distanceX1;
+        let yCenter1 = metadata.insetHeight - metadata.distanceY1; // MakerJS Y-Achse beachten!
+        let diameter1 = metadata.hole1Diameter / 2;
+
+        // Da cos(45°) und sin(45°) identisch mit Math.sqrt(0.5) sind:
+        let delta1 = diameter1 * Math.sqrt(0.5);
+
+        // hilfslinie Durchmesser
+        modelLocal.models.referenceLines.paths.diameterLine = new makerjs.paths.Line(
+            [xCenter1 - delta1, yCenter1 - delta1],
+            [xCenter1 + delta1, yCenter1 + delta1]
+        );
+
+        if (font) {
+            modelLocal.models.dimensioning.models.textDiameter1 = new makerjs.models.Text(
+                font,
+                metadata.hole1Diameter + " mm",
+                30, // Schriftgröße in mm
+                false, false, 0
+            );
+            makerjs.model.rotate(modelLocal.models.dimensioning.models.textDiameter1, 45);
+            makerjs.model.move(modelLocal.models.dimensioning.models.textDiameter1, [xCenter1 - 10, yCenter1 - 50]);
+        }
+
+
+        if (metadata.secondHole) {
+            // hilfslinie zum secundären Loch X
+            let yPosPrimaryHoleCenter2 = metadata.insetHeight - metadata.distanceY2; // Vertikale Mitte des Lochs
+            modelLocal.models.referenceLines.paths.lineX2 = new makerjs.paths.Line(
+                [0, yPosPrimaryHoleCenter2],
+                [metadata.distanceX2, yPosPrimaryHoleCenter2]
+            );
+
+            if (font) {
+                modelLocal.models.dimensioning.models.textX2 = new makerjs.models.Text(
+                    font,
+                    metadata.distanceX2 + " mm",
+                    30, // Schriftgröße in mm
+                    false, false, 0
+                );
+                makerjs.model.move(modelLocal.models.dimensioning.models.textX2, [metadata.distanceX2 - (metadata.hole2Diameter / 2) - 55, yPosPrimaryHoleCenter2 + 5]);
+            }
+
+            // hilfslinie zum primären Loch Y
+            modelLocal.models.referenceLines.paths.lineY2 = new makerjs.paths.Line(
+                [metadata.distanceX2, metadata.insetHeight],
+                [metadata.distanceX2, yPosPrimaryHoleCenter2]
+            );
+
+            if (font) {
+                modelLocal.models.dimensioning.models.textY2 = new makerjs.models.Text(
+                    font,
+                    metadata.distanceY2 + " mm",
+                    30, // Schriftgröße in mm
+                    false, false, 0
+                );
+                makerjs.model.rotate(modelLocal.models.dimensioning.models.textY2, 90);
+                makerjs.model.move(modelLocal.models.dimensioning.models.textY2, [metadata.distanceX2 - 5, metadata.insetHeight - (metadata.distanceY2 / 2) - 55]);
+            }
+
+
+            let xCenter2 = metadata.distanceX2;
+            let yCenter2 = metadata.insetHeight - metadata.distanceY2; // MakerJS Y-Achse beachten!
+            let diameter2 = metadata.hole2Diameter / 2;
+
+            // Da cos(45°) und sin(45°) identisch mit Math.sqrt(0.5) sind:
+            let delta2 = diameter2 * Math.sqrt(0.5);
+
+            // hilfslinie Durchmesser
+            modelLocal.models.referenceLines.paths.diameterLine = new makerjs.paths.Line(
+                [xCenter2 - delta2, yCenter2 - delta2],
+                [xCenter2 + delta2, yCenter2 + delta2]
+            );
+
+            if (font) {
+                modelLocal.models.dimensioning.models.textDiameter2 = new makerjs.models.Text(
+                    font,
+                    metadata.hole2Diameter + " mm",
+                    30, // Schriftgröße in mm
+                    false, false, 0
+                );
+                makerjs.model.rotate(modelLocal.models.dimensioning.models.textDiameter2, 45);
+                makerjs.model.move(modelLocal.models.dimensioning.models.textDiameter2, [xCenter2 - 10, yCenter2 - 50]);
+            }
+        }
+
+        modelLocal.models.referenceLines.paths.lineWidth = new makerjs.paths.Line(
+            [0, 8],
+            [metadata.insetWidth, 8]
+        );
+
+        if (font) {
+            modelLocal.models.dimensioning.models.lineWidth = new makerjs.models.Text(
+                font,
+                metadata.insetWidth + " mm",
+                30, // Schriftgröße in mm
+                false, false, 0
+            );
+            makerjs.model.move(modelLocal.models.dimensioning.models.lineWidth, [metadata.insetWidth / 2 -50, 15]);
+        }
+
+        modelLocal.models.referenceLines.paths.lineHeight = new makerjs.paths.Line(
+            [metadata.insetWidth - 8, 0],
+            [metadata.insetWidth - 8, metadata.insetHeight]
+        );
+
+        if (font) {
+            modelLocal.models.dimensioning.models.lineHeight = new makerjs.models.Text(
+                font,
+                metadata.insetHeight + " mm",
+                30, // Schriftgröße in mm
+                false, false, 0
+            );
+            makerjs.model.rotate(modelLocal.models.dimensioning.models.lineHeight, 90);
+            makerjs.model.move(modelLocal.models.dimensioning.models.lineHeight, [metadata.insetWidth -15, metadata.insetHeight / 2]);
+        }
+
+        /******************** END Hilfslinien und Beschriftungen *****************/
+
+        modelLocal.units = makerjs.unitType.Millimeter;
+
+        return modelLocal;
+    }
+
+    function drawPreview() {
+        console.log(model);
+        var svg = makerjs.exporter.toSVG(model, {
+            useHtmlLayers: true,
+            /*
+            layerOptions: {
+                "cuts":           { stroke: "#000000", strokeWidth: "0.5mm"  },
+                "referenceLines": { stroke: "#007bff", strokeWidth: "0.25mm" },
+                "dimensioning":   { stroke: "#007bff", strokeWidth: "0.25mm" }
+            }, */
+            svgAttrs: {
+                "width": "100%",
+                "height": "100%",
+                "id": "preViewSvg"
+            }
+        });
+
+        document.getElementById('contentDiv').innerHTML = svg;
+
+        let viewBoxAttrib = "-1 -1 " + (metadata.insetWidth + 2) + " " + (metadata.insetHeight + 2);
+        document.getElementById('preViewSvg').setAttribute("viewBox", viewBoxAttrib);
+
+        document.getElementById('downloadDXF').style.visibility = "";
+        document.getElementById('downloadSVG').style.visibility = "";
+
+        metadataToGuiElements();
+    }
+
+    function metadataToGuiElements() {
+        document.getElementById('insetWidth').value = metadata.insetWidth;
+        document.getElementById('insetHeight').value = metadata.insetHeight;
+        document.getElementById('distanceX1').value = metadata.distanceX1;
+        document.getElementById('distanceY1').value = metadata.distanceY1;
+        document.getElementById('hole1Diameter').value = metadata.hole1Diameter;
+        document.getElementById('secondHole').checked = metadata.secondHole;
+        secondHoleCheckGuiUpdate();
+        document.getElementById('distanceX2').value = metadata.distanceX2;
+        document.getElementById('distanceY2').value = metadata.distanceY2;
+        document.getElementById('hole2Diameter').value = metadata.hole2Diameter;
+    }
+
+    function download(data, filename, type) {
+        var file = new Blob([data], {type: type});
+        //if (window.navigator.msSaveOrOpenBlob) // IE10+
+        //    window.navigator.msSaveOrOpenBlob(file, filename);
+        //else { // Others
+            var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+        //}
+    }
+
+    function downloadDXF() {
+        // Wir erstellen eine Kopie des aktuellen Modells
+        var exportModel = createModel();
+
+        // Wir löschen die Hilfslinien aus der Kopie heraus!
+        if (exportModel.models.referenceLines) {
+            delete exportModel.models.referenceLines;
+        }
+
+        if (exportModel.models.dimensioning) {
+            delete exportModel.models.dimensioning;
+        }
+
+        var dxfExp = makerjs.exporter.toDXF(exportModel, {
+            fontSize: 4,
+            usePOLYLINE: true,
+            units: makerjs.unitType.Millimeter,
+            pointMatchingDistance: 0.1,
+        });
+        download(dxfExp, determineFilename("dxf"), "application/dxf");
+    }
+
+    function determineFilename(extension) {
+        let filename =
+            "Fenstereinsatz_" + metadata.insetWidth + "mm_x_" + metadata.insetHeight + "mm_AbstandX_" + metadata.distanceX1 + "mm_AbstandY_" + metadata.distanceY1 + "_Durchmesser_" + metadata.hole1Diameter;
+        if (metadata.secondHole) {
+            filename += "2.Loch_mm_AbstandX2_" + metadata.distanceX2 + "mm_AbstandY2_" + metadata.distanceY2 + "_Durchmesser2_" + metadata.hole2Diameter;
+
+        }
+        filename += "." + extension;
+        return filename;
+    }
+
+    function downloadSVG() {
+        var exportModel = createModel();
+
+        // Wir löschen die Hilfslinien aus der Kopie heraus!
+        if (exportModel.models.referenceLines) {
+            delete exportModel.models.referenceLines;
+        }
+
+        if (exportModel.models.dimensioning) {
+            delete exportModel.models.dimensioning;
+        }
+
+
+        let svgExp = '<' + '?xml version="1.0" encoding="UTF-8"?>\n' +
+            makerjs.exporter.toSVG(exportModel, {
+                units: makerjs.unitType.Millimeter,
+                svgAttrs: {
+                    "width": (metadata.insetWidth + "mm"),
+                    "height": (metadata.insetHeight + "mm"),
+                    "xmlns": "http://www.w3.org/2000/svg",
+                    "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                    "version": "1.1",
+                    "baseProfile": "full"
+                }
+            });
+        download(svgExp, determineFilename("svg"), "svg")
+    }
+
+    function genericChanged(elementId, metaDataFieldName) {
+        var widthInt = parseInt(document.getElementById(elementId).value);
+        if (!isNaN(widthInt)) {
+            document.getElementById(elementId).style.backgroundColor = "";
+            metadata[metaDataFieldName] = parseInt(widthInt);
+            return true;
+        } else {
+            document.getElementById(elementId).style.backgroundColor = "#d87979";
+            document.getElementById('inleyPreviewDiv').innerHTML = "<span style='font-size: 500px'>😵‍💫</span>";
+            return false;
+        }
+    }
+
+    function insetWidthChanged() {
+        document.getElementById("infoMessage").innerHTML = "";
+        document.getElementById("infoMessage").style.backgroundColor = "";
+
+        if (genericChanged("insetWidth", "insetWidth")) {
+            model = createModel();
+            drawPreview();
+        }
+    }
+
+    function insetHeightChanged() {
+        document.getElementById("infoMessage").innerHTML = "";
+        document.getElementById("infoMessage").style.backgroundColor = "";
+
+        if (genericChanged("insetHeight", "insetHeight")) {
+            model = createModel();
+            drawPreview();
+        }
+    }
+
+    function distanceX1Changed() {
+        document.getElementById("infoMessage").innerHTML = "";
+        document.getElementById("infoMessage").style.backgroundColor = "";
+
+        if (genericChanged("distanceX1", "distanceX1")) {
+            model = createModel();
+            drawPreview();
+        }
+    }
+
+    function distanceY1Changed() {
+        document.getElementById("infoMessage").innerHTML = "";
+        document.getElementById("infoMessage").style.backgroundColor = "";
+
+        if (genericChanged("distanceY1", "distanceY1")) {
+            model = createModel();
+            drawPreview();
+        }
+    }
+
+    function hole1DiameterChanged() {
+        document.getElementById("infoMessage").innerHTML = "";
+        document.getElementById("infoMessage").style.backgroundColor = "";
+
+        if (genericChanged("hole1Diameter", "hole1Diameter")) {
+            model = createModel();
+            drawPreview();
+        }
+    }
+
+    function secondHoleChanged() {
+        secondHoleCheckGuiUpdate();
+
+        document.getElementById("infoMessage").innerHTML = "";
+        document.getElementById("infoMessage").style.backgroundColor = "";
+
+        metadata.secondHole = document.getElementById("secondHole").checked;
+
+        model = createModel();
+        drawPreview();
+    }
+
+    function secondHoleCheckGuiUpdate() {
+        const checkbox = document.getElementById('secondHole');
+        const settingsContainer = document.getElementById('settings');
+        settingsContainer.classList.toggle('show-second-hole', checkbox.checked);
+    }
+
+    function distanceX2Changed() {
+        document.getElementById("infoMessage").innerHTML = "";
+        document.getElementById("infoMessage").style.backgroundColor = "";
+
+        if (genericChanged("distanceX2", "distanceX2")) {
+            model = createModel();
+            drawPreview();
+        }
+    }
+
+    function distanceY2Changed() {
+        document.getElementById("infoMessage").innerHTML = "";
+        document.getElementById("infoMessage").style.backgroundColor = "";
+
+        if (genericChanged("distanceY2", "distanceY2")) {
+            model = createModel();
+            drawPreview();
+        }
+    }
+
+    function hole2DiameterChanged() {
+        document.getElementById("infoMessage").innerHTML = "";
+        document.getElementById("infoMessage").style.backgroundColor = "";
+
+        if (genericChanged("hole2Diameter", "hole2Diameter")) {
+            model = createModel();
+            drawPreview();
+        }
+    }
+
+</script>
+</body>
+</html>
