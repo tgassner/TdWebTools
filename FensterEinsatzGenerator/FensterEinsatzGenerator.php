@@ -164,35 +164,35 @@
             <div class="form-row">
                 <label for="insetWidth"> Einsatz Breite: </label>
                 <div class="input-unit-wrapper">
-                    <input type="number" id="insetWidth" onchange="insetWidthChanged()" />
+                    <input type="number" id="insetWidth" onchange="updateParam('insetWidth')" />
                     <span class="unit">mm</span>
                 </div>
             </div>
             <div class="form-row">
                 <label for="insetHeight"> Einsatz Höhe: </label>
                 <div class="input-unit-wrapper">
-                    <input type="number" id="insetHeight" onchange="insetHeightChanged()">
+                    <input type="number" id="insetHeight" onchange="updateParam('insetHeight')">
                     <span class="unit">mm</span>
                 </div>
             </div>
             <div class="form-row">
                 <label for="distanceX1">↦ Abstand X (von links) </label>
                 <div class="input-unit-wrapper">
-                    <input type="number" id="distanceX1" onchange="distanceX1Changed()">
+                    <input type="number" id="distanceX1" onchange="updateParam('distanceX1')">
                     <span class="unit">mm</span>
                 </div>
             </div>
             <div class="form-row">
                 <label for="distanceY1">↧ Abstand Y (von oben) </label>
                 <div class="input-unit-wrapper">
-                    <input type="number" id="distanceY1" onchange="distanceY1Changed()">
+                    <input type="number" id="distanceY1" onchange="updateParam('distanceY1')">
                     <span class="unit">mm</span>
                 </div>
             </div>
             <div class="form-row">
                 <label for="hole1Diameter">⌀ Durchmesser des Auslasses</label>
                 <div class="input-unit-wrapper">
-                    <input type="number" id="hole1Diameter" onchange="hole1DiameterChanged()">
+                    <input type="number" id="hole1Diameter" onchange="updateParam('hole1Diameter')">
                     <span class="unit">mm</span>
                 </div>
             </div>
@@ -205,29 +205,41 @@
             <div class="form-row optionalSecondHole">
                 <label for="distanceX2">↦ Abstand X (von links) 2. Loch</label>
                 <div class="input-unit-wrapper">
-                    <input type="number" id="distanceX2" onchange="distanceX2Changed()">
+                    <input type="number" id="distanceX2" onchange="updateParam('distanceX2')">
                     <span class="unit">mm</span>
                 </div>
             </div>
             <div class="form-row optionalSecondHole">
                 <label for="distanceY2">↧ Abstand Y (von oben) 2. Loch</label>
                 <div class="input-unit-wrapper">
-                    <input type="number" id="distanceY2" onchange="distanceY2Changed()">
+                    <input type="number" id="distanceY2" onchange="updateParam('distanceY2')">
                     <span class="unit">mm</span>
                 </div>
             </div>
             <div class="form-row optionalSecondHole">
                 <label for="hole2Diameter">⌀ Durchmesser des 2. Auslasses</label>
                 <div class="input-unit-wrapper">
-                    <input type="number" id="hole2Diameter" onchange="hole2DiameterChanged()">
+                    <input type="number" id="hole2Diameter" onchange="updateParam('hole2Diameter')">
                     <span class="unit">mm</span>
                 </div>
             </div>
 
-            <span id="FensterEinsatzInfo"></span><br>
-
             <div style="width:45%;float: left;display:table-cell">
                 <div id="infoMessage" style="padding:10px;"></div>
+            </div>
+
+            <div class="form-row"">
+                <label for="xmlImport">📁 XML Datei importieren:</label>
+                <div class="checkbox-wrapper" style="flex-basis: 30%;">
+                    <input type="file" id="xmlImport" accept=".xml" onchange="importXMLFile(this)">
+                </div>
+            </div>
+
+            <div class="form-row" id="positionSelectRow" style="display: none; background-color: #f0f0f0; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                <label for="positionSelect">🎯 Position auswählen:</label>
+                <div class="input-unit-wrapper" style="flex-basis: 30%;">
+                    <select id="positionSelect" onchange="selectPosition(this.value)" style="width: 100%;"></select>
+                </div>
             </div>
         </div>
 
@@ -248,6 +260,7 @@
     var makerjs = require('makerjs');
     var font;
     var model;
+    var parsedXmlPositions = [];
 
     var metadata = {
         insetWidth: 800,
@@ -631,53 +644,19 @@
         }
     }
 
-    function insetWidthChanged() {
+    function updateParam(elementId) {
         document.getElementById("infoMessage").innerHTML = "";
         document.getElementById("infoMessage").style.backgroundColor = "";
 
-        if (genericChanged("insetWidth", "insetWidth")) {
+        var valInt = parseInt(document.getElementById(elementId).value);
+        if (!isNaN(valInt)) {
+            document.getElementById(elementId).style.backgroundColor = "";
+            metadata[elementId] = valInt;
             model = createModel();
             drawPreview();
-        }
-    }
-
-    function insetHeightChanged() {
-        document.getElementById("infoMessage").innerHTML = "";
-        document.getElementById("infoMessage").style.backgroundColor = "";
-
-        if (genericChanged("insetHeight", "insetHeight")) {
-            model = createModel();
-            drawPreview();
-        }
-    }
-
-    function distanceX1Changed() {
-        document.getElementById("infoMessage").innerHTML = "";
-        document.getElementById("infoMessage").style.backgroundColor = "";
-
-        if (genericChanged("distanceX1", "distanceX1")) {
-            model = createModel();
-            drawPreview();
-        }
-    }
-
-    function distanceY1Changed() {
-        document.getElementById("infoMessage").innerHTML = "";
-        document.getElementById("infoMessage").style.backgroundColor = "";
-
-        if (genericChanged("distanceY1", "distanceY1")) {
-            model = createModel();
-            drawPreview();
-        }
-    }
-
-    function hole1DiameterChanged() {
-        document.getElementById("infoMessage").innerHTML = "";
-        document.getElementById("infoMessage").style.backgroundColor = "";
-
-        if (genericChanged("hole1Diameter", "hole1Diameter")) {
-            model = createModel();
-            drawPreview();
+        } else {
+            document.getElementById(elementId).style.backgroundColor = "#d87979";
+            document.getElementById('contentDiv').innerHTML = "<span style='font-size: 150px'>😵‍💫</span>";
         }
     }
 
@@ -699,6 +678,7 @@
         settingsContainer.classList.toggle('show-second-hole', checkbox.checked);
     }
 
+    /*
     function distanceX2Changed() {
         document.getElementById("infoMessage").innerHTML = "";
         document.getElementById("infoMessage").style.backgroundColor = "";
@@ -727,6 +707,137 @@
             model = createModel();
             drawPreview();
         }
+    }
+*/
+    function importXMLFile(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const xmlString = e.target.result;
+
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+
+                if (xmlDoc.querySelector("parsererror")) {
+                    throw new Error("Ungültiges XML-Format.");
+                }
+
+                // 1. Alle Objekte vom Typ "Position" holen
+                const positionNodes = xmlDoc.querySelectorAll('object[name="Position"]');
+                parsedXmlPositions = []; // Speicher leeren
+
+                // 2. Durch alle Positionen laufen und filtern
+                positionNodes.forEach((posNode, index) => {
+                    const artikelNrTag = posNode.querySelector('field[name="ArtikelNr"]');
+
+                    // Prüfen, ob der Artikel stimmt
+                    if (artikelNrTag && artikelNrTag.textContent.trim() === "FENSTEREINSAETZE NACH MASS") {
+                        const langtextTag = posNode.querySelector('field[name="LangtextHtml"]');
+
+                        if (langtextTag) {
+                            // Daten für diese Position parsen
+                            const parsedData = parseLangtext(langtextTag.textContent);
+                            if (parsedData) {
+                                // ID oder Index für die Anzeige nutzen
+                                parsedData.index = parsedXmlPositions.length;
+                                parsedData.textDisplay = `Pos ${index + 1}: ${parsedData.insetWidth}x${parsedData.insetHeight}mm (Ø ${parsedData.hole1Diameter}mm)`;
+                                parsedXmlPositions.push(parsedData);
+                            }
+                        }
+                    }
+                });
+
+                // 3. Auswertung der Treffer
+                if (parsedXmlPositions.length === 0) {
+                    alert("Keine passende Position mit ArtikelNr 'FENSTEREINSAETZE NACH MASS' gefunden.");
+                    return;
+                }
+
+                const selectRow = document.getElementById('positionSelectRow');
+                const selectEl = document.getElementById('positionSelect');
+
+                if (parsedXmlPositions.length === 1) {
+                    // Nur eine Position? Direkt laden und Dropdown verstecken
+                    selectRow.style.display = "none";
+                    applyMetadata(parsedXmlPositions[0]);
+                } else {
+                    // Mehrere Positionen? Dropdown befüllen und anzeigen
+                    selectEl.innerHTML = "";
+                    parsedXmlPositions.forEach(pos => {
+                        let opt = document.createElement('option');
+                        opt.value = pos.index;
+                        opt.textContent = pos.textDisplay;
+                        selectEl.appendChild(opt);
+                    });
+                    selectRow.style.display = "flex";
+
+                    // Erste Position standardmäßig laden
+                    applyMetadata(parsedXmlPositions[0]);
+                }
+
+            } catch (error) {
+                console.error("Fehler beim Parsen der XML:", error);
+                alert("Fehler beim Laden der XML-Datei: " + error.message);
+            }
+        };
+
+        reader.readAsText(file);
+    }
+
+    // Hilfsfunktion: Übernimmt das reine RegEx-Parsing aus dem String
+    function parseLangtext(textContent) {
+        const dimensionsMatch = textContent.match(/(\d+)\s*x\s*(\d+)mm/i);
+        const diameterMatch   = textContent.match(/Ausschnitt\s*Ø\s*(\d+)mm/i);
+        const positionMatch   = textContent.match(/Stand\s*(\d+)\s*\/\s*(\d+)mm/i);
+
+        if (!dimensionsMatch) return null; // Ohne Maße bricht es ab
+
+        return {
+            insetWidth: parseInt(dimensionsMatch[1]),
+            insetHeight: parseInt(dimensionsMatch[2]),
+            hole1Diameter: diameterMatch ? parseInt(diameterMatch[1]) : 100, // Fallback falls kein Match
+            distanceX1: positionMatch ? parseInt(positionMatch[1]) : 100,
+            distanceY1: positionMatch ? parseInt(positionMatch[2]) : 100,
+            secondHole: false
+        };
+    }
+
+    // Hilfsfunktion: Schreibt die Daten ins Modell und die GUI
+    function applyMetadata(data) {
+        metadata.insetWidth = data.insetWidth;
+        metadata.insetHeight = data.insetHeight;
+        metadata.hole1Diameter = data.hole1Diameter;
+        metadata.distanceX1 = data.distanceX1;
+        metadata.distanceY1 = data.distanceY1;
+        metadata.secondHole = data.secondHole;
+
+        metadataToGuiElements();
+        resetInputStyles();
+        model = createModel();
+        drawPreview();
+        console.log("Position geladen:", metadata);
+    }
+
+    // Wird aufgerufen, wenn der User im Dropdown eine andere Position wählt
+    function selectPosition(index) {
+        const selectedData = parsedXmlPositions[parseInt(index)];
+        if (selectedData) {
+            applyMetadata(selectedData);
+        }
+    }
+
+    function resetInputStyles() {
+        const ids = ['insetWidth', 'insetHeight', 'distanceX1', 'distanceY1', 'hole1Diameter', 'distanceX2', 'distanceY2', 'hole2Diameter'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.backgroundColor = "";
+        });
+        document.getElementById("infoMessage").innerHTML = "";
+        document.getElementById("infoMessage").style.backgroundColor = "";
     }
 
 </script>
