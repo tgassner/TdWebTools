@@ -153,7 +153,7 @@
 <div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Fenstereinsatz Generator</h1>
-        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.1&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;06.07.2026 by Gassi</div>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.2&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;06.07.2026 by Gassi</div>
     </div>
     <img src="img/td_header.png" height="150px" style="display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
 </div>
@@ -197,7 +197,7 @@
                 </div>
             </div>
             <div class="form-row">
-                <label for="secondHole">Zweites Loch:</label>
+                <label for="secondHole">2️⃣ Zweites Loch:</label>
                 <div class="checkbox-wrapper">
                     <input type='checkbox' id='secondHole' class="form-checkbox" onChange='secondHoleChanged()'>
                 </div>
@@ -228,25 +228,38 @@
                 <div id="infoMessage" style="padding:10px;"></div>
             </div>
 
-            <div class="form-row"">
-                <label for="xmlImport">📁 XML Datei importieren:</label>
-                <div class="checkbox-wrapper" style="flex-basis: 30%;">
+
+            <div class="form-row" style="flex-direction: column; align-items: flex-start; gap: 5px;">
+                <span style="width: 100%; text-align: left;">📁 XML Datei importieren:</span>
+
+                <div id="dropZone"
+                     style="width: 100%; height: 100px; border: 2px dashed #999; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #fafdff; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box; padding: 10px;"
+                     onclick="document.getElementById('xmlImport').click()">
+                    <span style="font-size: 24px; margin-bottom: 5px;">📥</span>
+                    <span style="font-size: 13px; color: #555; text-align: center; font-family: sans-serif;">Datei hierher ziehen oder anklicken</span>
+                </div>
+
+                <input type="file" id="xmlImport" accept=".xml" onchange="importXMLFile(this)" style="display: none;">
+            </div>
+
+            <!--
+            <div class="form-row" style="flex-direction: column; align-items: flex-start; gap: 5px;">
+                <label for="xmlImport" style="flex-basis: auto; width: 100%; text-align: left;">📁 XML Datei importieren:</label>
+                <div class="checkbox-wrapper" style="flex-basis: auto; width: 100%; justify-content: flex-start;">
                     <input type="file" id="xmlImport" accept=".xml" onchange="importXMLFile(this)">
                 </div>
             </div>
-
-            <div class="form-row" id="positionSelectRow" style="display: none; background-color: #f0f0f0; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                <label for="positionSelect">🎯 Position auswählen:</label>
-                <div class="input-unit-wrapper" style="flex-basis: 30%;">
+-->
+            <div class="form-row" id="positionSelectRow" style="display: none; background-color: #f0f0f0; padding: 10px; border-radius: 4px; margin-bottom: 10px">
+                <label for="positionSelect" style="flex-basis: 35%;">🎯 Select Pos.:</label>
+                <div class="input-unit-wrapper" style="flex-basis: 65%; ">
                     <select id="positionSelect" onchange="selectPosition(this.value)" style="width: 100%;"></select>
                 </div>
             </div>
-        </div>
 
-        <div id="exportButtons" style="background-color: cornsilk; width: 100%; margin-top:10px">
-            <div style="padding: 15px;">
-                <button id="downloadDXF" onclick="downloadDXF()" title="Generiere und download eine DXF Datei."> DXF Download</button>
-                <button id="downloadSVG" onclick="downloadSVG()" title="Generiere und download eine SVG Datei"> SVG Download</button>
+            <div class="form-row" id="positionSelectRow" style="background-color: cornsilk; padding: 20px; border-radius: 4px; margin-bottom: 10px">
+                <button id="downloadDXF" onclick="downloadDXF()" style="flex-basis: 50%" title="Generiere und download eine DXF Datei."> DXF Download</button>
+                <button id="downloadSVG" onclick="downloadSVG()" style="flex-basis: 50%" title="Generiere und download eine SVG Datei"> SVG Download</button>
             </div>
         </div>
     </div>
@@ -270,7 +283,7 @@
         hole1Diameter: 200,
         secondHole: false,
         distanceX2: 600,
-        distanceY2: 200,
+        distanceY2: 250,
         hole2Diameter: 200,
     }
 
@@ -300,10 +313,53 @@
                 alert("Fehler beim Laden der Schriftart: " + err.message);
             });
 
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('xmlImport');
+
+        // Verhindert, dass der Browser die XML-Datei einfach so im Tab öffnet
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        // Visuelles Feedback: Fläche einfärben, wenn Datei darüber schwebt
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.style.backgroundColor = "#e1f5fe";
+                dropZone.style.borderColor = "#007bff";
+            }, false);
+        });
+
+        // Visuelles Feedback zurücksetzen, wenn die Datei wegbewegt oder gedroppt wird
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.style.backgroundColor = "#fafdff";
+                dropZone.style.borderColor = "#999";
+            }, false);
+        });
+
+        // Der eigentliche Drop-Event
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            if (files.length > 0) {
+                // Wir weisen die gedroppte Datei unserem versteckten Input zu
+                fileInput.files = files;
+                // Und triggern manuell die bestehende Import-Funktion
+                importXMLFile(fileInput);
+            }
+        }, false);
+
         metadataToGuiElements();
         model = createModel();
         drawPreview();
     });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
 
     function createModel() {
         var modelLocal = {
