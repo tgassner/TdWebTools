@@ -1,3 +1,5 @@
+<?php // TODO: Name vom Kunden beim Auftrag ?>
+<?php // TODO: Check auf illegale Eingaben samt Warnungen?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -22,6 +24,7 @@
     </script>
 
     <style>
+        body { font-family: sans-serif; }
         div#allContent { display: flex; flex-direction: row; }
         div#guiElements {display: flex; flex-direction: column;}
         div#settings {
@@ -35,7 +38,7 @@
         .form-row label,
         .form-row .input-unit-wrapper,
         .form-row .checkbox-wrapper {
-            box-sizing: border-box; /* Wichtig, damit Padding das Layout nicht zerschießt */
+            box-sizing: border-box;
             display: flex;
             justify-content: start;
         }
@@ -46,33 +49,27 @@
         }
 
         .form-row label {
-            padding-right: 10px; /* Kleiner Puffer zur rechten Spalte */
+            padding-right: 10px;
             flex-basis: 70%;
         }
 
         .input-unit-wrapper input {
             flex-grow: 1;
-            width: 100%; /* Damit es den Wrapper sauber ausfüllt */
+            width: 100%;
         }
 
         .input-unit-wrapper {
             display: flex;
             align-items: center;
-            gap: 5px; /* Abstand zwischen Input-Feld und "mm" */
+            gap: 5px;
         }
 
         .form-checkbox {
-            /* Verhindert, dass die Checkbox riesig wird */
             width: max-content;
-
-            /* Schiebt den "unsichtbaren Rest" des 50%-Platzes nach rechts.
-               Dadurch klebt die Checkbox felsenfest am linken Rand ihrer Spalte. */
             margin-right: auto;
-
-            /* Optional: Macht die Checkbox etwas größer und angenehmer zu klicken */
             transform: scale(1.2);
             cursor: pointer;
-            margin: 0; /* Verhindert, dass Browser-Standard-Margins stören */
+            margin: 0;
         }
 
         .optionalSecondHole {
@@ -85,12 +82,9 @@
 
         div#inleyPreviewDiv {
             display: flex;
-        }
-
-        #inleyPreviewDiv {
             max-height: 600px;
             width: 100%;
-            overflow: hidden; /* Verhindert, dass Ränder herausragen */
+            overflow: hidden;
         }
 
         #backgroundDiv {
@@ -101,26 +95,19 @@
         #contentDiv {
             height: 600px;
             max-height: 600px;
-            box-sizing: border-box; /* Zwingt Margins/Paddings in die 600px hinein */
+            box-sizing: border-box;
             display: flex;
-            justify-content: start; /* Richtet das SVG linksbündig aus */
+            justify-content: start;
             align-items: center;
-            padding: 22px;  /* 10px margin + 12px padding von vorher */
-            /* position: relative; */
+            padding: 22px;
         }
 
         #preViewSvg {
-            /* Wir überschreiben die harten width/height Attribute aus dem HTML */
             width: auto !important;
             height: auto !important;
-
-            /* Das SVG darf maximal so hoch werden wie das contentDiv (also 800px) */
             max-height: 100%;
             max-width: 100%;
-
-            /* Sorgt dafür, dass das Seitenverhältnis gewahrt bleibt und alles ins Bild passt */
             object-fit: contain;
-            /* Sorgt dafür, dass es flüssig skaliert */
             display: block;
         }
 
@@ -135,32 +122,56 @@
         svg#preViewSvg path[id^="referenceLines"] {
             stroke: #007bff !important;
             stroke-width: 0.25mm !important;
-            stroke-dasharray: 4, 4 !important; /* Etwas längere Striche, damit man es bei osifont gut sieht */
+            stroke-dasharray: 4, 4 !important;
         }
 
         svg#preViewSvg [id^="dimensioning"] path,
         svg#preViewSvg path[id^="dimensioning"] {
             stroke: #007bff !important;
             stroke-width: 0.3mm !important;
-            stroke-dasharray: none !important; /* Text bleibt durchgezogen sauber lesbar */
+            stroke-dasharray: none !important;
             fill: none !important;
         }
 
-    </style>
+        #downloadRow button {
+            background-color: #ffffff;
+            color: #333333;
+            border: 1.5px solid #bdc3c7;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
 
+        #downloadRow button:hover {
+            background-color: #2c3e50;
+            color: #ffffff;
+            border-color: #2c3e50;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px); /* Bewegt den Button minimal nach oben */
+        }
+
+        #downloadRow button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+    </style>
 </head>
 <body style="margin: 0px; ">
 <div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Fenstereinsatz Generator</h1>
-        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.2&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;06.07.2026 by Gassi</div>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.3&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;07.07.2026 by Gassi</div>
     </div>
     <img src="img/td_header.png" height="150px" style="display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
 </div>
 
 <div id="allContent">
-    <div id="guiElements" style="display:flex;width: fit-content; flex-direction: column">
-        <div id="settings" style="display:flex; flex-direction: column">
+    <div id="guiElements" style="width: fit-content">
+        <div id="settings">
             <div class="form-row">
                 <label for="insetWidth"> Einsatz Breite: </label>
                 <div class="input-unit-wrapper">
@@ -224,32 +235,17 @@
                 </div>
             </div>
 
-            <div style="width:45%;float: left;display:table-cell">
-                <div id="infoMessage" style="padding:10px;"></div>
-            </div>
-
+            <div id="infoMessage" class="form-row"></div>
 
             <div class="form-row" style="flex-direction: column; align-items: flex-start; gap: 5px;">
                 <span style="width: 100%; text-align: left;">📁 XML Datei importieren:</span>
-
-                <div id="dropZone"
-                     style="width: 100%; height: 100px; border: 2px dashed #999; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #fafdff; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box; padding: 10px;"
-                     onclick="document.getElementById('xmlImport').click()">
+                <div id="dropZone" style="width: 100%; height: 100px; border: 2px dashed #999; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #fafdff; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box; padding: 10px;" onclick="document.getElementById('xmlImport').click()">
                     <span style="font-size: 24px; margin-bottom: 5px;">📥</span>
-                    <span style="font-size: 13px; color: #555; text-align: center; font-family: sans-serif;">Datei hierher ziehen oder anklicken</span>
+                    <span style="font-size: 13px; color: #555; text-align: center;">Datei hierher ziehen oder anklicken</span>
                 </div>
-
                 <input type="file" id="xmlImport" accept=".xml" onchange="importXMLFile(this)" style="display: none;">
             </div>
 
-            <!--
-            <div class="form-row" style="flex-direction: column; align-items: flex-start; gap: 5px;">
-                <label for="xmlImport" style="flex-basis: auto; width: 100%; text-align: left;">📁 XML Datei importieren:</label>
-                <div class="checkbox-wrapper" style="flex-basis: auto; width: 100%; justify-content: flex-start;">
-                    <input type="file" id="xmlImport" accept=".xml" onchange="importXMLFile(this)">
-                </div>
-            </div>
--->
             <div class="form-row" id="positionSelectRow" style="display: none; background-color: #f0f0f0; padding: 10px; border-radius: 4px; margin-bottom: 10px">
                 <label for="positionSelect" style="flex-basis: 35%;">🎯 Select Pos.:</label>
                 <div class="input-unit-wrapper" style="flex-basis: 65%; ">
@@ -257,7 +253,7 @@
                 </div>
             </div>
 
-            <div class="form-row" id="positionSelectRow" style="background-color: cornsilk; padding: 20px; border-radius: 4px; margin-bottom: 10px">
+            <div class="form-row" id="downloadRow" style="background-color: cornsilk; padding: 20px; border-radius: 4px; margin-bottom: 10px; gap: 10px;">
                 <button id="downloadDXF" onclick="downloadDXF()" style="flex-basis: 50%" title="Generiere und download eine DXF Datei."> DXF Download</button>
                 <button id="downloadSVG" onclick="downloadSVG()" style="flex-basis: 50%" title="Generiere und download eine SVG Datei"> SVG Download</button>
             </div>
@@ -269,6 +265,7 @@
         </div>
     </div>
 </div>
+
 <script type="text/javascript">
     var makerjs = require('makerjs');
     var font;
@@ -293,19 +290,14 @@
                 if (!response.ok) {
                     throw new Error("Netzwerk-Antwort war nicht ok: " + response.statusText);
                 }
-                return response.arrayBuffer(); // Die Datei als Binärdaten (Buffer) laden
+                return response.arrayBuffer();
             })
             .then(buffer => {
-                // Wir versuchen, opentype zu sagen, dass es nur die Kern-Geometrie parsen soll
-                // (Hinweis: Ob das hilft, hängt von der genauen Version deiner opentype.js ab)
                 font = opentype.parse(buffer);
-
-                // Ab hier läuft dein Code wie gewohnt weiter:
                 model = createModel();
                 drawPreview();
 
-                // Hinweis: Falls 'outerDiameter' nicht existiert, passe die ID hier an deine GUI an
-                const focusElement = document.getElementById('outerDiameter') || document.getElementById('insetWidth');
+                const focusElement = document.getElementById('insetWidth');
                 if (focusElement) focusElement.focus();
             })
             .catch(err => {
@@ -316,13 +308,11 @@
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('xmlImport');
 
-        // Verhindert, dass der Browser die XML-Datei einfach so im Tab öffnet
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);
             document.body.addEventListener(eventName, preventDefaults, false);
         });
 
-        // Visuelles Feedback: Fläche einfärben, wenn Datei darüber schwebt
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, () => {
                 dropZone.style.backgroundColor = "#e1f5fe";
@@ -330,7 +320,6 @@
             }, false);
         });
 
-        // Visuelles Feedback zurücksetzen, wenn die Datei wegbewegt oder gedroppt wird
         ['dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, () => {
                 dropZone.style.backgroundColor = "#fafdff";
@@ -338,15 +327,11 @@
             }, false);
         });
 
-        // Der eigentliche Drop-Event
         dropZone.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
             const files = dt.files;
-
             if (files.length > 0) {
-                // Wir weisen die gedroppte Datei unserem versteckten Input zu
                 fileInput.files = files;
-                // Und triggern manuell die bestehende Import-Funktion
                 importXMLFile(fileInput);
             }
         }, false);
@@ -363,9 +348,7 @@
 
     function createModel() {
         var modelLocal = {
-            paths: {
-                //hole1 : new makerjs.paths.Circle([metadata.distanceX1, metadata.insetHeight - metadata.distanceY1], (metadata.hole1Diameter / 2)),
-            },
+            paths: {},
             models: {
                 cuts: {
                     layer: "cuts",
@@ -376,8 +359,6 @@
                         inlay: new makerjs.models.Rectangle(metadata.insetWidth, metadata.insetHeight),
                     }
                 },
-
-                // empty Container for reference lines / Hilfslinien and dimensioning
                 referenceLines: {
                     layer: "referenceLines",
                     paths: {},
@@ -391,14 +372,6 @@
             }
         };
 
-        /* TODO!!
-        if (metadata.secondHole) {
-            modelLocal.paths.hole2 = new makerjs.paths.Circle(
-                [metadata.distanceX2, metadata.insetHeight - metadata.distanceY2],
-                (metadata.hole2Diameter / 2)
-            );
-        } */
-
         if (metadata.secondHole) {
             modelLocal.models.cuts.paths.hole2 = new makerjs.paths.Circle(
                 [metadata.distanceX2, metadata.insetHeight - metadata.distanceY2],
@@ -406,8 +379,6 @@
             );
         }
 
-        /******************** BEGIN Hilfslinien und Beschriftungen *****************/
-        // hilfslinie zum primären Loch X
         let yPosPrimaryHoleCenter1 = metadata.insetHeight - metadata.distanceY1; // Vertikale Mitte des Lochs
         modelLocal.models.referenceLines.paths.lineX1 = new makerjs.paths.Line(
             [0, yPosPrimaryHoleCenter1],
@@ -415,13 +386,7 @@
         );
 
         if (font) {
-            modelLocal.models.dimensioning.models.textX1 = new makerjs.models.Text(
-                font,
-                metadata.distanceX1 + " mm",
-                30, // Schriftgröße in mm
-                false, false, 0
-            );
-            // Text ein Stück über der Linie platzieren
+            modelLocal.models.dimensioning.models.textX1 = new makerjs.models.Text(font, metadata.distanceX1 + " mm", 30, false, false, 0);
             makerjs.model.move(modelLocal.models.dimensioning.models.textX1, [metadata.distanceX1 - (metadata.hole1Diameter / 2) - 55, yPosPrimaryHoleCenter1 + 5]);
         }
 
@@ -432,12 +397,7 @@
         );
 
         if (font) {
-            modelLocal.models.dimensioning.models.textY1 = new makerjs.models.Text(
-                font,
-                metadata.distanceY1 + " mm",
-                30, // Schriftgröße in mm
-                false, false, 0
-            );
+            modelLocal.models.dimensioning.models.textY1 = new makerjs.models.Text(font, metadata.distanceY1 + " mm", 30, false, false, 0);
             makerjs.model.rotate(modelLocal.models.dimensioning.models.textY1, 90);
             makerjs.model.move(modelLocal.models.dimensioning.models.textY1, [metadata.distanceX1 - 5, metadata.insetHeight - (metadata.distanceY1 / 2) - 55]);
         }
@@ -457,12 +417,7 @@
         );
 
         if (font) {
-            modelLocal.models.dimensioning.models.textDiameter1 = new makerjs.models.Text(
-                font,
-                metadata.hole1Diameter + " mm",
-                30, // Schriftgröße in mm
-                false, false, 0
-            );
+            modelLocal.models.dimensioning.models.textDiameter1 = new makerjs.models.Text(font, metadata.hole1Diameter + " mm", 30, false, false, 0);
             makerjs.model.rotate(modelLocal.models.dimensioning.models.textDiameter1, 45);
             makerjs.model.move(modelLocal.models.dimensioning.models.textDiameter1, [xCenter1 - 10, yCenter1 - 50]);
         }
@@ -477,12 +432,7 @@
             );
 
             if (font) {
-                modelLocal.models.dimensioning.models.textX2 = new makerjs.models.Text(
-                    font,
-                    metadata.distanceX2 + " mm",
-                    30, // Schriftgröße in mm
-                    false, false, 0
-                );
+                modelLocal.models.dimensioning.models.textX2 = new makerjs.models.Text(font, metadata.distanceX2 + " mm", 30, false, false, 0);
                 makerjs.model.move(modelLocal.models.dimensioning.models.textX2, [metadata.distanceX2 - (metadata.hole2Diameter / 2) - 55, yPosPrimaryHoleCenter2 + 5]);
             }
 
@@ -493,19 +443,14 @@
             );
 
             if (font) {
-                modelLocal.models.dimensioning.models.textY2 = new makerjs.models.Text(
-                    font,
-                    metadata.distanceY2 + " mm",
-                    30, // Schriftgröße in mm
-                    false, false, 0
-                );
+                modelLocal.models.dimensioning.models.textY2 = new makerjs.models.Text(font, metadata.distanceY2 + " mm", 30, false, false, 0);
                 makerjs.model.rotate(modelLocal.models.dimensioning.models.textY2, 90);
                 makerjs.model.move(modelLocal.models.dimensioning.models.textY2, [metadata.distanceX2 - 5, metadata.insetHeight - (metadata.distanceY2 / 2) - 55]);
             }
 
 
             let xCenter2 = metadata.distanceX2;
-            let yCenter2 = metadata.insetHeight - metadata.distanceY2; // MakerJS Y-Achse beachten!
+            let yCenter2 = metadata.insetHeight - metadata.distanceY2;
             let diameter2 = metadata.hole2Diameter / 2;
 
             // Da cos(45°) und sin(45°) identisch mit Math.sqrt(0.5) sind:
@@ -535,12 +480,7 @@
         );
 
         if (font) {
-            modelLocal.models.dimensioning.models.lineWidth = new makerjs.models.Text(
-                font,
-                metadata.insetWidth + " mm",
-                30, // Schriftgröße in mm
-                false, false, 0
-            );
+            modelLocal.models.dimensioning.models.lineWidth = new makerjs.models.Text(font, metadata.insetWidth + " mm", 30, false, false, 0);
             makerjs.model.move(modelLocal.models.dimensioning.models.lineWidth, [metadata.insetWidth / 2 -50, 15]);
         }
 
@@ -550,12 +490,7 @@
         );
 
         if (font) {
-            modelLocal.models.dimensioning.models.lineHeight = new makerjs.models.Text(
-                font,
-                metadata.insetHeight + " mm",
-                30, // Schriftgröße in mm
-                false, false, 0
-            );
+            modelLocal.models.dimensioning.models.lineHeight = new makerjs.models.Text(font, metadata.insetHeight + " mm", 30, false, false, 0);
             makerjs.model.rotate(modelLocal.models.dimensioning.models.lineHeight, 90);
             makerjs.model.move(modelLocal.models.dimensioning.models.lineHeight, [metadata.insetWidth -15, metadata.insetHeight / 2]);
         }
@@ -588,10 +523,8 @@
 
         let viewBoxAttrib = "-1 -1 " + (metadata.insetWidth + 2) + " " + (metadata.insetHeight + 2);
         document.getElementById('preViewSvg').setAttribute("viewBox", viewBoxAttrib);
-
-        document.getElementById('downloadDXF').style.visibility = "";
-        document.getElementById('downloadSVG').style.visibility = "";
-
+        //document.getElementById('downloadDXF').style.visibility = "";
+        //document.getElementById('downloadSVG').style.visibility = "";
         metadataToGuiElements();
     }
 
@@ -610,27 +543,20 @@
 
     function download(data, filename, type) {
         var file = new Blob([data], {type: type});
-        //if (window.navigator.msSaveOrOpenBlob) // IE10+
-        //    window.navigator.msSaveOrOpenBlob(file, filename);
-        //else { // Others
-            var a = document.createElement("a"),
-                url = URL.createObjectURL(file);
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(function () {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 0);
-        //}
+        var a = document.createElement("a"), url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
     }
 
     function downloadDXF() {
-        // Wir erstellen eine Kopie des aktuellen Modells
         var exportModel = createModel();
 
-        // Wir löschen die Hilfslinien aus der Kopie heraus!
         if (exportModel.models.referenceLines) {
             delete exportModel.models.referenceLines;
         }
@@ -661,8 +587,6 @@
 
     function downloadSVG() {
         var exportModel = createModel();
-
-        // Wir löschen die Hilfslinien aus der Kopie heraus!
         if (exportModel.models.referenceLines) {
             delete exportModel.models.referenceLines;
         }
@@ -670,7 +594,6 @@
         if (exportModel.models.dimensioning) {
             delete exportModel.models.dimensioning;
         }
-
 
         let svgExp = '<' + '?xml version="1.0" encoding="UTF-8"?>\n' +
             makerjs.exporter.toSVG(exportModel, {
@@ -685,19 +608,6 @@
                 }
             });
         download(svgExp, determineFilename("svg"), "svg")
-    }
-
-    function genericChanged(elementId, metaDataFieldName) {
-        var widthInt = parseInt(document.getElementById(elementId).value);
-        if (!isNaN(widthInt)) {
-            document.getElementById(elementId).style.backgroundColor = "";
-            metadata[metaDataFieldName] = parseInt(widthInt);
-            return true;
-        } else {
-            document.getElementById(elementId).style.backgroundColor = "#d87979";
-            document.getElementById('inleyPreviewDiv').innerHTML = "<span style='font-size: 500px'>😵‍💫</span>";
-            return false;
-        }
     }
 
     function updateParam(elementId) {
@@ -718,10 +628,8 @@
 
     function secondHoleChanged() {
         secondHoleCheckGuiUpdate();
-
         document.getElementById("infoMessage").innerHTML = "";
         document.getElementById("infoMessage").style.backgroundColor = "";
-
         metadata.secondHole = document.getElementById("secondHole").checked;
 
         model = createModel();
@@ -734,46 +642,13 @@
         settingsContainer.classList.toggle('show-second-hole', checkbox.checked);
     }
 
-    /*
-    function distanceX2Changed() {
-        document.getElementById("infoMessage").innerHTML = "";
-        document.getElementById("infoMessage").style.backgroundColor = "";
-
-        if (genericChanged("distanceX2", "distanceX2")) {
-            model = createModel();
-            drawPreview();
-        }
-    }
-
-    function distanceY2Changed() {
-        document.getElementById("infoMessage").innerHTML = "";
-        document.getElementById("infoMessage").style.backgroundColor = "";
-
-        if (genericChanged("distanceY2", "distanceY2")) {
-            model = createModel();
-            drawPreview();
-        }
-    }
-
-    function hole2DiameterChanged() {
-        document.getElementById("infoMessage").innerHTML = "";
-        document.getElementById("infoMessage").style.backgroundColor = "";
-
-        if (genericChanged("hole2Diameter", "hole2Diameter")) {
-            model = createModel();
-            drawPreview();
-        }
-    }
-*/
     function importXMLFile(input) {
         const file = input.files[0];
         if (!file) return;
 
         const reader = new FileReader();
-
         reader.onload = function(e) {
             const xmlString = e.target.result;
-
             try {
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(xmlString, "text/xml");
@@ -782,23 +657,16 @@
                     throw new Error("Ungültiges XML-Format.");
                 }
 
-                // 1. Alle Objekte vom Typ "Position" holen
                 const positionNodes = xmlDoc.querySelectorAll('object[name="Position"]');
-                parsedXmlPositions = []; // Speicher leeren
+                parsedXmlPositions = [];
 
-                // 2. Durch alle Positionen laufen und filtern
                 positionNodes.forEach((posNode, index) => {
                     const artikelNrTag = posNode.querySelector('field[name="ArtikelNr"]');
-
-                    // Prüfen, ob der Artikel stimmt
                     if (artikelNrTag && artikelNrTag.textContent.trim() === "FENSTEREINSAETZE NACH MASS") {
                         const langtextTag = posNode.querySelector('field[name="LangtextHtml"]');
-
                         if (langtextTag) {
-                            // Daten für diese Position parsen
                             const parsedData = parseLangtext(langtextTag.textContent);
                             if (parsedData) {
-                                // ID oder Index für die Anzeige nutzen
                                 parsedData.index = parsedXmlPositions.length;
                                 parsedData.textDisplay = `Pos ${index + 1}: ${parsedData.insetWidth}x${parsedData.insetHeight}mm (Ø ${parsedData.hole1Diameter}mm)`;
                                 parsedXmlPositions.push(parsedData);
@@ -807,7 +675,6 @@
                     }
                 });
 
-                // 3. Auswertung der Treffer
                 if (parsedXmlPositions.length === 0) {
                     alert("Keine passende Position mit ArtikelNr 'FENSTEREINSAETZE NACH MASS' gefunden.");
                     return;
@@ -817,11 +684,9 @@
                 const selectEl = document.getElementById('positionSelect');
 
                 if (parsedXmlPositions.length === 1) {
-                    // Nur eine Position? Direkt laden und Dropdown verstecken
                     selectRow.style.display = "none";
                     applyMetadata(parsedXmlPositions[0]);
                 } else {
-                    // Mehrere Positionen? Dropdown befüllen und anzeigen
                     selectEl.innerHTML = "";
                     parsedXmlPositions.forEach(pos => {
                         let opt = document.createElement('option');
@@ -830,8 +695,6 @@
                         selectEl.appendChild(opt);
                     });
                     selectRow.style.display = "flex";
-
-                    // Erste Position standardmäßig laden
                     applyMetadata(parsedXmlPositions[0]);
                 }
 
@@ -840,11 +703,9 @@
                 alert("Fehler beim Laden der XML-Datei: " + error.message);
             }
         };
-
         reader.readAsText(file);
     }
 
-    // Hilfsfunktion: Übernimmt das reine RegEx-Parsing aus dem String
     function parseLangtext(textContent) {
         const dimensionsMatch = textContent.match(/(\d+)\s*x\s*(\d+)mm/i);
         const diameterMatch   = textContent.match(/Ausschnitt\s*Ø\s*(\d+)mm/i);
@@ -855,14 +716,13 @@
         return {
             insetWidth: parseInt(dimensionsMatch[1]),
             insetHeight: parseInt(dimensionsMatch[2]),
-            hole1Diameter: diameterMatch ? parseInt(diameterMatch[1]) : 100, // Fallback falls kein Match
+            hole1Diameter: diameterMatch ? parseInt(diameterMatch[1]) : 100,
             distanceX1: positionMatch ? parseInt(positionMatch[1]) : 100,
             distanceY1: positionMatch ? parseInt(positionMatch[2]) : 100,
             secondHole: false
         };
     }
 
-    // Hilfsfunktion: Schreibt die Daten ins Modell und die GUI
     function applyMetadata(data) {
         metadata.insetWidth = data.insetWidth;
         metadata.insetHeight = data.insetHeight;
@@ -875,10 +735,8 @@
         resetInputStyles();
         model = createModel();
         drawPreview();
-        console.log("Position geladen:", metadata);
     }
 
-    // Wird aufgerufen, wenn der User im Dropdown eine andere Position wählt
     function selectPosition(index) {
         const selectedData = parsedXmlPositions[parseInt(index)];
         if (selectedData) {
