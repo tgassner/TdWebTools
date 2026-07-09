@@ -1,4 +1,3 @@
-<?php // TODO: Name vom Kunden beim Auftrag ?>
 <?php // TODO: Check auf illegale Eingaben samt Warnungen?>
 <!DOCTYPE html>
 <html>
@@ -133,7 +132,8 @@
             fill: none !important;
         }
 
-        #downloadRow button {
+        #downloadRow button,
+        #resetRow button{
             background-color: #ffffff;
             color: #333333;
             border: 1.5px solid #bdc3c7;
@@ -164,7 +164,7 @@
 <div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Fenstereinsatz Generator</h1>
-        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.3&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;07.07.2026 by Gassi</div>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.9&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;09.07.2026 by Gassi</div>
     </div>
     <img src="img/td_header.png" height="150px" style="display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
 </div>
@@ -246,11 +246,15 @@
                 <input type="file" id="xmlImport" accept=".xml" onchange="importXMLFile(this)" style="display: none;">
             </div>
 
-            <div class="form-row" id="positionSelectRow" style="display: none; background-color: #f0f0f0; padding: 10px; border-radius: 4px; margin-bottom: 10px">
-                <label for="positionSelect" style="flex-basis: 35%;">🎯 Select Pos.:</label>
-                <div class="input-unit-wrapper" style="flex-basis: 65%; ">
+            <div class="form-row" id="positionSelectRow" style="display: none; flex-direction: column; background-color: #f0f0f0; padding: 10px; border-radius: 4px; margin-bottom: 10px">
+                <label for="positionSelect" style="margin-bottom: 10px; width: 100%">🎯 Ausgewählte Position:</label>
+                <div class="input-unit-wrapper" style="width: 100%">
                     <select id="positionSelect" onchange="selectPosition(this.value)" style="width: 100%;"></select>
                 </div>
+            </div>
+
+            <div class="form-row" id="resetRow" style="display: none; background-color: cornsilk; padding: 20px; border-radius: 4px; margin-bottom: 10px; gap: 10px;">
+                <button id="resetButton" onclick="doReset()" style="width: 100%" title="reset"> RESET file input data, leave values</button>
             </div>
 
             <div class="form-row" id="downloadRow" style="background-color: cornsilk; padding: 20px; border-radius: 4px; margin-bottom: 10px; gap: 10px;">
@@ -282,6 +286,9 @@
         distanceX2: 600,
         distanceY2: 250,
         hole2Diameter: 200,
+        customerName: "",
+        orderNumber: "",
+        posNr: "",
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -398,7 +405,7 @@
 
         if (font) {
             modelLocal.models.dimensioning.models.textY1 = new makerjs.models.Text(font, metadata.distanceY1 + " mm", 30, false, false, 0);
-            makerjs.model.rotate(modelLocal.models.dimensioning.models.textY1, 90);
+            makerjs.model.rotate(modelLocal.models.dimensioning.models.textY1, 89);
             makerjs.model.move(modelLocal.models.dimensioning.models.textY1, [metadata.distanceX1 - 5, metadata.insetHeight - (metadata.distanceY1 / 2) - 55]);
         }
 
@@ -444,7 +451,7 @@
 
             if (font) {
                 modelLocal.models.dimensioning.models.textY2 = new makerjs.models.Text(font, metadata.distanceY2 + " mm", 30, false, false, 0);
-                makerjs.model.rotate(modelLocal.models.dimensioning.models.textY2, 90);
+                makerjs.model.rotate(modelLocal.models.dimensioning.models.textY2, 89);
                 makerjs.model.move(modelLocal.models.dimensioning.models.textY2, [metadata.distanceX2 - 5, metadata.insetHeight - (metadata.distanceY2 / 2) - 55]);
             }
 
@@ -491,7 +498,7 @@
 
         if (font) {
             modelLocal.models.dimensioning.models.lineHeight = new makerjs.models.Text(font, metadata.insetHeight + " mm", 30, false, false, 0);
-            makerjs.model.rotate(modelLocal.models.dimensioning.models.lineHeight, 90);
+            makerjs.model.rotate(modelLocal.models.dimensioning.models.lineHeight, 89);
             makerjs.model.move(modelLocal.models.dimensioning.models.lineHeight, [metadata.insetWidth -15, metadata.insetHeight / 2]);
         }
 
@@ -575,11 +582,21 @@
     }
 
     function determineFilename(extension) {
-        let filename =
-            "Fenstereinsatz_" + metadata.insetWidth + "mm_x_" + metadata.insetHeight + "mm_AbstandX_" + metadata.distanceX1 + "mm_AbstandY_" + metadata.distanceY1 + "_Durchmesser_" + metadata.hole1Diameter;
-        if (metadata.secondHole) {
-            filename += "2.Loch_mm_AbstandX2_" + metadata.distanceX2 + "mm_AbstandY2_" + metadata.distanceY2 + "_Durchmesser2_" + metadata.hole2Diameter;
+        let filename = "Fenstereinsatz";
+        if (metadata.orderNumber) {
+            filename += "_" + metadata.orderNumber;
+        }
+        if (metadata.customerName) {
+            filename += "_" + metadata.customerName;
+        }
 
+        if (metadata.posNr) {
+            filename += "_Pos" + metadata.posNr;
+        }
+
+        filename += "_" + metadata.insetWidth + "x" + metadata.insetHeight + "_" + metadata.distanceX1 + "x" + metadata.distanceY1 + "_" + metadata.hole1Diameter;
+        if (metadata.secondHole) {
+            filename += "_" + metadata.distanceX2 + "x" + metadata.distanceY2 + "_" + metadata.hole2Diameter;
         }
         filename += "." + extension;
         return filename;
@@ -649,13 +666,29 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const xmlString = e.target.result;
+            let positionNodes;
             try {
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(xmlString, "text/xml");
 
                 if (xmlDoc.querySelector("parsererror")) {
-                    throw new Error("Ungültiges XML-Format.");
+                    throw new Error("Die Datei ist kein gültiges XML-Dokument oder beschädigt.");
                 }
+
+                // Kundennamen exportieren.
+                let extractedCustomer = "";
+                const firma1Tag = xmlDoc.querySelector('object[name="Adresse"] field[name="Firma1"]');
+                if (firma1Tag && firma1Tag.textContent.trim() !== "") {
+                    extractedCustomer = firma1Tag.textContent.trim().replace(/[\/\\:\*\?"<>\| ]+/g, "_");
+                }
+
+                // Auftragsnummer exportieren.
+                let extractedOrderNumber = "";
+                const orderNumberTag = xmlDoc.querySelector('object[name="Auftrag"] field[name="Nr"]');
+                if (orderNumberTag && orderNumberTag.textContent.trim() !== "") {
+                    extractedOrderNumber = orderNumberTag.textContent.trim();
+                }
+
 
                 const positionNodes = xmlDoc.querySelectorAll('object[name="Position"]');
                 parsedXmlPositions = [];
@@ -668,7 +701,18 @@
                             const parsedData = parseLangtext(langtextTag.textContent);
                             if (parsedData) {
                                 parsedData.index = parsedXmlPositions.length;
-                                parsedData.textDisplay = `Pos ${index + 1}: ${parsedData.insetWidth}x${parsedData.insetHeight}mm (Ø ${parsedData.hole1Diameter}mm)`;
+                                parsedData.customerName = extractedCustomer;
+                                parsedData.orderNumber = extractedOrderNumber;
+
+                                const posNrTag = posNode.querySelector('field[name="PosNr"]');
+                                let posNr = "";
+                                if (posNrTag && posNrTag.textContent.trim() !== "") {
+                                    posNr = posNrTag.textContent.trim();
+                                    parsedData.posNr = posNr;
+                                }
+
+                                parsedData.textDisplay = `Pos ${(posNr ? posNr :index + 1)}: ${parsedData.insetWidth}x${parsedData.insetHeight}mm (Ø ${parsedData.hole1Diameter}mm)`;
+
                                 parsedXmlPositions.push(parsedData);
                             }
                         }
@@ -676,9 +720,18 @@
                 });
 
                 if (parsedXmlPositions.length === 0) {
-                    alert("Keine passende Position mit ArtikelNr 'FENSTEREINSAETZE NACH MASS' gefunden.");
+                    alert("Die XML-Datei wurde korrekt geladen, aber es wurde keine Position mit der ArtikelNr 'FENSTEREINSAETZE NACH MASS' gefunden.");
                     return;
                 }
+            } catch (xmlError) {
+                console.error("Fehler beim XML-Struktur-Parsing:", xmlError);
+                alert("⚠️ XML-Import fehlgeschlagen:\n\nDie Datei konnte nicht als valides XML gelesen werden.\nDetails: " + xmlError.message);
+                return;
+            }
+
+            try {
+
+                disableAllInputs(true);
 
                 const selectRow = document.getElementById('positionSelectRow');
                 const selectEl = document.getElementById('positionSelect');
@@ -698,9 +751,14 @@
                     applyMetadata(parsedXmlPositions[0]);
                 }
 
-            } catch (error) {
-                console.error("Fehler beim Parsen der XML:", error);
-                alert("Fehler beim Laden der XML-Datei: " + error.message);
+                const resetRow = document.getElementById('resetRow');
+                if (resetRow) {
+                    resetRow.style.display = "flex";
+                }
+
+            } catch (renderError) {
+                console.error("Fehler beim GUI-Rendering nach XML-Import:", renderError);
+                alert("✅ XML-Daten erfolgreich geladen!\n\n⚠️ Aber beim Generieren der 2D-Vorschau ist ein interner Fehler aufgetreten.\nDie Maße wurden trotzdem in die Eingabefelder übernommen.");
             }
         };
         reader.readAsText(file);
@@ -730,6 +788,9 @@
         metadata.distanceX1 = data.distanceX1;
         metadata.distanceY1 = data.distanceY1;
         metadata.secondHole = data.secondHole;
+        metadata.customerName = data.customerName;
+        metadata.posNr = data.posNr;
+        metadata.orderNumber = data.orderNumber;
 
         metadataToGuiElements();
         resetInputStyles();
@@ -752,6 +813,43 @@
         });
         document.getElementById("infoMessage").innerHTML = "";
         document.getElementById("infoMessage").style.backgroundColor = "";
+    }
+
+    function disableAllInputs(disable) {
+        disableoneInput("insetWidth", disable);
+        disableoneInput("insetHeight", disable);
+        disableoneInput("distanceX1", disable);
+        disableoneInput("distanceY1", disable);
+        disableoneInput("hole1Diameter", disable);
+        disableoneInput("secondHole", disable);
+        disableoneInput("distanceX2", disable);
+        disableoneInput("distanceY2", disable);
+        disableoneInput("hole2Diameter", disable);
+        //disableoneInput("xmlImport", disable);
+    }
+
+    function disableoneInput(id, disable) {
+        let element = document.getElementById(id);
+        if(element) {
+            element.disabled = disable;
+        }
+    }
+
+    function doReset() {
+        const selectRow = document.getElementById('positionSelectRow');
+        const selectEl = document.getElementById('positionSelect');
+        selectEl.innerHTML = "";
+        selectRow.style.display = "none";
+        parsedXmlPositions = [];
+        disableAllInputs(false);
+        metadata.customerName = "";
+        metadata.posNr = "";
+        metadata.orderNumber = "";
+
+        const resetRow = document.getElementById('resetRow');
+        if (resetRow) {
+            resetRow.style.display = "none";
+        }
     }
 
 </script>
