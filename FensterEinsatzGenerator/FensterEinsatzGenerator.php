@@ -1,6 +1,5 @@
-<?php // TODO: Check auf illegale Eingaben samt Warnungen?>
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Fenstereinsatz Generator</title>
@@ -158,13 +157,35 @@
             transform: translateY(1px);
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
+
+        #downloadRow button:disabled {
+            background-color: #e0e0e0 !important;
+            color: #a0a0a0 !important;
+            border-color: #d0d0d0 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        #infoMessage {
+            background-color: #fce4e4;
+            border: 1px solid #f6b0b0;
+            color: #cc0000;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
     </style>
 </head>
 <body style="margin: 0px; ">
 <div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Fenstereinsatz Generator</h1>
-        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 0.9&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;09.07.2026 by Gassi</div>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 1.0&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;09.07.2026 by Gassi</div>
     </div>
     <img src="img/td_header.png" height="150px" style="display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
 </div>
@@ -235,7 +256,7 @@
                 </div>
             </div>
 
-            <div id="infoMessage" class="form-row"></div>
+            <div id="infoMessage" class="form-row" style="display: none"></div>
 
             <div class="form-row" style="flex-direction: column; align-items: flex-start; gap: 5px;">
                 <span style="width: 100%; text-align: left;">📁 XML Datei importieren:</span>
@@ -254,7 +275,7 @@
             </div>
 
             <div class="form-row" id="resetRow" style="display: none; background-color: cornsilk; padding: 20px; border-radius: 4px; margin-bottom: 10px; gap: 10px;">
-                <button id="resetButton" onclick="doReset()" style="width: 100%" title="reset"> RESET file input data, leave values</button>
+                <button id="resetButton" onclick="doReset()" style="width: 100%" title="reset"> RESET Datei import, aber lass die Werte</button>
             </div>
 
             <div class="form-row" id="downloadRow" style="background-color: cornsilk; padding: 20px; border-radius: 4px; margin-bottom: 10px; gap: 10px;">
@@ -393,8 +414,8 @@
         );
 
         if (font) {
-            modelLocal.models.dimensioning.models.textX1 = new makerjs.models.Text(font, metadata.distanceX1 + " mm", 30, false, false, 0);
-            makerjs.model.move(modelLocal.models.dimensioning.models.textX1, [metadata.distanceX1 - (metadata.hole1Diameter / 2) - 55, yPosPrimaryHoleCenter1 + 5]);
+            modelLocal.models.dimensioning.models.textX1 = new makerjs.models.Text(font, metadata.distanceX1 + "", 30, false, false, 0);
+            makerjs.model.move(modelLocal.models.dimensioning.models.textX1, [15, yPosPrimaryHoleCenter1 + 5]);
         }
 
         // hilfslinie zum primären Loch Y
@@ -404,9 +425,9 @@
         );
 
         if (font) {
-            modelLocal.models.dimensioning.models.textY1 = new makerjs.models.Text(font, metadata.distanceY1 + " mm", 30, false, false, 0);
+            modelLocal.models.dimensioning.models.textY1 = new makerjs.models.Text(font, metadata.distanceY1 + "", 30, false, false, 0);
             makerjs.model.rotate(modelLocal.models.dimensioning.models.textY1, 89);
-            makerjs.model.move(modelLocal.models.dimensioning.models.textY1, [metadata.distanceX1 - 5, metadata.insetHeight - (metadata.distanceY1 / 2) - 55]);
+            makerjs.model.move(modelLocal.models.dimensioning.models.textY1, [metadata.distanceX1 - 5, metadata.insetHeight - 70]);
         }
 
 
@@ -418,15 +439,15 @@
         let delta1 = diameter1 * Math.sqrt(0.5);
 
         // hilfslinie Durchmesser
-        modelLocal.models.referenceLines.paths.diameterLine = new makerjs.paths.Line(
+        modelLocal.models.referenceLines.paths.diameter1Line = new makerjs.paths.Line(
             [xCenter1 - delta1, yCenter1 - delta1],
             [xCenter1 + delta1, yCenter1 + delta1]
         );
 
         if (font) {
-            modelLocal.models.dimensioning.models.textDiameter1 = new makerjs.models.Text(font, metadata.hole1Diameter + " mm", 30, false, false, 0);
+            modelLocal.models.dimensioning.models.textDiameter1 = new makerjs.models.Text(font, metadata.hole1Diameter + "", 30, false, false, 0);
             makerjs.model.rotate(modelLocal.models.dimensioning.models.textDiameter1, 45);
-            makerjs.model.move(modelLocal.models.dimensioning.models.textDiameter1, [xCenter1 - 10, yCenter1 - 50]);
+            makerjs.model.move(modelLocal.models.dimensioning.models.textDiameter1, [xCenter1 + 5, yCenter1 - 40]);
         }
 
 
@@ -439,8 +460,8 @@
             );
 
             if (font) {
-                modelLocal.models.dimensioning.models.textX2 = new makerjs.models.Text(font, metadata.distanceX2 + " mm", 30, false, false, 0);
-                makerjs.model.move(modelLocal.models.dimensioning.models.textX2, [metadata.distanceX2 - (metadata.hole2Diameter / 2) - 55, yPosPrimaryHoleCenter2 + 5]);
+                modelLocal.models.dimensioning.models.textX2 = new makerjs.models.Text(font, metadata.distanceX2 + "", 30, false, false, 0);
+                makerjs.model.move(modelLocal.models.dimensioning.models.textX2, [15, yPosPrimaryHoleCenter2 - 30]);
             }
 
             // hilfslinie zum primären Loch Y
@@ -450,9 +471,9 @@
             );
 
             if (font) {
-                modelLocal.models.dimensioning.models.textY2 = new makerjs.models.Text(font, metadata.distanceY2 + " mm", 30, false, false, 0);
+                modelLocal.models.dimensioning.models.textY2 = new makerjs.models.Text(font, metadata.distanceY2 + "", 30, false, false, 0);
                 makerjs.model.rotate(modelLocal.models.dimensioning.models.textY2, 89);
-                makerjs.model.move(modelLocal.models.dimensioning.models.textY2, [metadata.distanceX2 - 5, metadata.insetHeight - (metadata.distanceY2 / 2) - 55]);
+                makerjs.model.move(modelLocal.models.dimensioning.models.textY2, [metadata.distanceX2 + 28, metadata.insetHeight - 70]);
             }
 
 
@@ -464,20 +485,15 @@
             let delta2 = diameter2 * Math.sqrt(0.5);
 
             // hilfslinie Durchmesser
-            modelLocal.models.referenceLines.paths.diameterLine = new makerjs.paths.Line(
+            modelLocal.models.referenceLines.paths.diameter2Line = new makerjs.paths.Line(
                 [xCenter2 - delta2, yCenter2 - delta2],
                 [xCenter2 + delta2, yCenter2 + delta2]
             );
 
             if (font) {
-                modelLocal.models.dimensioning.models.textDiameter2 = new makerjs.models.Text(
-                    font,
-                    metadata.hole2Diameter + " mm",
-                    30, // Schriftgröße in mm
-                    false, false, 0
-                );
+                modelLocal.models.dimensioning.models.textDiameter2 = new makerjs.models.Text(font, metadata.hole2Diameter + "",30, false, false, 0);
                 makerjs.model.rotate(modelLocal.models.dimensioning.models.textDiameter2, 45);
-                makerjs.model.move(modelLocal.models.dimensioning.models.textDiameter2, [xCenter2 - 10, yCenter2 - 50]);
+                makerjs.model.move(modelLocal.models.dimensioning.models.textDiameter2, [xCenter2 + 5, yCenter2 - 40]);
             }
         }
 
@@ -487,7 +503,7 @@
         );
 
         if (font) {
-            modelLocal.models.dimensioning.models.lineWidth = new makerjs.models.Text(font, metadata.insetWidth + " mm", 30, false, false, 0);
+            modelLocal.models.dimensioning.models.lineWidth = new makerjs.models.Text(font, metadata.insetWidth + "", 30, false, false, 0);
             makerjs.model.move(modelLocal.models.dimensioning.models.lineWidth, [metadata.insetWidth / 2 -50, 15]);
         }
 
@@ -497,7 +513,7 @@
         );
 
         if (font) {
-            modelLocal.models.dimensioning.models.lineHeight = new makerjs.models.Text(font, metadata.insetHeight + " mm", 30, false, false, 0);
+            modelLocal.models.dimensioning.models.lineHeight = new makerjs.models.Text(font, metadata.insetHeight + "", 30, false, false, 0);
             makerjs.model.rotate(modelLocal.models.dimensioning.models.lineHeight, 89);
             makerjs.model.move(modelLocal.models.dimensioning.models.lineHeight, [metadata.insetWidth -15, metadata.insetHeight / 2]);
         }
@@ -628,27 +644,32 @@
     }
 
     function updateParam(elementId) {
-        document.getElementById("infoMessage").innerHTML = "";
-        document.getElementById("infoMessage").style.backgroundColor = "";
-
         var valInt = parseInt(document.getElementById(elementId).value);
         if (!isNaN(valInt)) {
-            document.getElementById(elementId).style.backgroundColor = "";
             metadata[elementId] = valInt;
+            validateParameters();
             model = createModel();
             drawPreview();
         } else {
             document.getElementById(elementId).style.backgroundColor = "#d87979";
             document.getElementById('contentDiv').innerHTML = "<span style='font-size: 150px'>😵‍💫</span>";
+
+            const infoBox = document.getElementById("infoMessage");
+            const btnDxf = document.getElementById("downloadDXF");
+            const btnSvg = document.getElementById("downloadSVG");
+
+            infoBox.innerHTML = "<strong>⚠️ Ungültiger Wert im Eingabefeld:</strong>";
+            infoBox.style.display = "block";
+
+            if (btnDxf) btnDxf.disabled = true;
+            if (btnSvg) btnSvg.disabled = true;
         }
     }
 
     function secondHoleChanged() {
         secondHoleCheckGuiUpdate();
-        document.getElementById("infoMessage").innerHTML = "";
-        document.getElementById("infoMessage").style.backgroundColor = "";
         metadata.secondHole = document.getElementById("secondHole").checked;
-
+        validateParameters()
         model = createModel();
         drawPreview();
     }
@@ -788,12 +809,12 @@
         metadata.distanceX1 = data.distanceX1;
         metadata.distanceY1 = data.distanceY1;
         metadata.secondHole = data.secondHole;
-        metadata.customerName = data.customerName;
-        metadata.posNr = data.posNr;
-        metadata.orderNumber = data.orderNumber;
+        metadata.customerName = data.customerName || "";
+        metadata.posNr = data.posNr || "";
+        metadata.orderNumber = data.orderNumber || "";
 
         metadataToGuiElements();
-        resetInputStyles();
+        validateParameters()
         model = createModel();
         drawPreview();
     }
@@ -849,6 +870,91 @@
         const resetRow = document.getElementById('resetRow');
         if (resetRow) {
             resetRow.style.display = "none";
+        }
+    }
+
+    function validateParameters() {
+        let errors = [];
+        const infoBox = document.getElementById("infoMessage");
+        const btnDxf = document.getElementById("downloadDXF");
+        const btnSvg = document.getElementById("downloadSVG");
+
+        const MIN_EDGE_DISTANCE = 50;
+        const MAX_WIDTH = 2030;
+        const MAX_HEIGHT = 3050;
+
+        const inputs = ['insetWidth', 'insetHeight', 'distanceX1', 'distanceY1', 'hole1Diameter', 'distanceX2', 'distanceY2', 'hole2Diameter'];
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.backgroundColor = "";
+        });
+
+        if (metadata.insetWidth > MAX_WIDTH) {
+            errors.push(`Die Breite überschreitet das maximale Plattenmaß von ${MAX_WIDTH} mm.`);
+            document.getElementById("insetWidth").style.backgroundColor = "#ffcccc";
+        }
+        if (metadata.insetHeight > MAX_HEIGHT) {
+            errors.push(`Die Höhe überschreitet das maximale Plattenmaß von ${MAX_HEIGHT} mm.`);
+            document.getElementById("insetHeight").style.backgroundColor = "#ffcccc";
+        }
+
+        let r1 = metadata.hole1Diameter / 2;
+
+        if ((metadata.distanceX1 - r1) < MIN_EDGE_DISTANCE || (metadata.distanceX1 + r1) > (metadata.insetWidth - MIN_EDGE_DISTANCE)) {
+            errors.push(`Auslass 1 ist horizontal zu nah am Rand (Mindestabstand: ${MIN_EDGE_DISTANCE} mm).`);
+            document.getElementById("distanceX1").style.backgroundColor = "#ffcccc";
+            document.getElementById("hole1Diameter").style.backgroundColor = "#ffcccc";
+        }
+        if ((metadata.distanceY1 - r1) < MIN_EDGE_DISTANCE || (metadata.distanceY1 + r1) > (metadata.insetHeight - MIN_EDGE_DISTANCE)) {
+            errors.push(`Auslass 1 ist vertikal zu nah am Rand (Mindestabstand: ${MIN_EDGE_DISTANCE} mm).`);
+            document.getElementById("distanceY1").style.backgroundColor = "#ffcccc";
+            document.getElementById("hole1Diameter").style.backgroundColor = "#ffcccc";
+        }
+
+        if (metadata.secondHole) {
+            let r2 = metadata.hole2Diameter / 2;
+
+            if ((metadata.distanceX2 - r2) < MIN_EDGE_DISTANCE || (metadata.distanceX2 + r2) > (metadata.insetWidth - MIN_EDGE_DISTANCE)) {
+                errors.push(`Auslass 2 ist horizontal zu nah am Rand (Mindestabstand: ${MIN_EDGE_DISTANCE} mm).`);
+                document.getElementById("distanceX2").style.backgroundColor = "#ffcccc";
+                document.getElementById("hole2Diameter").style.backgroundColor = "#ffcccc";
+            }
+            if ((metadata.distanceY2 - r2) < MIN_EDGE_DISTANCE || (metadata.distanceY2 + r2) > (metadata.insetHeight - MIN_EDGE_DISTANCE)) {
+                errors.push(`Auslass 2 ist vertikal zu nah am Rand (Mindestabstand: ${MIN_EDGE_DISTANCE} mm).`);
+                document.getElementById("distanceY2").style.backgroundColor = "#ffcccc";
+                document.getElementById("hole2Diameter").style.backgroundColor = "#ffcccc";
+            }
+
+            // Prüfen, ob sich Loch 1 und Loch 2 überschneiden oder den Mindestabstand ZUEINANDER unterschreiten
+            let dx = metadata.distanceX1 - metadata.distanceX2;
+            let dy = (metadata.insetHeight - metadata.distanceY1) - (metadata.insetHeight - metadata.distanceY2);
+            let distanceBetweenCenters = Math.sqrt(dx * dx + dy * dy);
+
+            if (distanceBetweenCenters < (r1 + r2 + MIN_EDGE_DISTANCE)) {
+                errors.push(`⚠️ Die beiden Auslässe sind zu nah beieinander oder überschneiden sich (Mindestabstand zwischen den Kanten: ${MIN_EDGE_DISTANCE} mm).`);
+                document.getElementById("distanceX1").style.backgroundColor = "#ffdfd0";
+                document.getElementById("distanceX2").style.backgroundColor = "#ffdfd0";
+            }
+        }
+
+        // --- GUI STEUERUNG ---
+        if (errors.length > 0) {
+            infoBox.innerHTML = "<strong>⚠️ Ungültige Parameter:</strong><br><ul style='margin:5px 0 0 20px; padding:0;'>" +
+                errors.map(e => `<li>${e}</li>`).join("") + "</ul>";
+            infoBox.style.display = "block";
+
+            if (btnDxf) btnDxf.disabled = true;
+            if (btnSvg) btnSvg.disabled = true;
+
+            document.getElementById('contentDiv').innerHTML = "<div style='font-size: 100px; text-align: center; width:100%;'>🛑</div>";
+            return false;
+        } else {
+            infoBox.innerHTML = "";
+            infoBox.style.display = "none";
+
+            if (btnDxf) btnDxf.disabled = false;
+            if (btnSvg) btnSvg.disabled = false;
+            return true;
         }
     }
 
