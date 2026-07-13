@@ -185,7 +185,7 @@
 <div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Fenstereinsatz Generator</h1>
-        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 1.0&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;09.07.2026 by Gassi</div>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 1.0.1&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;13.07.2026 by Gassi</div>
     </div>
     <img src="img/td_header.png" height="150px" style="display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
 </div>
@@ -879,7 +879,7 @@
         const btnDxf = document.getElementById("downloadDXF");
         const btnSvg = document.getElementById("downloadSVG");
 
-        const MIN_EDGE_DISTANCE = 50;
+        const MIN_EDGE_DISTANCE = 20;
         const MAX_WIDTH = 2030;
         const MAX_HEIGHT = 3050;
 
