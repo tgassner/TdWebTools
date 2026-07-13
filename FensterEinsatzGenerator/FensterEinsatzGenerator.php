@@ -185,7 +185,7 @@
 <div style="display: flex; flex-flow: row; background-color: #ffdc14; background: linear-gradient(135deg, rgba(255,205,0,1) 0%, rgba(255,220,20,1) 35%, rgba(255,205,0,1) 100%);padding-left: 20px; justify-content: space-between;height:100px">
     <div style="display: flex; flex-flow: column;">
         <h1 style="display: flex;margin-top: 5px;margin-bottom: 2px;font-family: Khand, Helvetia, Arial, sans-serif; font-size: 34px; font-weight: 600; color:#000000;">Fenstereinsatz Generator</h1>
-        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 1.0.1&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;13.07.2026 by Gassi</div>
+        <div style="display: flex; margin-top: 0px;margin-bottom: 15px;">Version 1.0.2&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;13.07.2026 by Gassi</div>
     </div>
     <img src="img/td_header.png" height="150px" style="display: flex; justify-content: right; align-self: center;filter: drop-shadow(8px 8px 40px #FFB214);">
 </div>
@@ -598,24 +598,50 @@
     }
 
     function determineFilename(extension) {
-        let filename = "Fenstereinsatz";
-        if (metadata.orderNumber) {
-            filename += "_" + metadata.orderNumber;
-        }
+        let filename = "";
+
         if (metadata.customerName) {
-            filename += "_" + metadata.customerName;
+            filename += formatNameForFilename(metadata.customerName);
+        }
+
+        if (metadata.orderNumber) {
+            filename += (filename ? "_" : "" ) + metadata.orderNumber;
         }
 
         if (metadata.posNr) {
-            filename += "_Pos" + metadata.posNr;
+            filename += (filename ? "_" : "" ) + metadata.posNr;
         }
 
-        filename += "_" + metadata.insetWidth + "x" + metadata.insetHeight + "_" + metadata.distanceX1 + "x" + metadata.distanceY1 + "_" + metadata.hole1Diameter;
+        filename += (filename ? "_" : "" ) + metadata.insetWidth + "x" + metadata.insetHeight + "_" + metadata.distanceX1 + "x" + metadata.distanceY1 + "_" + metadata.hole1Diameter;
         if (metadata.secondHole) {
             filename += "_" + metadata.distanceX2 + "x" + metadata.distanceY2 + "_" + metadata.hole2Diameter;
         }
+        filename += "_" + "Fenstereinsatz";
         filename += "." + extension;
         return filename;
+    }
+
+    function formatNameForFilename(fullName) {
+        if (!fullName || typeof fullName !== 'string') {
+            return "";
+        }
+
+        const words = fullName.trim().split(/\s+/);
+
+        if (words.length === 0 || words[0] === "") {
+            return "";
+        }
+
+        let result = "";
+
+        if (words.length === 1) {
+            result = words[0];
+        } else {
+            const lastName = words.pop();
+            result = `${lastName} ${words.join(" ")}`;
+        }
+
+        return result.replace(/\s+/g, "_");
     }
 
     function downloadSVG() {
@@ -700,7 +726,7 @@
                 let extractedCustomer = "";
                 const firma1Tag = xmlDoc.querySelector('object[name="Adresse"] field[name="Firma1"]');
                 if (firma1Tag && firma1Tag.textContent.trim() !== "") {
-                    extractedCustomer = firma1Tag.textContent.trim().replace(/[\/\\:\*\?"<>\| ]+/g, "_");
+                    extractedCustomer = firma1Tag.textContent.trim().replace(/[\/\\:\*\?"<>\| ]+/g, " ");
                 }
 
                 // Auftragsnummer exportieren.
