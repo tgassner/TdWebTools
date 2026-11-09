@@ -23,6 +23,18 @@
 
             let select = document.getElementById('employees');
 
+
+            // Array nach Nachname, dann nach Vorname sortieren
+            employeesJson.employees.sort((a, b) => {
+                // 1. Nach Nachname vergleichen
+                const surnameCompare = a.surname.localeCompare(b.surname, 'de');
+                if (surnameCompare !== 0) {
+                    return surnameCompare;
+                }
+                // 2. Wenn Nachnamen identisch sind, nach Vorname vergleichen
+                return a.firstname.localeCompare(b.firstname, 'de');
+            });
+
             for (const employee of employeesJson["employees"]) {
                 let opt = document.createElement('option');
                 opt.value = employee["id"];
