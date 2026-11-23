@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <image href="token_gelb.svg" x="1" y="0" width="50" height="50"/>
+  <circle cx="45" cy="45" r="18" fill="#ffffff" stroke="#374151" stroke-width="2.5"/>
+  <text x="45" y="52.5" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#374151">@</text>
+</svg>

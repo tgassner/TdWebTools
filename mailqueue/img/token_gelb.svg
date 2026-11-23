@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 24.0.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 84.41 82.05" style="enable-background:new 0 0 84.41 82.05;" xml:space="preserve">
+<style type="text/css">
+	.st0{clip-path:url(#SVGID_2_);fill:#FFDE14;}
+	.st1{clip-path:url(#SVGID_4_);fill:url(#SVGID_5_);}
+</style>
+<g>
+	<defs>
+		<rect id="SVGID_1_" x="4.36" y="3.87" width="73.12" height="73.98"/>
+	</defs>
+	<clipPath id="SVGID_2_">
+		<use xlink:href="#SVGID_1_"  style="overflow:visible;"/>
+	</clipPath>
+	<path class="st0" d="M16.73,30.14H9.7c0,0,0,0,0,0c-0.96,0-1.49,0.52-1.79,1.29C7.5,32.9,7.13,34.4,6.8,35.89c0,0,0.01,0,0.01-0.01
+		c3.78-1.16,7.75-1.92,11.84-2.27v-1.51c0,0,0,0,0,0C18.64,31.03,17.81,30.15,16.73,30.14 M75.97,50.42
+		c-2.42-6.83-9.05-18.11-17.72-27.18C49.52,14.05,36.85,3.55,28,3.87c-6.62,0.26-10.37,4.75-13.73,11.34
+		c-0.31,0.84,0.08,1.56,1.43,1.56h22.08c0,0,1.64-0.04,2.52,0.83c3.21,3.17,5.31,6.22,6.91,9.81c0.7,1.58-0.09,2.72-2.26,2.72
+		c-3.99,0-7.88,0-9.61,0c-1.07,0-1.86,0.94-1.86,1.99c0,0.01,0,0.01,0,0.02l0,2.13c17.65,3.08,32.35,14.21,39.89,29.31
+		c0,0,0,0.01,0.01,0.01C78.84,59.5,77.88,55.82,75.97,50.42"/>
+</g>
+<g>
+	<defs>
+		<path id="SVGID_3_" d="M6.81,35.88c-1.58,6.97-2.44,13.94-2.45,18.83v0.21c0,0.25,0,0.49,0.01,0.72
+			c0.19,8.06,1.14,13.52,4.77,18.08c3.44,4.31,14.16,4.85,24.53,3.43c16.66-2.2,25.68-6.05,33.91-10.16c2.47-1.19,4.35-2.31,5.8-3.4
+			c-7.55-15.1-22.24-26.24-39.89-29.31l-0.03,24.66c0,0,0.04,1.21-1.49,1.94c-3.01,1.44-7.64,2.75-11.97,3.21
+			c0,0-1.34,0.26-1.34-1.42V33.62C14.55,33.96,10.59,34.73,6.81,35.88"/>
+	</defs>
+	<clipPath id="SVGID_4_">
+		<use xlink:href="#SVGID_3_"  style="overflow:visible;"/>
+	</clipPath>
+	
+		<radialGradient id="SVGID_5_" cx="-98.1399" cy="183.9547" r="0.3499" gradientTransform="matrix(88.7614 0 0 -88.7614 8752.2119 16380.8184)" gradientUnits="userSpaceOnUse">
+		<stop  offset="0" style="stop-color:#FFDE14"/>
+		<stop  offset="9.340660e-04" style="stop-color:#FFDE14"/>
+		<stop  offset="1" style="stop-color:#FFCD00"/>
+	</radialGradient>
+	<rect x="4.36" y="33.62" class="st1" width="69.02" height="44.95"/>
+</g>
+</svg>
